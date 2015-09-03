@@ -25,8 +25,9 @@
 
 int main(void) {
 	t_log* Planificador;
-	Planificador = log_create("Nuevo", "Panificador", 1, LOG_LEVEL_INFO) ; //Creo el primer archivo de log del proceso planificador
-	log_trace(Planificador, "Primer Log");//Porque no hace nada?
+	Planificador = log_create("Nuevo_Log", "Panificador", 1, LOG_LEVEL_INFO) ; //Creo el primer archivo de log del proceso planificador
+	log_debug(Planificador, "Primer Log");//Porque no hace nada?
+	log_impl_template(log_info, LOG_LEVEL_INFO);
 	puts("!!!Planificacion!!"); /* prints !!!Planificacion!! */
 	return EXIT_SUCCESS;
 }
