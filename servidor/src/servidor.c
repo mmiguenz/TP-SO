@@ -27,8 +27,8 @@ int main(void) {
 
 
     client_addr.sin_family = AF_INET;
-    client_addr.sin_addr.s_addr = INADDR_ANY;
-    client_addr.sin_port = htons(8084);
+    client_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    client_addr.sin_port = htons(8080);
 
 	int servidor = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -39,8 +39,16 @@ int main(void) {
 
 	printf("Estoy escuchando\n");
 	listen(servidor, 100);
-	close(servidor);
 
+	struct sockaddr_in direcli;
+		unsigned int len;
+		int cliente = accept(servidor, (void*) &direcli, &len);
+
+		printf("Recibí una conexión en %d!!\n", cliente);
+		send(cliente, "Hola NetCat!", 13, 0);
+		send(cliente, ":)\n", 4, 0);
+
+		close(servidor);
 
 	for(;;);
 
