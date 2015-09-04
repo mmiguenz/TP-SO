@@ -16,23 +16,28 @@
 
 int main(void) {
 
-
-    int socket_host;
-    struct sockaddr_in client_addr;
-
-    struct timeval tv;      /* Para el timeout del accept */
-    socklen_t size_addr = 0;
-    int socket_client;
-    fd_set rfds;
+//**********Soy una barra inicial********************************************//
+//**********Estructuras para el socket**************************************//
 
 
-    client_addr.sin_family = AF_INET;
-    client_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    client_addr.sin_port = htons(8080);
+    struct sockaddr_in servidor_addr;
+
+
+
+    servidor_addr.sin_family = AF_INET;
+    servidor_addr.sin_addr.s_addr = INADDR_ANY;
+    servidor_addr.sin_port = htons(8080);
+
+ //**********Soy una barra separadora :P**************************************//
+//**********Creo la coneccion del soket**************************************//
 
 	int servidor = socket(AF_INET, SOCK_STREAM, 0);
 
-	if (bind(servidor, (void*) &client_addr, sizeof(client_addr)) != 0) {
+	int activado = 1;
+
+	setsockopt(servidor, SOL_SOCKET, SO_REUSEADDR, &activado, sizeof(activado));
+
+	if (bind(servidor, (void*) &servidor_addr, sizeof(servidor_addr)) != 0) {
 		perror("Falló el bind");
 		return 1;
 	}
@@ -40,15 +45,18 @@ int main(void) {
 	printf("Estoy escuchando\n");
 	listen(servidor, 100);
 
+//**********Soy una barra separadora :P**************************************//
+//**********Acepto las conecciones******************************************//
+
 	struct sockaddr_in direcli;
-		unsigned int len;
-		int cliente = accept(servidor, (void*) &direcli, &len);
+	unsigned int tamaniodireccion;
+	int cliente = accept(servidor, (void*) &direcli, &tamaniodireccion);
 
 		printf("Recibí una conexión en %d!!\n", cliente);
 		send(cliente, "Hola NetCat!", 13, 0);
 		send(cliente, ":)\n", 4, 0);
 
-		close(servidor);
+
 
 	for(;;);
 
