@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <string.h>
+#include <commons/config.h>
 
 #include <commons/log.h>
 
@@ -48,10 +49,13 @@ int main(void) {
     int socket_client;
     fd_set rfds;
     dire_serv.sin_family = AF_INET;
-    dire_serv.sin_addr.s_addr = inet_addr("127.0.0.1");
+    dire_serv.sin_addr.s_addr = inet_addr("10.15.90.166");
 	dire_serv.sin_port = htons(8080);
+	t_config* config;
+config = config_create("Resources/Config.cfg");
+printf("Lei mi archivo: %s",config_get_string_value(config, "IP"));
 
-		int cliente = socket(AF_INET, SOCK_STREAM, 0);
+int cliente = socket(AF_INET, SOCK_STREAM, 0);
 		if (connect(cliente, (void*) &dire_serv, sizeof(dire_serv)) != 0) {
 			perror("No se pudo conectar");
 			return 1;
@@ -59,6 +63,7 @@ int main(void) {
 
 		while (1) {
 			char mensaje[1000];
+
 			scanf("%s", mensaje);
 
 			send(cliente, mensaje, strlen(mensaje), 0);
