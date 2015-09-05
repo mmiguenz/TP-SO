@@ -22,6 +22,10 @@ void reloj(int loop);
 /** Número máximo de hijos */
 #define MAX_CHILDS 3
 
+
+/** Longitud del buffer  */
+#define BUFFERSIZE 512
+
 int main(void) {
 
 //**********Soy una barra inicial********************************************//
@@ -149,10 +153,22 @@ int main(void) {
 
 int AtiendeCliente(int socket, struct sockaddr_in addr)
 {
-	send(socket, "Hola", 5, 0);
-	return 1;
-}
+	char buffer[BUFFERSIZE];
+	    char aux[BUFFERSIZE];
+	    int bytecount;
+	    int fin=0;
+	    int code=0;         /* Código de salida por defecto */
+	    time_t t;
+	    struct tm *tmp;
 
+
+	       memset(buffer, 0, BUFFERSIZE);
+	       if((bytecount = recv(socket, buffer, BUFFERSIZE, 0))== -1)
+	         error(5, "No puedo recibir información");
+	       printf("Recibi %s\n", buffer);
+
+	    return 0;
+}
 
 void error(int code, char *err)
 {
@@ -167,13 +183,13 @@ void reloj(int loop)
   if (loop==0)
     printf("[SERVIDOR] Esperando conexión  ");
 
-  printf("\033[1D");        /* Introducimos código ANSI para retroceder 2 caracteres */
+  printf("...");
   switch (loop%4)
     {
-    case 0: printf("|"); break;
-    case 1: printf("/"); break;
-    case 2: printf("-"); break;
-    case 3: printf("\\"); break;
+    case 0: printf(":)"); break;
+    case 1: printf(":("); break;
+    case 2: printf(":$"); break;
+    case 3: printf("u.u"); break;
     default:            /* No debemos estar aquí */
       break;
     }
