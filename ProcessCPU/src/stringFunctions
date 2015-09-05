@@ -17,6 +17,7 @@ int leecad(char *cad, int n) {
         return 0; 
     } 
 
+
     if (c == '\n') 
         i = 0; 
     else { 
