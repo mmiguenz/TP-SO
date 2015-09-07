@@ -132,7 +132,7 @@ if (p == NULL) {
     fprintf(stderr, "selectserver: failed to bind\n");
     exit(2);
 }
-
+//..
 freeaddrinfo(ai); // all done with this
 
 // listen
