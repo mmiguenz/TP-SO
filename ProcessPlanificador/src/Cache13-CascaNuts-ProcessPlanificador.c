@@ -1,22 +1,10 @@
 /*
- ============================================================================
- Name        : Cache13-CascaNuts-ProcessPlanificador.c
- Author      : GrupoCascaNuts
- Version     :
- Copyright   : Ante Cualquier copia se le formateara la pc ;)
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-/*
- * serviv2.c
+ * ProcessPlanificador
  *
  *  Created on: 6/9/2015
- *      Author: utnso
+ *      Author: Cascanuts
  */
 
-/*
-** selectserver.c -- a cheezy multiperson chat server
-*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,12 +23,6 @@
 
 
 
-/*
- * utils.c
- *
- *  Created on: Apr 14, 2013
- *      Author: r2t2
- */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -208,14 +190,14 @@ char * IntToStr(int number)
 
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
 
-    char** comando = (char**)malloc(sizeof(char) * 1024 * 255);
+   // char** comando = (char**)malloc(sizeof(char) * 1024 * 255);
 
     //char action [255] ;
    // char cpu [255] ;
     //char msg[255] ;
     //getPosStr(action,buf, ',',0);
 
-    printf("llegue %s\n", buf);//action);
+    printf("%s\n", buf);//action);
 
 /*
 
@@ -269,7 +251,8 @@ int main(void)
     struct sockaddr_storage remoteaddr; // client address
     socklen_t addrlen;
 
-    char buf[256];    // buffer for client data
+    char buf[256]="";    // buffer for client data
+
     int nbytes;
 
     char remoteIP[INET6_ADDRSTRLEN];
@@ -375,13 +358,13 @@ int main(void)
                         close(i); // bye!
                         FD_CLR(i, &master); // remove from master set
                     } else {
-                        // we got some data from a client
+                       // we got some data from a client
                         for(j = 0; j <= fdmax; j++) {
                             // send to everyone!
-                            if (FD_ISSET(j, &master)) {
+                            if (FD_ISSET(j, &master)&& i!=j) {
                                 // except the listener and ourselves
                                 shell (listener, i, j , buf, nbytes);
-                            }
+                           }
                         }
                     }
                 } // END handle data from client
@@ -391,3 +374,4 @@ int main(void)
 
     return 0;
 }
+
