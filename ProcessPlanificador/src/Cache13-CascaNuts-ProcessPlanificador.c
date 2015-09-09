@@ -15,25 +15,15 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-
 #include <assert.h>
-
-
-#define PORT "9034"   // port we're listening on
-
-
-
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <regex.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <sys/ioctl.h>
-#include <netinet/in.h>
 #include <net/if.h>
+#include <commons/config.h>
+
+
+
 
 int isNum(char ch);
 
@@ -185,9 +175,6 @@ char * IntToStr(int number)
 
 
 
-
-
-
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
 
    // char** comando = (char**)malloc(sizeof(char) * 1024 * 255);
@@ -239,10 +226,37 @@ void *get_in_addr(struct sockaddr *sa)
 
 
 
+void limpiar (char *cadena)
+{
+  char *p;
+  p = strchr (cadena, '\n');
+  if (p)
+    *p = '\0';
+}
 
+int tamaniobuf(char cad[])
+{
+   int pos = -1;
+   int len = strlen( cad);
+int i;
+   for( i = 0; pos == -1 && i < len; i++){ // si quitas la condición pos == -1
+            // te devuelve la última posición encontrada (si es que hay más de 1)
+      if(*(cad+i) == '\0')
+         pos = i+1;
+   }
+   return pos;
+}
 int main(void)
 {
-    fd_set master;    // master file descriptor list
+	//Espacio para la configuracion del entorno---------------------------<<
+	char* port; //Puerto de escucha
+	t_config* config_panificador;
+	config_panificador = config_create("Resources/Config.cfg");
+	port= config_get_string_value(config_panificador, "PORT");
+
+	//----------Soy una barra separadora ;)--------------------------------------//
+
+	fd_set master;    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
     int fdmax;        // maximum file descriptor number
 
@@ -270,7 +284,7 @@ int main(void)
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
+    if ((rv = getaddrinfo(NULL, port, &hints, &ai)) != 0) {
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
     }
@@ -281,7 +295,7 @@ int main(void)
             continue;
         }
 
-        // lose the pesky "address already in use" error message
+        //  "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
         if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
@@ -338,11 +352,19 @@ int main(void)
                             fdmax = newfd;
                         }
                         printf("selectserver: new connection from %s on "
-                            "socket %d\n",
+                            "Cpu %d\n",//Uso el identificador del soket como nombre del soket
                             inet_ntop(remoteaddr.ss_family,
                                 get_in_addr((struct sockaddr*)&remoteaddr),
                                 remoteIP, INET6_ADDRSTRLEN),
                             newfd);
+                        char cadena[30]= "";
+                        fgets (cadena, sizeof cadena, stdin);
+                        limpiar(cadena);
+                        while(send(newfd,cadena, sizeof cadena,0)!=-1){
+                        	fgets (cadena, sizeof cadena, stdin);
+                        	                        limpiar(cadena);
+                        }
+                        printf("El ultimo comando no se pudo mandar porque la cpu se cerro");
                     }
                 } else {
                     // handle data from a client
@@ -359,7 +381,7 @@ int main(void)
                         FD_CLR(i, &master); // remove from master set
                     } else {
                        // we got some data from a client
-                        for(j = 0; j <= fdmax; j++) {
+                       for(j = 0; j <= fdmax; j++) {
                             // send to everyone!
                             if (FD_ISSET(j, &master)&& i!=j) {
                                 // except the listener and ourselves
