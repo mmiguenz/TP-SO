@@ -15,7 +15,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <assert.h>
-#include <string.h>
 #include <regex.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -30,13 +29,17 @@ void limpiar (char *cadena);
 int tamaniobuf(char cad[]);
 
 int main(void)
-{/*
+{
 	//Espacio para la configuracion del entorno---------------------------<<
-	char* port; //Puerto de escucha
-	t_config* config_panificador;
-	config_panificador = config_create("Resources/Config.cfg");
-	port= config_get_string_value(config_panificador, "PORT");
-*/
+ char* puerto_escucha_planif;
+                        	t_config* config;
+
+                        	puerto_escucha_planif=malloc(sizeof puerto_escucha_planif);
+                        	config = config_create("config.cfg");
+                        	if(config != NULL){
+                        	puerto_escucha_planif=config_get_string_value(config, "PORT");}
+
+
 	//----------Soy una barra separadora ;)--------------------------------------//
 
 	fd_set master;    // master file descriptor list
@@ -67,7 +70,7 @@ int main(void)
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, "9034", &hints, &ai)) != 0) {
+    if ((rv = getaddrinfo(NULL, puerto_escucha_planif, &hints, &ai)) != 0) {
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
     }
@@ -141,15 +144,13 @@ int main(void)
                                 remoteIP, INET6_ADDRSTRLEN),
                             newfd);
                         char cadena[30]= "";
-                        fgets (cadena, sizeof cadena, stdin);
+
+                       fgets (cadena, sizeof cadena, stdin);
 
 						limpiar(cadena);
 
-						while(send(newfd,cadena, sizeof cadena,0)!=-1){
-                        	fgets (cadena, sizeof cadena, stdin);
-                        	                        limpiar(cadena);
-                        }
-                        printf("El ultimo comando no se pudo mandar porque la cpu se cerro");
+						send(newfd,cadena, sizeof cadena,0);
+
                     }
                 } else {
                     // handle data from a client
@@ -178,6 +179,7 @@ int main(void)
             } // END got new incoming connection
         } // END looping through file descriptors
     } // END for(;;)--and you thought it would never end!
+
 
     return 0;
 }
