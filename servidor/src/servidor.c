@@ -34,7 +34,7 @@ int main(void) {
 
     struct sockaddr_in servidor_addr;
     struct sockaddr_in client_addr;
-    struct sockaddr_in my_addr;
+    //struct sockaddr_in my_addr;
 
 
     servidor_addr.sin_family = AF_INET;
