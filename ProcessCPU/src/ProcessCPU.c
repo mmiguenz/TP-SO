@@ -45,10 +45,10 @@ int main(void) {
     char* ip_planificador;
     port_planificador=malloc(sizeof port_planificador);
     ip_planificador=malloc(sizeof ip_planificador);
+    t_config* config_cpu = config_create("config.cfg");
 
 
 
-        t_config* config_cpu = config_create("config.cfg");
         if (config_cpu != NULL){
 
         port_planificador= config_get_string_value(config_cpu, "PUERTO_PLANIFICADOR");
