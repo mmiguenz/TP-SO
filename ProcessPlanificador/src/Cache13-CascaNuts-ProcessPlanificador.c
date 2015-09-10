@@ -1,4 +1,4 @@
-* ProcessPlanificador
+/* ProcessPlanificador
  *
  *  Created on: 6/9/2015
  *      Author: Cascanuts
@@ -15,7 +15,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <assert.h>
-#include <string.h>
 #include <regex.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -23,48 +22,24 @@
 
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes);
 
+void *get_in_addr(struct sockaddr *sa);
 
+void limpiar (char *cadena);
 
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
+int tamaniobuf(char cad[]);
 
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-
-
-void limpiar (char *cadena)
-{
-  char *p;
-  p = strchr (cadena, '\n');
-  if (p)
-    *p = '\0';
-}
-
-int tamaniobuf(char cad[])
-{
-   int pos = -1;
-   int len = strlen( cad);
-int i;
-   for( i = 0; pos == -1 && i < len; i++){ // si quitas la condición pos == -1
-            // te devuelve la última posición encontrada (si es que hay más de 1)
-      if(*(cad+i) == '\0')
-         pos = i+1;
-   }
-   return pos;
-}
 int main(void)
 {
 	//Espacio para la configuracion del entorno---------------------------<<
-	/*char* port; //Puerto de escucha
-	t_config* config_panificador;
-	config_panificador = config_create("Resources/Config.cfg");
-	port= config_get_string_value(config_panificador, "PORT");
-*/
+ char* puerto_escucha_planif;
+                        	t_config* config;
+
+                        	puerto_escucha_planif=malloc(sizeof puerto_escucha_planif);
+                        	config = config_create("config.cfg");
+                        	if(config != NULL){
+                        	puerto_escucha_planif=config_get_string_value(config, "PORT");}
+
+
 	//----------Soy una barra separadora ;)--------------------------------------//
 
 	fd_set master;    // master file descriptor list
@@ -95,7 +70,7 @@ int main(void)
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, "9034", &hints, &ai)) != 0) {
+    if ((rv = getaddrinfo(NULL, puerto_escucha_planif, &hints, &ai)) != 0) {
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
     }
@@ -169,13 +144,13 @@ int main(void)
                                 remoteIP, INET6_ADDRSTRLEN),
                             newfd);
                         char cadena[30]= "";
-                        fgets (cadena, sizeof cadena, stdin);
-                        limpiar(cadena);
-                        while(send(newfd,cadena, sizeof cadena,0)!=-1){
-                        	fgets (cadena, sizeof cadena, stdin);
-                        	                        limpiar(cadena);
-                        }
-                        printf("El ultimo comando no se pudo mandar porque la cpu se cerro");
+
+                       fgets (cadena, sizeof cadena, stdin);
+
+						limpiar(cadena);
+
+						send(newfd,cadena, sizeof cadena,0);
+
                     }
                 } else {
                     // handle data from a client
@@ -205,6 +180,7 @@ int main(void)
         } // END looping through file descriptors
     } // END for(;;)--and you thought it would never end!
 
+
     return 0;
 }
 
@@ -218,4 +194,40 @@ void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
 }
 
 
+
+
+
+// get sockaddr, IPv4 or IPv6:
+void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+
+void limpiar (char *cadena)
+{
+  char *p;
+  p = strchr (cadena, '\n');
+  if (p)
+    *p = '\0';
+}
+
+
+
+int tamaniobuf(char cad[])
+{
+   int pos = -1;
+   int len = strlen( cad);
+int i;
+   for( i = 0; pos == -1 && i < len; i++){ // si quitas la condición pos == -1
+            // te devuelve la última posición encontrada (si es que hay más de 1)
+      if(*(cad+i) == '\0')
+         pos = i+1;
+   }
+   return pos;
+}
 
