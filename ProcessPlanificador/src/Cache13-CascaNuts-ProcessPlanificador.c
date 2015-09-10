@@ -1,5 +1,4 @@
-/*
- * ProcessPlanificador
+* ProcessPlanificador
  *
  *  Created on: 6/9/2015
  *      Author: Cascanuts
@@ -217,5 +216,6 @@ void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
 
 
 }
+
 
 
