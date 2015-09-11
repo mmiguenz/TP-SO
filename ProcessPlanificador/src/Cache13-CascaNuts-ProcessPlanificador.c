@@ -28,6 +28,8 @@ void limpiar (char *cadena);
 
 int tamaniobuf(char cad[]);
 
+int esComando(char * comando);
+
 int main(void)
 {
 	//Espacio para la configuracion del entorno---------------------------<<
@@ -146,7 +148,11 @@ int main(void)
                         char cadena[30]= "";
 
                        fgets (cadena, sizeof cadena, stdin);
-
+if(esComando(cadena)==0)
+{
+	printf("No es un comando correcto");
+	exit(1);
+}
 						limpiar(cadena);
 
 						send(newfd,cadena, sizeof cadena,0);
@@ -230,4 +236,13 @@ int i;
    }
    return pos;
 }
+
+int esComando(char * comando){
+int flag ;
+if(strcmp(comando,"Correr Programa")){
+return 1;
+}
+return 0;
+}
+
 
