@@ -79,7 +79,7 @@ int main(void) {
 
 
 					send(memoria, mensaje,sizeof mensaje,0);
-					printf("Recibi mensaje: %s \n", mensaje);
+					printf("Envie mensaje: %s \n", mensaje);
 
 
 				return 0;
