@@ -152,6 +152,7 @@ if(esComando(cadena)==0)
 {
 	printf("No es un comando correcto");
 	exit(1);
+
 }
 						limpiar(cadena);
 
