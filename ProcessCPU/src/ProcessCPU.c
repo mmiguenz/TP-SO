@@ -1,22 +1,3 @@
-/*
- ============================================================================
- Name        : ProcessCPU.c
- Author      : 
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-
-/*
- ============================================================================
- Name        :
- Author      :
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
@@ -31,45 +12,38 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <string.h>
-#include <string.h>
 #include <commons/config.h>
-#include <commons/log.h>
-#include <commons/string.h>
 
 int main(void) {
-    int socket_planificador;
-    struct sockaddr_in dire_planificador;
+
+	 int puerto_escucha_cpu;
+	 char* ip_conec_plani;
+	 ip_conec_plani= malloc(sizeof ip_conec_plani);
+	 t_config* config;
+
+	                        	//puerto_escucha_planif=malloc(sizeof puerto_escucha_planif);
+	                        	config = config_create("config.cfg");
+	                        	if(config != NULL){
+	                        	puerto_escucha_cpu=config_get_int_value(config, "PORT");
+	                        	ip_conec_plani=config_get_string_value(config,"IP");}
+
+
+    int socket_cpu;
+    struct sockaddr_in dire_serv;
     fd_set rfds;
+    dire_serv.sin_family = AF_INET;
+    dire_serv.sin_addr.s_addr = inet_addr(ip_conec_plani);
+	dire_serv.sin_port = htons(puerto_escucha_cpu);
 
-    char* port_planificador;
-    char* ip_planificador;
-    port_planificador=malloc(sizeof port_planificador);
-    ip_planificador=malloc(sizeof ip_planificador);
-    t_config* config_cpu = config_create("config.cfg");
-
-
-
-        if (config_cpu != NULL){
-
-        port_planificador= config_get_string_value(config_cpu, "PUERTO_PLANIFICADOR");
-        ip_planificador= config_get_string_value(config_cpu, "IP_PLANIFICADOR");
-        }
-
-
-
-    dire_planificador.sin_family = AF_INET;
-    dire_planificador.sin_addr.s_addr = inet_addr(ip_planificador);
-	dire_planificador.sin_port = htons(port_planificador);
-
-		int planificador = socket(AF_INET, SOCK_STREAM, 0);
-		if (connect(planificador, (void*) &dire_planificador, sizeof(dire_planificador)) != 0) {
+		int cliente = socket(AF_INET, SOCK_STREAM, 0);
+		if (connect(cliente, (void*) &dire_serv, sizeof(dire_serv)) != 0) {
 			perror("No se pudo conectar");
 			return 1;
 		}
 
 
 			char mensaje[1000]="";
-			recv(planificador, mensaje,sizeof mensaje,0);
+			recv(cliente, mensaje,sizeof mensaje,0);
 			printf("Recibi mensaje: %s \n", mensaje);
 
 
