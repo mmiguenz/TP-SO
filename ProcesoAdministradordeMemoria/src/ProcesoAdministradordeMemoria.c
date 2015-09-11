@@ -33,13 +33,17 @@ void limpiar (char *cadena);
 int tamaniobuf(char cad[]);
 
 int main(void)
-{/*
-	//Espacio para la configuracion del entorno---------------------------<<
-	char* port; //Puerto de escucha
-	t_config* config_panificador;
-	config_panificador = config_create("Resources/Config.cfg");
-	port= config_get_string_value(config_panificador, "PORT");
-*/
+{
+	 char* puerto_escucha_memoria;
+                        	t_config* config;
+
+                        	puerto_escucha_memoria=malloc(sizeof puerto_escucha_memoria);
+                        	config = config_create("config");
+                        	if(config != NULL){
+                        	puerto_escucha_memoria=config_get_string_value(config, "PORT");}
+
+
+
 	//----------Soy una barra separadora ;)--------------------------------------//
 
 	fd_set master;    // master file descriptor list
@@ -70,7 +74,7 @@ int main(void)
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, "9022", &hints, &ai)) != 0) {
+    if ((rv = getaddrinfo(NULL, puerto_escucha_memoria, &hints, &ai)) != 0) {
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
     }
@@ -80,7 +84,6 @@ int main(void)
         if (listener < 0) {
             continue;
         }
-
         //  "address already in use" error message
         setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 
@@ -88,10 +91,8 @@ int main(void)
             close(listener);
             continue;
         }
-
         break;
     }
-
     // if we got here, it means we didn't get bound
     if (p == NULL) {
         fprintf(stderr, "selectserver: failed to bind\n");
@@ -178,13 +179,9 @@ int main(void)
     return 0;
 }
 
-
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
 
-
     printf("%s\n", buf);//action);
-
-
 }
 
 
@@ -223,5 +220,35 @@ int i;
          pos = i+1;
    }
    return pos;
+
+
+	/* int puerto_escucha_swap;
+	 char* ip_conec_swap;
+	 ip_conec_swap= malloc(sizeof ip_conec_swap);
+	 t_config* config;
+
+	                        	//puerto_escucha_planif=malloc(sizeof puerto_escucha_planif);
+	                        	config = config_create("config");
+	                        	if(config != NULL){
+	                        	puerto_escucha_swap=config_get_int_value(config, "PORTSWAP");
+	                        	ip_conec_swap=config_get_string_value(config,"IPSWAP");}
+
+
+  int socket_swap;
+  struct sockaddr_in dire_serv;
+  fd_set rfds;
+  dire_serv.sin_family = AF_INET;
+  dire_serv.sin_addr.s_addr = inet_addr(ip_conec_swap);
+	dire_serv.sin_port = htons(puerto_escucha_swap);
+
+		int swap = socket(AF_INET, SOCK_STREAM, 0);
+		if (connect(swap, (void*) &dire_serv, sizeof(dire_serv)) != 0) {
+			perror("No se pudo conectar");
+			return 1;
+		}
+			char mensaje[1000]="";
+			recv(swap, mensaje,sizeof mensaje,0);
+			printf("Recibi mensaje: %s \n", mensaje);*/
+
 }
 
