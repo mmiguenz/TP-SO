@@ -143,16 +143,9 @@ int main(void)
                                 get_in_addr((struct sockaddr*)&remoteaddr),
                                 remoteIP, INET6_ADDRSTRLEN),
                             newfd);
-                        char cadena[30]= "";
-                        fgets (cadena, sizeof cadena, stdin);
-
-						limpiar(cadena);
-
-						while(send(newfd,cadena, sizeof cadena,0)!=-1){
-                        	fgets (cadena, sizeof cadena, stdin);
-                        	                        limpiar(cadena);
-                        }
-                        printf("El ultimo comando no se pudo mandar porque la cpu se cerro");
+                        char mensaje[1000]="";
+                        			recv(newfd, mensaje,sizeof mensaje,0);
+                        			printf("Recibi mensaje: %s \n", mensaje);
                     }
                 } else {
                     // handle data from a client
