@@ -36,13 +36,13 @@ int esComando(char * comando);
 int main(void)
 {
 	//Espacio para la configuracion del entorno---------------------------<<
- char* puerto_escucha_planif;
+ char* puerto_escucha_swap;
                         	t_config* config;
 
-                        	puerto_escucha_planif=malloc(sizeof puerto_escucha_planif);
+                        	puerto_escucha_swap=malloc(sizeof puerto_escucha_swap);
                         	config = config_create("config.cfg");
                         	if(config != NULL){
-                        	puerto_escucha_planif=config_get_string_value(config, "PORT");}
+                        	puerto_escucha_swap=config_get_string_value(config, "PORT_SWAP");}
 
 
 	//----------Soy una barra separadora ;)--------------------------------------//
@@ -75,7 +75,7 @@ int main(void)
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, puerto_escucha_planif, &hints, &ai)) != 0) {
+    if ((rv = getaddrinfo(NULL, puerto_escucha_swap, &hints, &ai)) != 0) {
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
         exit(1);
     }
@@ -148,19 +148,9 @@ int main(void)
                                 get_in_addr((struct sockaddr*)&remoteaddr),
                                 remoteIP, INET6_ADDRSTRLEN),
                             newfd);
-                        char cadena[30]= "";
-
-                       fgets (cadena, sizeof cadena, stdin);
-if(esComando(cadena)==0)
-{
-	printf("No es un comando correcto");
-	exit(1);
-
-}
-						limpiar(cadena);
-
-						send(newfd,cadena, sizeof cadena,0);
-
+                        char mensaje[1000]="";
+                        recv(newfd, mensaje,sizeof mensaje,0);
+                        printf("Recibi mensaje: %s  del administrador de memoria.\n", mensaje);
                     }
                 } else {
                     // handle data from a client

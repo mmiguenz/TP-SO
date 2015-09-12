@@ -40,7 +40,7 @@ int main(void)
                         	puerto_escucha_memoria=malloc(sizeof puerto_escucha_memoria);
                         	config = config_create("config");
                         	if(config != NULL){
-                        	puerto_escucha_memoria=config_get_string_value(config, "PORT");}
+                        	puerto_escucha_memoria=config_get_string_value(config, "PORT_ESCUCHA");}
 
 
 
@@ -147,6 +147,40 @@ int main(void)
                         char mensaje[1000]="";
                         			recv(newfd, mensaje,sizeof mensaje,0);
                         			printf("Recibi mensaje: %s \n", mensaje);
+
+
+
+
+                        			 int puerto_escucha_swap;
+                        			                        			 char* ip_conec_swap;
+                        			                        			 ip_conec_swap= malloc(sizeof ip_conec_swap);
+                        			                        			 t_config* config;
+
+                        			                        			 config = config_create("config.cfg");
+                        			                        			 if(config != NULL){
+                        			                        			 puerto_escucha_swap=config_get_int_value(config, "PORT_PORT_SWAP");
+                        			                        			 ip_conec_swap=config_get_string_value(config,"IP_SWAP");}
+
+
+
+                        			                        		    struct sockaddr_in dire_serv;
+
+                        			                        		    dire_serv.sin_family = AF_INET;
+                        			                        		    dire_serv.sin_addr.s_addr = inet_addr(ip_conec_swap);
+                        			                        			dire_serv.sin_port = htons(puerto_escucha_swap);
+
+                        			                        				int planificador = socket(AF_INET, SOCK_STREAM, 0);
+                        			                        				if (connect(planificador, (void*) &dire_serv, sizeof(dire_serv)) != 0) {
+                        			                        					perror("No se pudo conectar");
+
+                        			                        				}
+
+
+
+
+
+
+
                     }
                 } else {
                     // handle data from a client
