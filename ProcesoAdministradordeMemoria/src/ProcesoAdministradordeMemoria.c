@@ -38,7 +38,7 @@ int main(void)
                         	t_config* config;
 
                         	puerto_escucha_memoria=malloc(sizeof puerto_escucha_memoria);
-                        	config = config_create("config");
+                        	config = config_create("config.cfg");
                         	if(config != NULL){
                         	puerto_escucha_memoria=config_get_string_value(config, "PORT_ESCUCHA");}
 
@@ -148,38 +148,22 @@ int main(void)
                         			recv(newfd, mensaje,sizeof mensaje,0);
                         			printf("Recibi mensaje: %s \n", mensaje);
 
+                        			if(true){
+                        		/*	 int puerto_escucha_swap;
+                        			 char* ip_conec_swap;
+                        			 ip_conec_swap= malloc(sizeof ip_conec_swap);
+                        				 puerto_escucha_swap=config_get_int_value(config, "PORT_PORT_SWAP");
+                        				 ip_conec_swap=config_get_string_value(config,"IP_SWAP");*/
+                        			 struct sockaddr_in dire_servi;
+                        			 dire_servi.sin_family = AF_INET;
+                        			 dire_servi.sin_addr.s_addr = inet_addr("127.0.0.1");
+                        			 dire_servi.sin_port = htons(9034);
 
-
-
-                        			 int puerto_escucha_swap;
-                        			                        			 char* ip_conec_swap;
-                        			                        			 ip_conec_swap= malloc(sizeof ip_conec_swap);
-                        			                        			 t_config* config;
-
-                        			                        			 config = config_create("config.cfg");
-                        			                        			 if(config != NULL){
-                        			                        			 puerto_escucha_swap=config_get_int_value(config, "PORT_PORT_SWAP");
-                        			                        			 ip_conec_swap=config_get_string_value(config,"IP_SWAP");}
-
-
-
-                        			                        		    struct sockaddr_in dire_serv;
-
-                        			                        		    dire_serv.sin_family = AF_INET;
-                        			                        		    dire_serv.sin_addr.s_addr = inet_addr(ip_conec_swap);
-                        			                        			dire_serv.sin_port = htons(puerto_escucha_swap);
-
-                        			                        				int planificador = socket(AF_INET, SOCK_STREAM, 0);
-                        			                        				if (connect(planificador, (void*) &dire_serv, sizeof(dire_serv)) != 0) {
-                        			                        					perror("No se pudo conectar");
-
+                        			 int planificador = socket(AF_INET, SOCK_STREAM, 0);
+                        			 if (connect(planificador, (void*) &dire_servi, sizeof(dire_servi)) != 0) {
+                        			 perror("No se pudo conectar");}
+                        			 send(planificador,mensaje,sizeof mensaje,0);
                         			                        				}
-
-
-
-
-
-
 
                     }
                 } else {

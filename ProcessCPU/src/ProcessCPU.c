@@ -63,9 +63,9 @@ int main(void) {
 			                        	ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
 
 
-		    int socket_memoria;
+
 		    struct sockaddr_in dire_memoria;
-		    fd_set rfds2;
+
 		    dire_memoria.sin_family = AF_INET;
 		    dire_memoria.sin_addr.s_addr = inet_addr(ip_conec_memoria);
 			dire_memoria.sin_port = htons(puerto_escucha_memoria);
