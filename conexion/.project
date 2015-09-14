@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Cache13-CascaNuts-ProcessPlanificador</name>
+	<name>conexion</name>
 	<comment></comment>
 	<projects>
-		<project>conexion</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
