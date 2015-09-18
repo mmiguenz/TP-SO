@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Cache13-CascaNuts-ProcessPlanificador</name>
+	<name>FuncionesPCB</name>
 	<comment></comment>
 	<projects>
-		<project>conexion</project>
-		<project>FuncionesPCB</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

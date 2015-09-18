@@ -20,6 +20,7 @@
 #include <net/if.h>
 #include <commons/config.h>
 #include <servidor.h>
+#include <PCB.h>
 
 
 
