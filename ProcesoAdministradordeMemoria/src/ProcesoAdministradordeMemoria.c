@@ -145,6 +145,7 @@ int main(void)
                                 remoteIP, INET6_ADDRSTRLEN),
                             newfd);
                         char mensaje[1000]="";
+
                         			recv(newfd, mensaje,sizeof mensaje,0);
                         			printf("Recibi mensaje: %s \n", mensaje);
 
