@@ -7,7 +7,8 @@
  Description : Hello World in C, Ansi-style
  ============================================================================
  */
-
+#ifndef HILITO_C_
+#define HILITO_C_
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -29,6 +30,7 @@
 #include <pthread.h>
 #include <commons/string.h>
 #include <assert.h>
+#include "hilito.h"
 
 void procesarCadena(char* cadena){
   char* line = cadena;
@@ -56,13 +58,13 @@ void procesarCadena(char* cadena){
 }
 
 
-void abrirmCod(){
+void* abrirmCod(char* path){
 
 	FILE *archivo;
  	char caracteres[100];
- 	//caracteres= malloc(sizeof caracteres); free (caracteres);
+ 	//caracteres= malloc(sizeof caracteres);
 
- 	archivo = fopen("mCod","r");
+ 	archivo = fopen(path,"r");
 
  				if (archivo == NULL){
 
@@ -79,19 +81,11 @@ void abrirmCod(){
 
  						}
  			        }
-        system("PAUSE");
 
+ 		//free (caracteres);
         fclose(archivo);
-
+        return EXIT_SUCCESS;
 }
 
-//int main(void) {
 
-	//pthread_t unHilito;
-	//pthread_create(&unHilito, NULL,(void*)abrirmCod, NULL);
-
-
-
-
-//	return EXIT_SUCCESS;
-//}
+#endif

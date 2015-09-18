@@ -15,11 +15,9 @@
 #include <commons/config.h>
 #include <cliente.h>
 #include <pthread.h>
-
+#include <hilito.h>
 
 int main(void) {
-
-	pthread_t unHilito;
 
 
 	int puerto_escucha_planificador;
@@ -45,13 +43,15 @@ int main(void) {
 
    int memoria = conectar_cliente(puerto_escucha_memoria, ip_conec_memoria);
 
-   char* mensaje = recibirMensaje( planificador);
+   char* tamanioPath = recibirMensaje( planificador);
+   char* path = recibirMensaje( planificador);
 
-   enviarMesaje(memoria, mensaje);
+   pthread_t t1;
+   pthread_create(&t1, NULL, abrirmCod, NULL);
 
+   	pthread_join(t1, NULL);
 
-
-				return 0;
+   //enviarMesaje(memoria, mensaje);
 
 
 	return EXIT_SUCCESS;
