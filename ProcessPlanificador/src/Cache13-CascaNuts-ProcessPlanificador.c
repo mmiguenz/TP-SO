@@ -20,9 +20,9 @@
 #include <net/if.h>
 #include <commons/config.h>
 #include <servidor.h>
-#include <PCB.h>
+#include "PCB.h"
 
-
+ t_queue * fifo_PCB;
 
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes);
 
