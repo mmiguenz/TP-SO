@@ -4,8 +4,8 @@
  *  Created on: 18/9/2015
  *      Author: utnso
  */
-#include "PCB.h"
 
+#include "PCB.h"
 static PCB *pcb_create(char *name, int estado){
 	PCB *new = malloc( sizeof(PCB) );
 	new->nombreProc = name;
@@ -20,4 +20,5 @@ static void pcb_destroy(PCB *self){
 	free(self->nombreProc);
 	free(self);
 }
+
 

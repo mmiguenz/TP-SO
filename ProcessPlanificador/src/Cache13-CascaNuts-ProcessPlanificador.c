@@ -19,8 +19,10 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <commons/config.h>
+#include <commons/log.h>
 #include <servidor.h>
-#include "PCB.h"
+#include <pthread.h>
+#include "PCB.c"
 
  t_queue * fifo_PCB;
 
@@ -30,16 +32,24 @@ int tamaniobuf(char cad[]);
 
 int esComando(char * comando);
 
+static void log_in_disk(char* temp_file);
+
+
+
 int main(void)
 {
 	//Espacio para la configuracion del entorno---------------------------<<
- char* puerto_escucha_planif;
+    t_log* logger = log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
+	char* puerto_escucha_planif;
                         	t_config* config;
 
                         	puerto_escucha_planif=malloc(sizeof puerto_escucha_planif);
                         	config = config_create("config.cfg");
                         	if(config != NULL){
-                        	puerto_escucha_planif=config_get_string_value(config, "PORT");}
+                        	puerto_escucha_planif=config_get_string_value(config, "PORT");
+                        	 log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
+                        	}
+
 
 
 	//----------Soy una barra separadora ;)--------------------------------------//
@@ -87,3 +97,14 @@ return 0;
 
 
 
+static void log_in_disk(char* temp_file) {
+    t_log* logger = log_create("log.txt", "PLANIFICADOR",true, LOG_LEVEL_INFO);
+
+    log_trace(logger, "LOG A NIVEL %s", "TRACE");
+    log_debug(logger, "LOG A NIVEL %s", "DEBUG");
+    log_info(logger, "LOG A NIVEL %s", "INFO");
+    log_warning(logger, "LOG A NIVEL %s", "WARNING");
+    log_error(logger, "LOG A NIVEL %s", "ERROR");
+
+ ;
+}

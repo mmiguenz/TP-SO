@@ -14,6 +14,7 @@
 #include <commons/string.h>
 #include <commons/collections/queue.h>
 
+
 typedef struct {
 char* nombreProc;
 int estado;
@@ -25,5 +26,7 @@ int contadorProgram;
 static PCB *pcb_create(char *name, int estado);
 
 static void pcb_destroy(PCB *self);
+
+
 
 #endif /* PCB_H_ */
