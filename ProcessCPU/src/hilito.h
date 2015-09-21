@@ -1,12 +1,13 @@
 /*
  * hilito.h
  *
- *  Created on: 18/9/2015
+ *  Created on: 19/9/2015
  *      Author: utnso
  */
 
 #ifndef HILITO_H_
 #define HILITO_H_
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,5 +33,8 @@
 
 void procesarCadena(char* cadena);
 void* abrirmCod();
-
+void conectar();
 #endif /* HILITO_H_ */
+
+
+

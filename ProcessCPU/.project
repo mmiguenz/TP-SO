@@ -4,7 +4,6 @@
 	<comment></comment>
 	<projects>
 		<project>conexion</project>
-		<project>hilitosLib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
