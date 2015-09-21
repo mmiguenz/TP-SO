@@ -2,11 +2,11 @@
  * PCB.c
  *
  *  Created on: 18/9/2015
- *      Author: utnso
+ *      Author: Sebastian Agosta
  */
 
 #include "PCB.h"
-static PCB *pcb_create(char *name, int estado){
+ PCB *pcb_create(char *name, int estado){
 	PCB *new = malloc( sizeof(PCB) );
 	new->nombreProc = name;
 	new->PID = 0;
@@ -16,7 +16,7 @@ static PCB *pcb_create(char *name, int estado){
 }
 
 
-static void pcb_destroy(PCB *self){
+ void pcb_destroy(PCB *self){
 	free(self->nombreProc);
 	free(self);
 }

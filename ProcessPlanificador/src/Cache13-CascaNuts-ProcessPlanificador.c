@@ -21,10 +21,10 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include <pthread.h>
-#include "PCB.h"
 #include "servidor.h"
+#include "PCB.h"
 
- t_queue * fifo_PCB;
+t_queue * fifo_PCB;
 
 void shell();
 
@@ -32,7 +32,7 @@ int tamaniobuf(char cad[]);
 
 int esComando(char * comando);
 
-static void log_in_disk(char* temp_file);
+//static void log_in_disk(char* temp_file);
 
 
 
@@ -59,10 +59,10 @@ int main(void)
 	//----------Soy una barra separadora ;)--------------------------------------//
                         	pthread_create(&hilo_shell, NULL, shell, NULL);
 
-                        	pthread_join(hilo_shell, NULL);
 
                         	conectar(puerto_escucha_planif);
 
+                        	pthread_join(hilo_shell, NULL);
 
     return 0;
 }
@@ -70,16 +70,30 @@ int main(void)
 
 void shell(){
 	char* comando = malloc(sizeof(char*));
-	printf("-----------------Bienvenido al Planificador Cache 13 V1.0----------------\n");
+	char* ruta =  string_new();;
+	PCB* nuevoPCB=malloc(sizeof(PCB*));
+	char** substring =malloc(sizeof(char**));
+
+	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V1.0----------------\n");
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
 	printf("--------------------------------------------------------------------------\n\n\n\n");
 
     while(1){
     printf("Por favor ingrese el mProc que desea correr:  \n");
     fgets(comando,50,stdin);
-    printf("\n El mProc que eligio es %s \n",comando);
+    substring= string_split(comando, " ");
+    if(!strcmp(substring[0], "correr")){
+    printf("\n El mProc que eligio es %s \n",substring[1]);
+    ruta= (char*)malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(substring[1]) + strlen(".cod"));
+    strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
+    strcat(ruta, substring[1]);
+    strcat(ruta, ".cod");
 
-
+    printf("Y su ruta de acceso es: %s \n", ruta);
+    }
+    else{printf("el comando ingresado es incorrecto \n");}
+     //nuevoPCB = pcb_create(comando,0);
+    // pcb_create(comando,0);
     }
 
 
@@ -114,7 +128,7 @@ return 0;
 }
 
 
-
+/*
 static void log_in_disk(char* temp_file) {
     t_log* logger = log_create("log.txt", "PLANIFICADOR",true, LOG_LEVEL_INFO);
 
@@ -126,3 +140,4 @@ static void log_in_disk(char* temp_file) {
 
  ;
 }
+*/
