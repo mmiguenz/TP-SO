@@ -20,9 +20,9 @@
 #include <net/if.h>
 #include <commons/config.h>
 #include <commons/log.h>
-#include <servidor.h>
 #include <pthread.h>
-#include "PCB.c"
+#include "PCB.h"
+//#include "servidor.c"
 
  t_queue * fifo_PCB;
 
@@ -53,7 +53,7 @@ int main(void)
 
 
 	//----------Soy una barra separadora ;)--------------------------------------//
-                        	conectar_servidor(puerto_escucha_planif);
+                        	conectar(puerto_escucha_planif);
 
     return 0;
 }

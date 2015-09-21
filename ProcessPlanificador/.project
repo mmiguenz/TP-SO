@@ -3,7 +3,6 @@
 	<name>Cache13-CascaNuts-ProcessPlanificador</name>
 	<comment></comment>
 	<projects>
-		<project>ConexServidor</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
