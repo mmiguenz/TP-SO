@@ -9,3 +9,8 @@
 [INFO] 11:16:55:616 PLANIFICADOR/(3245:3245): Se abrio el archivo de configuracion CONFIG
 [INFO] 00:11:52:29 PLANIFICADOR/(5171:5171): Se abrio el archivo de configuracion CONFIG
 [INFO] 00:12:05:840 PLANIFICADOR/(5189:5189): Se abrio el archivo de configuracion CONFIG
+[INFO] 02:17:09:710 PLANIFICADOR/(2990:2990): Se abrio el archivo de configuracion CONFIG
+[INFO] 02:18:04:555 PLANIFICADOR/(3002:3002): Se abrio el archivo de configuracion CONFIG
+[INFO] 02:20:09:564 PLANIFICADOR/(3062:3062): Se abrio el archivo de configuracion CONFIG
+[INFO] 02:21:25:855 PLANIFICADOR/(3100:3100): Se abrio el archivo de configuracion CONFIG
+[INFO] 12:24:41:817 PLANIFICADOR/(2671:2671): Se abrio el archivo de configuracion CONFIG

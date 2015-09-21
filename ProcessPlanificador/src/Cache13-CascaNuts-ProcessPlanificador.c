@@ -22,11 +22,11 @@
 #include <commons/log.h>
 #include <pthread.h>
 #include "PCB.h"
-//#include "servidor.c"
+#include "servidor.h"
 
  t_queue * fifo_PCB;
 
-void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes);
+void shell();
 
 int tamaniobuf(char cad[]);
 
@@ -39,7 +39,11 @@ static void log_in_disk(char* temp_file);
 int main(void)
 {
 	//Espacio para la configuracion del entorno---------------------------<<
-    t_log* logger = log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
+
+	t_log* logger = log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
+
+	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
+
 	char* puerto_escucha_planif;
                         	t_config* config;
 
@@ -53,16 +57,30 @@ int main(void)
 
 
 	//----------Soy una barra separadora ;)--------------------------------------//
+                        	pthread_create(&hilo_shell, NULL, shell, NULL);
+
+                        	pthread_join(hilo_shell, NULL);
+
                         	conectar(puerto_escucha_planif);
+
 
     return 0;
 }
 
 
-void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
+void shell(){
+	char* comando = malloc(sizeof(char*));
+	printf("-----------------Bienvenido al Planificador Cache 13 V1.0----------------\n");
+	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
+	printf("--------------------------------------------------------------------------\n\n\n\n");
+
+    while(1){
+    printf("Por favor ingrese el mProc que desea correr:  \n");
+    fgets(comando,50,stdin);
+    printf("\n El mProc que eligio es %s \n",comando);
 
 
-    printf("%s\n", buf);//action);
+    }
 
 
 }

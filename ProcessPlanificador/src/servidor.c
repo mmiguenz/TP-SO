@@ -98,17 +98,15 @@ void conectar(char* puerto_escucha_planif)
 
 		/* Se comprueba si algún cliente nuevo desea conectarse y se le
 		 * admite */
-		if (FD_ISSET (socketServidor, &descriptoresLectura))
+		if (FD_ISSET (socketServidor, &descriptoresLectura)){
 			nuevoCliente (socketServidor, socketCliente, &numeroClientes);
 
-			char*mensaje=malloc(sizeof(char*));
 
-				fgets(mensaje,50,stdin);
-				send(socketCliente[(numeroClientes)-1],mensaje,strlen(mensaje),0);
+				send(socketCliente[(numeroClientes)-1],"Te conectaste con el planificador",strlen("Te conectaste con el planificador"),0);
 				//free(mensaje);
 				//mensaje=malloc(sizeof(char*));
 
-	}
+	}}
 }
 
 /*
