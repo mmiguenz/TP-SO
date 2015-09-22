@@ -1,11 +1,22 @@
 #include "servidor.h"
+
+
+
+typedef struct {
+char* nombreProc;
+int estado;
+int PID;
+int contadorProgram;
+char* path;
+}PCB ;
+
 /*
  * Programa principal.
  * Crea un socket servidor y se mete en un select() a la espera de clientes.
  * Cuando un cliente se conecta, le atiende y lo añade al select() y vuelta
  * a empezar.
  */
-void conectar(char* puerto_escucha_planif)
+void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB)
 {
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -78,10 +89,13 @@ void conectar(char* puerto_escucha_planif)
 				if ((recv(socketCliente[i],buffer,50,0)) > 0){
 					printf ("Cliente %d envía %s\n", i+1, buffer);
 
-					char*mensaje=malloc(sizeof(char*));
 
-					fgets(mensaje,50,stdin);
-					send(socketCliente[(numeroClientes)-1],mensaje,strlen(mensaje),0);
+
+					PCB* PcbAux = malloc(sizeof(PCB));
+					PcbAux=queue_pop(fifo_PCB);
+
+					send(socketCliente[(numeroClientes)-1],sprintf("%d",strlen(PcbAux->path)),sizeof(int)+1,0);
+					send(socketCliente[(numeroClientes)-1],PcbAux->path,strlen(PcbAux->path),0);
 
 				}
 

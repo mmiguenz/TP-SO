@@ -5,6 +5,9 @@
  *      Author: utnso
  */
 
+
+
+
 #ifndef SERVIDOR_H_
 #define SERVIDOR_H_
 #include <sys/time.h>
@@ -18,7 +21,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
-#include "PCB.h"
 
 
 
@@ -59,6 +61,6 @@ int dameMaximo (int *tabla, int n);
 void compactaClaves (int *tabla, int *n);
 
 
-void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB);
+void conectar_servidor(char* puerto_escucha_planif);
 
 #endif /* SERVIDOR_H_ */

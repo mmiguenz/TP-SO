@@ -20,11 +20,40 @@
 #include <net/if.h>
 #include <commons/config.h>
 #include <commons/log.h>
+#include <commons/string.h>
+#include <commons/collections/queue.h>
 #include <pthread.h>
-#include "servidor.h"
-#include "PCB.h"
 
 t_queue * fifo_PCB;
+
+
+
+typedef struct {
+char* nombreProc;
+int estado;
+int PID;
+int contadorProgram;
+char* path;
+}PCB ;
+
+//#include "PCB.h"
+
+
+PCB *pcb_create(char *name, int estado, char* ruta){
+	PCB *new = malloc( sizeof(PCB) );
+	new->nombreProc = name;
+	new->PID = 0;
+	new->estado=0;
+	new->contadorProgram=0;
+	new->path=malloc(strlen(ruta)+1);
+	new->path=ruta;
+	return new;
+}
+
+
+#include "servidor.h"
+
+
 
 void shell();
 
@@ -32,14 +61,13 @@ int tamaniobuf(char cad[]);
 
 int esComando(char * comando);
 
-//static void log_in_disk(char* temp_file);
-
 
 
 int main(void)
 {
 	//Espacio para la configuracion del entorno---------------------------<<
 
+	fifo_PCB=queue_create();
 	t_log* logger = log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
 
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
@@ -60,7 +88,7 @@ int main(void)
                         	pthread_create(&hilo_shell, NULL, shell, NULL);
 
 
-                        	conectar(puerto_escucha_planif);
+                        	conectar(puerto_escucha_planif, fifo_PCB);
 
                         	pthread_join(hilo_shell, NULL);
 
@@ -71,7 +99,7 @@ int main(void)
 void shell(){
 	char* comando = malloc(sizeof(char*));
 	char* ruta =  string_new();;
-	PCB* nuevoPCB=malloc(sizeof(PCB*));
+	PCB* nuevoPCB=malloc(sizeof(PCB));
 	char** substring =malloc(sizeof(char**));
 
 	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V1.0----------------\n");
@@ -90,10 +118,13 @@ void shell(){
     strcat(ruta, ".cod");
 
     printf("Y su ruta de acceso es: %s \n", ruta);
+    nuevoPCB = pcb_create(substring[1],0,ruta);//Creo mi pcb
+
+    queue_push(fifo_PCB,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
     }
     else{printf("el comando ingresado es incorrecto \n");}
-     //nuevoPCB = pcb_create(comando,0);
-    // pcb_create(comando,0);
+
+
     }
 
 
