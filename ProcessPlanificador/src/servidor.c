@@ -94,7 +94,7 @@ void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB)
 					PCB* PcbAux = malloc(sizeof(PCB));
 					PcbAux=queue_pop(fifo_PCB);
 
-					send(socketCliente[(numeroClientes)-1],sprintf("%d",strlen(PcbAux->path)),sizeof(int)+1,0);
+					//send(socketCliente[(numeroClientes)-1],sprintf("%d",strlen(PcbAux->path)),sizeof(int)+1,0);
 					send(socketCliente[(numeroClientes)-1],PcbAux->path,strlen(PcbAux->path),0);
 
 				}

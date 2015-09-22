@@ -85,10 +85,11 @@ int main(void)
 
 
 	//----------Soy una barra separadora ;)--------------------------------------//
+
                         	pthread_create(&hilo_shell, NULL, shell, NULL);
 
-
                         	conectar(puerto_escucha_planif, fifo_PCB);
+
 
                         	pthread_join(hilo_shell, NULL);
 
