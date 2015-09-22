@@ -1,7 +1,5 @@
 #include "servidor.h"
 
-
-
 typedef struct {
 char* nombreProc;
 int estado;
@@ -9,6 +7,7 @@ int PID;
 int contadorProgram;
 char* path;
 }PCB ;
+sem_t empty;
 
 /*
  * Programa principal.
@@ -16,7 +15,7 @@ char* path;
  * Cuando un cliente se conecta, le atiende y lo añade al select() y vuelta
  * a empezar.
  */
-void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB)
+void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger)
 {
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -86,16 +85,17 @@ void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB)
 
 				buffer=malloc(sizeof(char*));
 
-				if ((recv(socketCliente[i],buffer,50,0)) > 0){
+				if ((recv(socketCliente[i],buffer,5,0)) > 0){
 					printf ("Cliente %d envía %s\n", i+1, buffer);
 
 
 
 					PCB* PcbAux = malloc(sizeof(PCB));
+					sem_wait(&empty);
 					PcbAux=queue_pop(fifo_PCB);
 
-					//send(socketCliente[(numeroClientes)-1],sprintf("%d",strlen(PcbAux->path)),sizeof(int)+1,0);
-					send(socketCliente[(numeroClientes)-1],PcbAux->path,strlen(PcbAux->path),0);
+					//send(socketCliente[i],(char*)strlen(PcbAux->path),sizeof(int)+1,0);
+					send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
 
 				}
 
@@ -105,6 +105,7 @@ void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB)
 					 * marca con -1 el descriptor para que compactaClaves() lo
 					 * elimine */
 					printf ("Cliente %d ha cerrado la conexión\n", i+1);
+					log_info(logger, "Se ha cerrado la conexion con el CPU: %d", socketCliente[i]);
 					socketCliente[i] = -1;
 				}
 			}
@@ -117,10 +118,13 @@ void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB)
 
 
 				send(socketCliente[(numeroClientes)-1],"Te conectaste con el planificador",strlen("Te conectaste con el planificador"),0);
+				 log_info(logger, "Se conecto exitosamente el CPU: %d", socketCliente[i]);
 				//free(mensaje);
 				//mensaje=malloc(sizeof(char*));
 
 	}}
+
+
 }
 
 /*

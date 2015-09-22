@@ -23,6 +23,10 @@
 #include <commons/string.h>
 #include <commons/collections/queue.h>
 #include <pthread.h>
+#include <semaphore.h>
+
+sem_t empty ;
+
 
 t_queue * fifo_PCB;
 
@@ -68,7 +72,7 @@ int main(void)
 	//Espacio para la configuracion del entorno---------------------------<<
 
 	fifo_PCB=queue_create();
-	t_log* logger = log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
+	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
 
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
 
@@ -81,14 +85,16 @@ int main(void)
                         	puerto_escucha_planif=config_get_string_value(config, "PORT");
                         	 log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
                         	}
+//------------------Soy una barra separadora ;p------------------------------------//
+                        	sem_init(&empty,0,50);
 
 
+/********************Soy una barra llena de asteriscos*********************************************/
 
-	//----------Soy una barra separadora ;)--------------------------------------//
 
                         	pthread_create(&hilo_shell, NULL, shell, NULL);
 
-                        	conectar(puerto_escucha_planif, fifo_PCB);
+                        	conectar(puerto_escucha_planif, fifo_PCB, logger);
 
 
                         	pthread_join(hilo_shell, NULL);
@@ -113,15 +119,17 @@ void shell(){
     substring= string_split(comando, " ");
     if(!strcmp(substring[0], "correr")){
     printf("\n El mProc que eligio es %s \n",substring[1]);
-    ruta= (char*)malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(substring[1]) + strlen(".cod"));
+    substring=string_split(substring[1],"\n");
+    ruta= (char*)malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(substring[0]) + strlen(".cod"));
     strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
-    strcat(ruta, substring[1]);
+    strcat(ruta, substring[0]);
     strcat(ruta, ".cod");
 
     printf("Y su ruta de acceso es: %s \n", ruta);
-    nuevoPCB = pcb_create(substring[1],0,ruta);//Creo mi pcb
+    nuevoPCB = pcb_create(substring[0],0,ruta);//Creo mi pcb
 
     queue_push(fifo_PCB,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
+    sem_post(&empty);
     }
     else{printf("el comando ingresado es incorrecto \n");}
 
