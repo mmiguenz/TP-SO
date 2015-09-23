@@ -1,13 +1,18 @@
 #include "servidor.h"
 
+
+
 typedef struct {
 char* nombreProc;
 int estado;
 int PID;
 int contadorProgram;
 char* path;
+int cpu_asignada;
+
 }PCB ;
 
+t_queue * fifo_PCB_running; //Cola de pcb que estan corriendose
 
 /*
  * Programa principal.
@@ -15,7 +20,7 @@ char* path;
  * Cuando un cliente se conecta, le atiende y lo añade al select() y vuelta
  * a empezar.
  */
-void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger)
+void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger)
 {
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -97,6 +102,8 @@ void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger)
 
 					//send(socketCliente[i],(char*)strlen(PcbAux->path),sizeof(int)+1,0);
 					send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
+					PcbAux->cpu_asignada=socketCliente[i];
+					queue_push(fifo_PCB_running,PcbAux);
 					}else{send(socketCliente[i],"La cola esta vacia",strlen("La cola esta vacia"),0);}
 				}
 

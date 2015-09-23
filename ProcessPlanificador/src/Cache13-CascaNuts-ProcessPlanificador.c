@@ -28,7 +28,7 @@
 //sem_t haveData;
 
 
-t_queue * fifo_PCB;
+t_queue * fifo_PCB_ready;//Cola de pcb que estan listo para ejecutar
 
 
 
@@ -38,6 +38,8 @@ int estado;
 int PID;
 int contadorProgram;
 char* path;
+int cpu_asignada;
+
 }PCB ;
 
 //#include "PCB.h"
@@ -59,7 +61,7 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 
 
 
-void shell();
+void* shell();
 
 int tamaniobuf(char cad[]);
 
@@ -71,7 +73,7 @@ int main(void)
 {
 	//Espacio para la configuracion del entorno---------------------------<<
 
-	fifo_PCB=queue_create();
+	fifo_PCB_ready=queue_create();
 	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
 
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
@@ -95,7 +97,7 @@ int main(void)
 
                         	pthread_create(&hilo_shell, NULL, shell, NULL);
 
-                        	conectar(puerto_escucha_planif, fifo_PCB, logger);
+                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger);
 
 
                         	pthread_join(hilo_shell, NULL);
@@ -104,7 +106,7 @@ int main(void)
 }
 
 
-void shell(){
+void *shell(){
 	char* comando = malloc(sizeof(char*));
 	char* ruta =  string_new();;
 	PCB* nuevoPCB=malloc(sizeof(PCB));
@@ -129,7 +131,7 @@ void shell(){
     printf("Y su ruta de acceso es: %s \n", ruta);
     nuevoPCB = pcb_create(substring[0],0,ruta);//Creo mi pcb
 
-    queue_push(fifo_PCB,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
+    queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
    // sem_post(&haveData);
     }
     else{printf("el comando ingresado es incorrecto \n");}

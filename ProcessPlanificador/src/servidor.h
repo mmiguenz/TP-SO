@@ -61,6 +61,6 @@ int dameMaximo (int *tabla, int n);
 void compactaClaves (int *tabla, int *n);
 
 
-void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger);
+void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger);
 
 #endif /* SERVIDOR_H_ */
