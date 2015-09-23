@@ -13,7 +13,6 @@
 
 int conectar_cliente(int puerto,char* ip){
 
-	int socket_planificador;
 	struct sockaddr_in dire_serv;
 	fd_set rfds;
 	dire_serv.sin_family = AF_INET;
@@ -32,10 +31,12 @@ int conectar_cliente(int puerto,char* ip){
 }
 char* recibirMensaje(int socket) {
 
-		char mensaje[1000]="";
+		char* mensaje;
+		mensaje = malloc(sizeof(mensaje));
 		recv(socket, mensaje,sizeof mensaje,0);
 		printf("Recibi mensaje: %s \n", mensaje);
 		return mensaje;
+
 }
 void enviarMesaje(int socket,char* mensaje) {
 

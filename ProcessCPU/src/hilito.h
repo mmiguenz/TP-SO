@@ -31,9 +31,12 @@
 #include <commons/string.h>
 #include <assert.h>
 
-void procesarCadena(char* cadena);
-void* abrirmCod();
-void conectar();
+int procesarCadena(char* cadena, int memoria, int planificador);
+
+void abrirmCod(char* path, int memoria, int planificador);
+
+void* conectar();
+
 #endif /* HILITO_H_ */
 
 

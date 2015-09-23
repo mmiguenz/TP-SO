@@ -13,18 +13,57 @@
 #include <pthread.h>
 #include <string.h>
 #include <commons/config.h>
-#include <cliente.h>
+#include "cliente.h"
 #include <pthread.h>
 #include "hilito.h"
+#include <commons/collections/list.h>
+
+typedef struct {
+char* nombreProc;
+int estado;
+int PID;
+int contadorProgram;
+char* path;
+char** instruccionesLeidas ;
+int* nroPag;
+}miestructurita ;
+
+struct param{
+	int puerto_escucha_planificador;
+	char* ip_conec_plani;
+	int puerto_escucha_memoria;
+	char* ip_conec_memoria;
+};
+
+int puerto_escucha_planificador;
+char* ip_conec_plani;
+int puerto_escucha_memoria;
+char* ip_conec_memoria;
+
+
 
 int main(void) {
+	ip_conec_plani= malloc(sizeof ip_conec_plani);
+	t_config* config;
+	ip_conec_memoria= malloc(sizeof ip_conec_memoria);
+        	config = config_create("config.cfg");
+		          	if(config != NULL){
+		              	puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
+		                ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
+		                puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
+		                ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
+		          	}
 
 
+	pthread_t hilito;
+	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria};
 
-   pthread_t t1;
-   pthread_create(&t1, NULL, abrirmCod, NULL);
+	pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
 
-   	pthread_join(t1, NULL);
+
+	pthread_join(hilito, NULL);
+	free ( ip_conec_memoria);
+	free ( ip_conec_plani);
 
 
 

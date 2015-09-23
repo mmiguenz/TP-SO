@@ -3,7 +3,6 @@
 	<name>ProcessCPU</name>
 	<comment></comment>
 	<projects>
-		<project>conexion</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

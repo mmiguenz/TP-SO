@@ -21,9 +21,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
-#include <stdlib.h>
 #include <errno.h>
-#include <stdio.h>
 #include <netinet/in.h>
 #include <resolv.h>
 #include <sys/socket.h>
@@ -32,74 +30,101 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <string.h>
 #include <commons/config.h>
 #include <commons/log.h>
 #include <pthread.h>
 #include <commons/string.h>
-
-#include <cliente.h>
+#include "cliente.h"
 #include <assert.h>
 #include "hilito.h"
 
-void conectar(){
+struct param{
 	int puerto_escucha_planificador;
 	char* ip_conec_plani;
-	ip_conec_plani= malloc(sizeof ip_conec_plani);
-	 t_config* config;
+	int puerto_escucha_memoria;
+	char* ip_conec_memoria;
+};
+void* conectar(struct param *mensa){
 
-	 int puerto_escucha_memoria;
-	 char* ip_conec_memoria;
-	 ip_conec_memoria= malloc(sizeof ip_conec_memoria);
+	int puertoPlanificador = mensa->puerto_escucha_planificador;
+	char* ipPlanificador = mensa ->ip_conec_plani;
+	int puertoMemoria = mensa-> puerto_escucha_memoria;
+	char* ipMemoria = mensa->ip_conec_memoria;
+
+	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
+
+   int memoria = conectar_cliente(puertoMemoria, ipMemoria);
+
+   char* mensaje;
+   mensaje = malloc(sizeof(mensaje));
+   mensaje = "estoy libre";
+
+   recibirMensaje( planificador);
+   enviarMesaje( planificador, mensaje);
+
+   char* mCod;
+   mCod = malloc(sizeof(mCod));
+   mCod = recibirMensaje(planificador);
+   //aca en un futuro recibiremos un paquete
+
+   printf("\n\n encontro iniciar\n\n %s \n", mCod);
+   //abrirmCod(mCod, memoria, planificador);
 
 
-	                        	config = config_create("config.cfg");
-	                        	if(config != NULL){
-	                        	puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
-	                        	ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
-	                        	puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
-	                        	ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");}
-
-
-   int planificador = conectar_cliente(puerto_escucha_planificador, ip_conec_plani);
-
-   int memoria = conectar_cliente(puerto_escucha_memoria, ip_conec_memoria);
-   free ( ip_conec_memoria);
-
-   char* tamanioPath = recibirMensaje( planificador);
-   char* path = recibirMensaje( planificador);
-
-   enviarMesaje(memoria, path);
-   return ;
+   return EXIT_SUCCESS;
 }
 
-void procesarCadena(char* cadena){
-  char* line = cadena;
-  char** substrings = string_split(line, " ");
+int procesarCadena(char* cadena, int memoria, int planificador){
 
-	if (strcmp( substrings[0] ,"iniciar")==0){
-		//aviso a memoria substrings[1] = nroPaginas
-		// if (hay lugar para ejecutar mcod)
-		// return mProc x -iniciado/fallo
-		//y a planificador
-		printf("\n\n encontro iniciar\n\n");
-	}
+	char* line = cadena;
+	char** substrings = string_split(line, " ");
 
-	if (strcmp(substrings[0] ,"leer")==0){
-		//aviso a memoria que lea substrings[1]
-		printf("\n\n encontro leer\n\n");
+			if (strcmp( substrings[0] ,"iniciar")==0){
 
-	}
-	if (strcmp(substrings[0] ,"finalizar")==0){
-		//aviso a memoria y a planificador
-		printf("\n\n encontro finalizar\n\n");
-	}
-						free(substrings[0]);
+				printf("\n\n encontro iniciar\n\n");
+
+				char nroPaginas = substrings[1] ;
+				enviarMesaje(memoria, nroPaginas);
+
+				char* msj = recibirMensaje(memoria);
+				enviarMesaje(planificador, msj);
+				msj = recibirMensaje(planificador);
+
+						if (strcmp (msj ,"continuar")==0){
+									return 1 ;
+								}else {return 0;}
+				} else if (strcmp ( substrings[0] ,"leer")==0){
+						//aviso a memoria que lea substrings[1]
+						printf("\n\n encontro leer\n\n");
+
+						char nroPaginas = substrings[1] ;
+						enviarMesaje(memoria, nroPaginas);
+
+						char* msj = recibirMensaje(memoria);
+						enviarMesaje(planificador, msj);
+						msj = recibirMensaje(planificador);
+							if (strcmp (msj ,"continuar")==0){
+								return 1 ;
+							}else {return 0;}
+
+					}else if (strcmp(substrings[0] ,"finalizar")==0){
+							//aviso a memoria y a planificador
+							printf("\n\n encontro finalizar\n\n");
+
+							char FinalizarmCod = substrings[1] ;
+							enviarMesaje(memoria, FinalizarmCod);
+
+							char* msj = recibirMensaje(memoria);
+							enviarMesaje(planificador, msj);
+							msj = recibirMensaje(planificador);
+							return 2;}
+			return 2;
+							free(substrings[0]);
 	                    //free(substrings)
 }
 
 
-void* abrirmCod(char* path){
+void abrirmCod(char* path, int memoria, int planificador){
 
 	FILE *archivo;
  	char caracteres[100];
@@ -111,13 +136,13 @@ void* abrirmCod(char* path){
 
  					printf("\nError de apertura del archivo. \n\n");
  			        }else{
+ 			        	int valor = 1;
 
-
- 					while (feof(archivo) == 0)
+ 					while (feof(archivo) == 0 || valor ==  1)
  						{
  							char* cadena = fgets(caracteres,100,archivo);
 
- 							procesarCadena(cadena);
+ 							 valor = procesarCadena(cadena, memoria, planificador);
 
 
  						}
@@ -125,7 +150,7 @@ void* abrirmCod(char* path){
 
  		//free (caracteres);
         fclose(archivo);
-        return EXIT_SUCCESS;
+        return ;
 }
 
 
