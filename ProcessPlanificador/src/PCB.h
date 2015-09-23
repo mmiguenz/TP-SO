@@ -14,19 +14,20 @@
 #include <commons/string.h>
 #include <commons/collections/queue.h>
 
-
+/*
 typedef struct {
 char* nombreProc;
 int estado;
 int PID;
 int contadorProgram;
+char* path;
 }PCB ;
 
 
-static PCB *pcb_create(char *name, int estado);
+static PCB *pcb_create(char *name, int estado, char*ruta);
 
 static void pcb_destroy(PCB *self);
 
-
+*/
 
 #endif /* PCB_H_ */

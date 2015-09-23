@@ -1,26 +1,11 @@
 #include "servidor.h"
-
-
-
-typedef struct {
-char* nombreProc;
-int estado;
-int PID;
-int contadorProgram;
-char* path;
-int cpu_asignada;
-
-}PCB ;
-
-t_queue * fifo_PCB_running; //Cola de pcb que estan corriendose
-
 /*
  * Programa principal.
  * Crea un socket servidor y se mete en un select() a la espera de clientes.
  * Cuando un cliente se conecta, le atiende y lo añade al select() y vuelta
  * a empezar.
  */
-void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger)
+void conectar_servidor(char* puerto_escucha_memoria)
 {
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -33,7 +18,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 	/* Se abre el socket servidor, avisando por pantalla y saliendo si hay
 	 * algún problema */
 
-	socketServidor = Abre_Socket_Inet (puerto_escucha_planif);//"cpp_java");
+	socketServidor = Abre_Socket_Inet (puerto_escucha_memoria);//"cpp_java");
 	if (socketServidor == -1)
 	{
 		perror ("Error al abrir servidor");
@@ -90,21 +75,15 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 				buffer=malloc(sizeof(char*));
 
-				if ((recv(socketCliente[i],buffer,7,0)) > 0){
-					printf ("Cliente %d envía %s\n", i, buffer);
+				if ((recv(socketCliente[i],buffer,50,0)) > 0){
+					printf ("Cliente %d envía %s\n", i+1, buffer);
 
+					char*mensaje=malloc(sizeof(char*));
 
+					fgets(mensaje,50,stdin);
 
-					PCB* PcbAux = malloc(sizeof(PCB));
+					send(socketCliente[(numeroClientes)-1],mensaje,strlen(mensaje),0);
 
-					if(queue_size(fifo_PCB)>0){
-					PcbAux=queue_pop(fifo_PCB);
-
-					//send(socketCliente[i],(char*)strlen(PcbAux->path),sizeof(int)+1,0);
-					send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
-					PcbAux->cpu_asignada=socketCliente[i];
-					queue_push(fifo_PCB_running,PcbAux);
-					}else{send(socketCliente[i],"La cola esta vacia",strlen("La cola esta vacia"),0);}
 				}
 
 				else
@@ -113,7 +92,6 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					 * marca con -1 el descriptor para que compactaClaves() lo
 					 * elimine */
 					printf ("Cliente %d ha cerrado la conexión\n", i+1);
-					log_info(logger, "Se ha cerrado la conexion con el CPU: %d", socketCliente[i]);
 					socketCliente[i] = -1;
 				}
 			}
@@ -126,13 +104,10 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 
 				send(socketCliente[(numeroClientes)-1],"Te conectaste con el planificador",strlen("Te conectaste con el planificador"),0);
-				 log_info(logger, "Se conecto exitosamente el CPU: %d", socketCliente[i]);
 				//free(mensaje);
 				//mensaje=malloc(sizeof(char*));
 
 	}}
-
-
 }
 
 /*
@@ -367,7 +342,7 @@ int Acepta_Conexion_Cliente (int Descriptor)
 * Se pasa como parametro el nombre del servicio. Debe estar dado
 * de alta en el fichero /etc/services
 */
-int Abre_Socket_Inet (char* puerto_escucha_planif)
+int Abre_Socket_Inet (char* puerto_escucha_memoria)
 {
 	fd_set master;    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
@@ -388,7 +363,7 @@ int Abre_Socket_Inet (char* puerto_escucha_planif)
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, puerto_escucha_planif, &hints, &ai)) != 0) {
+    if ((rv = getaddrinfo(NULL, puerto_escucha_memoria, &hints, &ai)) != 0) {
         fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
 
     }
@@ -426,4 +401,3 @@ int Abre_Socket_Inet (char* puerto_escucha_planif)
 
 	return listener;
 }
-
