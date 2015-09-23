@@ -25,7 +25,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-sem_t empty ;
+//sem_t haveData;
 
 
 t_queue * fifo_PCB;
@@ -86,7 +86,8 @@ int main(void)
                         	 log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
                         	}
 //------------------Soy una barra separadora ;p------------------------------------//
-                        	sem_init(&empty,0,50);
+
+                        	//sem_init(&haveData, 0, 0);
 
 
 /********************Soy una barra llena de asteriscos*********************************************/
@@ -129,7 +130,7 @@ void shell(){
     nuevoPCB = pcb_create(substring[0],0,ruta);//Creo mi pcb
 
     queue_push(fifo_PCB,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
-    sem_post(&empty);
+   // sem_post(&haveData);
     }
     else{printf("el comando ingresado es incorrecto \n");}
 

@@ -7,7 +7,7 @@ int PID;
 int contadorProgram;
 char* path;
 }PCB ;
-sem_t empty;
+
 
 /*
  * Programa principal.
@@ -85,18 +85,19 @@ void conectar(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger)
 
 				buffer=malloc(sizeof(char*));
 
-				if ((recv(socketCliente[i],buffer,5,0)) > 0){
-					printf ("Cliente %d envía %s\n", i+1, buffer);
+				if ((recv(socketCliente[i],buffer,7,0)) > 0){
+					printf ("Cliente %d envía %s\n", i, buffer);
 
 
 
 					PCB* PcbAux = malloc(sizeof(PCB));
-					sem_wait(&empty);
+
+					if(queue_size(fifo_PCB)>0){
 					PcbAux=queue_pop(fifo_PCB);
 
 					//send(socketCliente[i],(char*)strlen(PcbAux->path),sizeof(int)+1,0);
 					send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
-
+					}else{send(socketCliente[i],"La cola esta vacia",strlen("La cola esta vacia"),0);}
 				}
 
 				else
