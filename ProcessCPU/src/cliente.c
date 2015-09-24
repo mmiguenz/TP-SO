@@ -20,7 +20,7 @@ int conectar_cliente(int puerto,char* ip){
 	dire_serv.sin_port = htons(puerto);
 
 			int planificador = socket(AF_INET, SOCK_STREAM, 0);
-			if (connect(planificador, (void*) &dire_serv, sizeof(dire_serv)) != 0) {
+			if (connect(planificador, (void*) &dire_serv, sizeof(dire_serv)) == 0) {
 							perror("No se pudo conectar");
 
 			}
@@ -33,8 +33,9 @@ char* recibirMensaje(int socket) {
 
 		char* mensaje;
 		mensaje = (char*)malloc(sizeof(mensaje));
-		recv(socket, mensaje,50,0);
+		recv(socket, mensaje,100,0);
 		printf("Recibi mensaje: %s \n", mensaje);
+
 		return mensaje;
 
 }

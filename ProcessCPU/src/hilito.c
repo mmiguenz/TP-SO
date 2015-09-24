@@ -69,7 +69,7 @@ void* conectar(struct param *mensa){
    //mCod = recibirMensaje(planificador);
    //aca en un futuro recibiremos un paquete
 
-   printf("\n\n encontro iniciar\n\n %s \n", recibirMensaje(planificador));
+   printf(" %s \n", recibirMensaje(planificador));
    //abrirmCod(mCod, memoria, planificador);
 
    //}

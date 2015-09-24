@@ -129,8 +129,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 			nuevoCliente (socketServidor, socketCliente, &numeroClientes);
 
 //(numeroClientes)-1
-				send(socketCliente[i],"Te conectaste con el planificador",strlen("Te conectaste con el planificador"),0);
-				 log_info(logger, "Se conecto exitosamente el CPU: %d", socketCliente[i]);
+					 log_info(logger, "Se conecto exitosamente el CPU: %d", socketCliente[i]);
 				//free(mensaje);
 				//mensaje=malloc(sizeof(char*));
 
@@ -159,7 +158,7 @@ void nuevoCliente (int servidor, int *clientes, int *nClientes)
 	}
 
 	/* Envía su número de cliente al cliente */
-	Escribe_Socket (clientes[(*nClientes)-1], (char *)nClientes, sizeof(int));
+	Escribe_Socket (clientes[(*nClientes)-1], "Te conectaste al planificador", strlen("Te conectaste al planificador"));
 
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
 	printf ("Aceptado cliente %d\n", *nClientes);
