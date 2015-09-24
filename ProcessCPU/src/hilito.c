@@ -56,21 +56,23 @@ void* conectar(struct param *mensa){
    int memoria = conectar_cliente(puertoMemoria, ipMemoria);
 
    char* mensaje;
-   mensaje = malloc(sizeof(mensaje));
+
+  // while(1){
+   mensaje = (char*)malloc(sizeof(mensaje));
    mensaje = "estoy libre";
 
-   recibirMensaje( planificador);
-   enviarMesaje( planificador, mensaje);
+   recibirMensaje(planificador);
+   enviarMesaje(planificador, "estoy libre");
 
    char* mCod;
-   mCod = malloc(sizeof(mCod));
-   mCod = recibirMensaje(planificador);
+   mCod = (char*)malloc(sizeof(mCod));
+   //mCod = recibirMensaje(planificador);
    //aca en un futuro recibiremos un paquete
 
-   printf("\n\n encontro iniciar\n\n %s \n", mCod);
+   printf("\n\n encontro iniciar\n\n %s \n", recibirMensaje(planificador));
    //abrirmCod(mCod, memoria, planificador);
 
-
+   //}
    return EXIT_SUCCESS;
 }
 

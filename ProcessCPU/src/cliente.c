@@ -32,15 +32,15 @@ int conectar_cliente(int puerto,char* ip){
 char* recibirMensaje(int socket) {
 
 		char* mensaje;
-		mensaje = malloc(sizeof(mensaje));
-		recv(socket, mensaje,sizeof mensaje,0);
+		mensaje = (char*)malloc(sizeof(mensaje));
+		recv(socket, mensaje,50,0);
 		printf("Recibi mensaje: %s \n", mensaje);
 		return mensaje;
 
 }
 void enviarMesaje(int socket,char* mensaje) {
 
-	send(socket, mensaje,sizeof mensaje,0);
+	send(socket, mensaje,strlen (mensaje),0);
 	printf("Envie mensaje: %s \n", mensaje);
 
 	return;

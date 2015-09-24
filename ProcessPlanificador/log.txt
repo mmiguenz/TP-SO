@@ -1,0 +1,2 @@
+[INFO] 12:34:46:988 PLANIFICADOR/(2463:2463): Se abrio el archivo de configuracion CONFIG
+[INFO] 18:02:51:263 PLANIFICADOR/(2200:2200): Se abrio el archivo de configuracion CONFIG

@@ -88,22 +88,26 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 			{
 				/* Se lee lo enviado por el cliente y se escribe en pantalla */
 
-				buffer=malloc(sizeof(char*));
+				buffer=(char*)malloc(sizeof(char*));
 
-				if ((recv(socketCliente[i],buffer,7,0)) > 0){
-					printf ("Cliente %d envía %s\n", i, buffer);
+				if ((recv(socketCliente[i],buffer,30,0)) > 0){
 
+					char** substringaux=(char**)malloc(sizeof (char**));
+					substringaux=	string_split(buffer,"\n");
+
+					printf ("Cliente %d envía %s\n", i, substringaux[0]);
+					free(substringaux);
 
 
 					PCB* PcbAux = malloc(sizeof(PCB));
 
 					if(queue_size(fifo_PCB)>0){
 					PcbAux=queue_pop(fifo_PCB);
-
+					//printf("%s",PcbAux->path);
 					//send(socketCliente[i],(char*)strlen(PcbAux->path),sizeof(int)+1,0);
 					send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
-					PcbAux->cpu_asignada=socketCliente[i];
-					queue_push(fifo_PCB_running,PcbAux);
+					//PcbAux->cpu_asignada=socketCliente[i];
+					//queue_push(fifo_PCB_running,PcbAux);
 					}else{send(socketCliente[i],"La cola esta vacia",strlen("La cola esta vacia"),0);}
 				}
 
@@ -124,8 +128,8 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 		if (FD_ISSET (socketServidor, &descriptoresLectura)){
 			nuevoCliente (socketServidor, socketCliente, &numeroClientes);
 
-
-				send(socketCliente[(numeroClientes)-1],"Te conectaste con el planificador",strlen("Te conectaste con el planificador"),0);
+//(numeroClientes)-1
+				send(socketCliente[i],"Te conectaste con el planificador",strlen("Te conectaste con el planificador"),0);
 				 log_info(logger, "Se conecto exitosamente el CPU: %d", socketCliente[i]);
 				//free(mensaje);
 				//mensaje=malloc(sizeof(char*));
