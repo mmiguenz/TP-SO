@@ -42,7 +42,7 @@ struct param{
 };
 
 int main(void) {
-	t_log* logger= log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
+	//t_log* logger= log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
 	ip_conec_plani= malloc(sizeof ip_conec_plani);
 	t_config* config;
 	ip_conec_memoria= malloc(sizeof ip_conec_memoria);
@@ -59,6 +59,7 @@ int main(void) {
 	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria};
 	pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
 	pthread_join(hilito, NULL);
+
 	free ( ip_conec_memoria);
 	free ( ip_conec_plani);
 	return EXIT_SUCCESS;

@@ -37,7 +37,7 @@ char* recibirMensaje(int socket) {
 	return mensaje;
 }
 void enviarMesaje(int socket,char* mensaje) {
-	send(socket, mensaje,strlen (mensaje),0);
+	send(socket, mensaje,strlen (mensaje)+1,0);
 	printf("Envie mensaje: %s \n", mensaje);
 	return;
 }

@@ -63,26 +63,31 @@ int procesarCadena(char* cadena, int memoria, int planificador){
 				printf("\n\n mProc X Finalizado\n\n");
 				valor =1;
 	}
-	free(substrings[0]);
+	//free(substrings[0]);
 	return valor;
 }
 
 
 
 void abrir(char* path){
-	printf("%s  \n \n \n", path);
-    FILE *archivo;
- 	char caracteres[100];
- 	archivo = fopen("mCod","r");
-	if (archivo == NULL){
+	printf("%s  \n \n \n", path);//fanatica de \n
+
+
+    char caracteres[100];
+
+    FILE * fp;
+
+       fp = fopen ("file.txt", "r");
+
+    if (fp == NULL){
 		printf("\nError de apertura del archivo. \n\n");
  	}else{
- 		while (feof(archivo) == 0){
- 				char* cadena = fgets(caracteres,100,archivo);
+ 		while (feof(fp) == 0){
+ 				char* cadena = fgets(caracteres,100,fp);
  				printf("%s", cadena);
 		}
       }
-    fclose(archivo);
+    fclose(fp);
 }
 
 
@@ -100,9 +105,30 @@ void* conectar(struct param *mensa){
     char* mCod;
     mCod = (char*)malloc(sizeof(mCod));
     mCod = recibirMensaje(planificador);
-    abrir(mCod);
 
-    //}
+    printf("%s  \n \n \n", mCod);//fanatica de \n
+
+
+        char caracteres[100];
+
+        FILE * fp;
+
+           fp =fopen (mCod, "r");
+
+        if (fp == NULL){
+    		printf("\nError de apertura del archivo. \n\n");
+     	}else{
+     		while (feof(fp) == 0){
+     				char* cadena = fgets(caracteres,100,fp);
+     				printf("%s", cadena);
+    		}
+
+          }
+
+
+
+
+
      return EXIT_SUCCESS;
 }
 

@@ -92,6 +92,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 				buffer=(char*)malloc(sizeof(char*));
 
+
 				if ((recv(socketCliente[i],buffer,30,0)) > 0){
 
 					char** substringaux=(char**)malloc(sizeof (char**));
@@ -107,8 +108,8 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					PcbAux=queue_pop(fifo_PCB);
 					char* paquete= (char*)malloc(300);
 					paquete=empaquetate(PcbAux);
-					send(socketCliente[i],paquete,strlen(paquete),0);
-					//send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
+					//send(socketCliente[i],paquete,strlen(paquete),0);
+					send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
 					PcbAux->cpu_asignada=socketCliente[i];
 					queue_push(fifo_PCB_running,PcbAux);
 					}else{send(socketCliente[i],"La cola esta vacia",strlen("La cola esta vacia"),0);}
