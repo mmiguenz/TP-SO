@@ -22,27 +22,42 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <commons/config.h>
+#include "LibSwap.h"
 
-void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes);
 
-void *get_in_addr(struct sockaddr *sa);
-
-void limpiar (char *cadena);
-
-int tamaniobuf(char cad[]);
-
-int esComando(char * comando);
 
 int main(void)
 {
 	//Espacio para la configuracion del entorno---------------------------<<
- char* puerto_escucha_swap;
-                        	t_config* config;
 
-                        	puerto_escucha_swap=malloc(sizeof puerto_escucha_swap);
-                        	config = config_create("config.cfg");
-                        	if(config != NULL){
-                        	puerto_escucha_swap=config_get_string_value(config, "PORT_SWAP");}
+	//variables de configuracion.
+	char* puerto_escucha_swap;
+	char* nombre_swap;
+	int cant_pag;
+	int tam_pag;
+	int retardo_swat;
+	int retardo_compactacion;
+	t_config* config;
+
+
+	puerto_escucha_swap=malloc(sizeof puerto_escucha_swap);
+
+	config = config_create("config.cfg");
+	if(config != NULL){
+		//setea las variables de configuracion.
+		puerto_escucha_swap=config_get_string_value(config, "PORT_SWAP");
+		nombre_swap=config_get_string_value(config, "NOMBRE_SWAT");
+		cant_pag=config_get_int_value(config, "CANTIDAD_PAGINAS");
+		tam_pag=config_get_int_value(config, "TAMANIO_PAGINA");
+		retardo_swat=config_get_int_value(config, "RETARDO_SWAT");
+		retardo_compactacion=config_get_int_value(config, "RETARDO_COMPACTACION");
+	}else{
+		error_show("Error al crear Archivo de configuracion");
+		return EXIT_FAILURE;
+	}
+
+	//Obtiene el path del archivo creado.
+	char* pathArchivoSwap=crearArchivoSwap(nombre_swap,cant_pag*tam_pag);
 
 
 	//----------Soy una barra separadora ;)--------------------------------------//
@@ -182,59 +197,4 @@ int main(void)
 
 
     return 0;
-}
-
-
-void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
-
-
-    printf("%s\n", buf);//action);
-
-
-}
-
-
-
-
-
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-
-void limpiar (char *cadena)
-{
-  char *p;
-  p = strchr (cadena, '\n');
-  if (p)
-    *p = '\0';
-}
-
-
-
-int tamaniobuf(char cad[])
-{
-   int pos = -1;
-   int len = strlen( cad);
-int i;
-   for( i = 0; pos == -1 && i < len; i++){ // si quitas la condición pos == -1
-            // te devuelve la última posición encontrada (si es que hay más de 1)
-      if(*(cad+i) == '\0')
-         pos = i+1;
-   }
-   return pos;
-}
-
-int esComando(char * comando){
-int flag ;
-if(strcmp(comando,"Correr Programa")){
-return 1;
-}
-return 0;
 }
