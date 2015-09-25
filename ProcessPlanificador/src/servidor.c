@@ -452,3 +452,22 @@ char* empaquetate(PCB* pcb){
 
 	return paqueton;
 }
+
+PCB* desempaquetate(char* paquete){
+	PCB* nuevoPCB=malloc(sizeof(PCB));
+
+	char** substring =malloc(sizeof(char**));
+	substring= string_split(paquete, "$");
+	if(atoi(substring[0])==0)//controla el codigo delmensaje
+	{
+		nuevoPCB->nombreProc=substring[1];
+		nuevoPCB->path=substring[2];
+		nuevoPCB->contadorProgram=atoi(substring[3]);
+		nuevoPCB->estado=atoi(substring[4]);
+	}
+
+
+
+		return nuevoPCB;
+
+}
