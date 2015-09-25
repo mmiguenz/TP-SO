@@ -28,7 +28,7 @@ int conectar_cliente(int puerto,char* ip){
 
 char* recibirMensaje(int socket) {
 	char* mensaje;
-	mensaje = (char*)malloc(sizeof(mensaje));
+	mensaje = (char*)malloc(sizeof(char*));
 	if (recv(socket, mensaje,100,0)> 0){
 			printf("Recibi mensaje: %s \n", mensaje);
 	}else 	{

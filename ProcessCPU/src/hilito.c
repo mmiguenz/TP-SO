@@ -103,30 +103,33 @@ void* conectar(struct param *mensa){
     recibirMensaje(planificador);
     enviarMesaje(planificador, mensaje);
     char* mCod;
-    mCod = (char*)malloc(sizeof(mCod));
-    mCod = recibirMensaje(planificador);
+    mCod = (char*)malloc(100);
+    //mCod = recibirMensaje(planificador);
+    char** substring1=malloc(sizeof(char**));
+    strcpy(mCod,recibirMensaje(planificador));
+    printf("%s",mCod);
+    substring1=string_split(mCod,"$");
+    printf("%s  \n \n \n", substring1[0]);//fanatica de \n
 
-    printf("%s  \n \n \n", mCod);//fanatica de \n
 
-
-        char caracteres[100];
+        char *cadena=(char*)malloc(sizeof (char*));
 
         FILE * fp;
 
-           fp =fopen ( "mCod", "r");
+           fp =fopen ( substring1[0] , "r");
 
         if (fp == NULL){
     		printf("\nError de apertura del archivo. \n\n");
      	}else{
-     		while (feof(fp) == 0){
-     				char* cadena = fgets(caracteres,100,fp);
+     		while (fgets(cadena,100,fp) != NULL){
+
      				printf("%s", cadena);
     		}
 
           }
 
-
-
+free(cadena);
+//fclose(fp);
 
 
      return EXIT_SUCCESS;

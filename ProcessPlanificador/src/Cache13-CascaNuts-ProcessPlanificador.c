@@ -126,7 +126,7 @@ void *shell(){
     ruta= (char*)malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(substring[0]) + strlen(".cod"));
     strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
     strcat(ruta, substring[0]);
-    strcat(ruta, ".cod");
+    strcat(ruta, ".cod$");
 
     printf("Y su ruta de acceso es: %s \n", ruta);
     nuevoPCB = pcb_create(substring[0],0,ruta);//Creo mi pcb
