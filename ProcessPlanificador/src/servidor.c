@@ -13,7 +13,7 @@ int cpu_asignada;
 }PCB ;
 
 t_queue * fifo_PCB_running; //Cola de pcb que estan corriendose
-
+char* empaquetate(PCB* pcb);
 /*
  * Programa principal.
  * Crea un socket servidor y se mete en un select() a la espera de clientes.
@@ -22,6 +22,8 @@ t_queue * fifo_PCB_running; //Cola de pcb que estan corriendose
  */
 void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger)
 {
+
+	fifo_PCB_running=queue_create();
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 	int numeroClientes = 0;			/* Número clientes conectados */
@@ -103,11 +105,12 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 					if(queue_size(fifo_PCB)>0){
 					PcbAux=queue_pop(fifo_PCB);
-					//printf("%s",PcbAux->path);
-					//send(socketCliente[i],(char*)strlen(PcbAux->path),sizeof(int)+1,0);
-					send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
-					//PcbAux->cpu_asignada=socketCliente[i];
-					//queue_push(fifo_PCB_running,PcbAux);
+					char* paquete= (char*)malloc(300);
+					paquete=empaquetate(PcbAux);
+					send(socketCliente[i],paquete,strlen(paquete),0);
+					//send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
+					PcbAux->cpu_asignada=socketCliente[i];
+					queue_push(fifo_PCB_running,PcbAux);
 					}else{send(socketCliente[i],"La cola esta vacia",strlen("La cola esta vacia"),0);}
 				}
 
@@ -430,3 +433,22 @@ int Abre_Socket_Inet (char* puerto_escucha_planif)
 	return listener;
 }
 
+
+char* empaquetate(PCB* pcb){
+	char* paqueton= malloc(500);
+
+		strcpy(paqueton, string_itoa(0)); //Codigo de mensaje si es 0 es un PCB
+	    strcat(paqueton, "$");
+
+	    strcpy(paqueton, pcb->nombreProc);
+	    strcat(paqueton, "$");
+	    strcat(paqueton, pcb->path);
+	    strcat(paqueton, "$");
+	    strcat(paqueton, string_itoa(pcb->contadorProgram));
+	    strcat(paqueton, "$");
+	    strcat(paqueton, string_itoa(pcb->estado));
+
+
+
+	return paqueton;
+}
