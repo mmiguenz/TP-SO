@@ -12,41 +12,34 @@
 #include <commons/config.h>
 
 int conectar_cliente(int puerto,char* ip){
-
 	struct sockaddr_in dire_serv;
-	fd_set rfds;
 	dire_serv.sin_family = AF_INET;
 	dire_serv.sin_addr.s_addr = inet_addr(ip);
 	dire_serv.sin_port = htons(puerto);
+	int planificador = socket(AF_INET, SOCK_STREAM, 0);
+	if (connect(planificador, (void*) &dire_serv, sizeof(dire_serv)) > 0) {
+				perror("No se pudo conectar");
+	}
 
-			int planificador = socket(AF_INET, SOCK_STREAM, 0);
-			if (connect(planificador, (void*) &dire_serv, sizeof(dire_serv)) == 0) {
-							perror("No se pudo conectar");
-
-			}
-
-			return planificador	;
+	return planificador	;
 
 
 }
+
 char* recibirMensaje(int socket) {
-
-		char* mensaje;
-		mensaje = (char*)malloc(sizeof(mensaje));
-		recv(socket, mensaje,100,0);
-		printf("Recibi mensaje: %s \n", mensaje);
-
-		return mensaje;
-
+	char* mensaje;
+	mensaje = (char*)malloc(sizeof(mensaje));
+	if (recv(socket, mensaje,100,0)> 0){
+			printf("Recibi mensaje: %s \n", mensaje);
+	}else 	{
+		printf("Falle");
+	}
+	return mensaje;
 }
 void enviarMesaje(int socket,char* mensaje) {
-
 	send(socket, mensaje,strlen (mensaje),0);
 	printf("Envie mensaje: %s \n", mensaje);
-
 	return;
 }
-
-
 
 #endif /* CLIENTE_C_ */

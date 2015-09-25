@@ -15,7 +15,7 @@
  Description : Hello World in C, Ansi-style
  ============================================================================
  */
-#ifndef HILITO_C_
+
 #define HILITO_C_
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,116 +44,65 @@ struct param{
 	int puerto_escucha_memoria;
 	char* ip_conec_memoria;
 };
+
+
+
+int procesarCadena(char* cadena, int memoria, int planificador){
+	char* line = cadena;
+	char** substrings = string_split(line, " ");
+    int valor;
+	if (strcmp( substrings[0] ,"iniciar")==0){
+				printf("\n\n mProc X Iniciado\n\n");
+				//printf("\n\n mProc X Fallo\n\n");
+				printf("Cantidad de paginas %s",substrings[1]);
+				 valor = 1;
+	} else if (strcmp ( substrings[0] ,"leer")==0){
+				printf("\n\n mProc X Pagina N leida: contenido\n\n");
+				valor = 1;
+	}else if (strcmp(substrings[0] ,"finalizar")==0){
+				printf("\n\n mProc X Finalizado\n\n");
+				valor =1;
+	}
+	free(substrings[0]);
+	return valor;
+}
+
+
+
+void abrir(char* path){
+	printf("%s  \n \n \n", path);
+    FILE *archivo;
+ 	char caracteres[100];
+ 	archivo = fopen("mCod","r");
+	if (archivo == NULL){
+		printf("\nError de apertura del archivo. \n\n");
+ 	}else{
+ 		while (feof(archivo) == 0){
+ 				char* cadena = fgets(caracteres,100,archivo);
+ 				printf("%s", cadena);
+		}
+      }
+    fclose(archivo);
+}
+
+
 void* conectar(struct param *mensa){
 
 	int puertoPlanificador = mensa->puerto_escucha_planificador;
 	char* ipPlanificador = mensa ->ip_conec_plani;
-	int puertoMemoria = mensa-> puerto_escucha_memoria;
-	char* ipMemoria = mensa->ip_conec_memoria;
-
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
+	char* mensaje;
+    //  while(1){
+    mensaje = (char*)malloc(sizeof(mensaje));
+    mensaje = "estoy libre";
+    recibirMensaje(planificador);
+    enviarMesaje(planificador, mensaje);
+    char* mCod;
+    mCod = (char*)malloc(sizeof(mCod));
+    mCod = recibirMensaje(planificador);
+    abrir(mCod);
 
-   int memoria = conectar_cliente(puertoMemoria, ipMemoria);
-
-   char* mensaje;
-
-  // while(1){
-   mensaje = (char*)malloc(sizeof(mensaje));
-   mensaje = "estoy libre";
-
-   recibirMensaje(planificador);
-   enviarMesaje(planificador, "estoy libre");
-
-   char* mCod;
-   mCod = (char*)malloc(sizeof(mCod));
-   //mCod = recibirMensaje(planificador);
-   //aca en un futuro recibiremos un paquete
-
-   printf(" %s \n", recibirMensaje(planificador));
-   //abrirmCod(mCod, memoria, planificador);
-
-   //}
-   return EXIT_SUCCESS;
+    //}
+     return EXIT_SUCCESS;
 }
 
-int procesarCadena(char* cadena, int memoria, int planificador){
-
-	char* line = cadena;
-	char** substrings = string_split(line, " ");
-
-			if (strcmp( substrings[0] ,"iniciar")==0){
-
-				printf("\n\n encontro iniciar\n\n");
-
-				char nroPaginas = substrings[1] ;
-				enviarMesaje(memoria, nroPaginas);
-
-				char* msj = recibirMensaje(memoria);
-				enviarMesaje(planificador, msj);
-				msj = recibirMensaje(planificador);
-
-						if (strcmp (msj ,"continuar")==0){
-									return 1 ;
-								}else {return 0;}
-				} else if (strcmp ( substrings[0] ,"leer")==0){
-						//aviso a memoria que lea substrings[1]
-						printf("\n\n encontro leer\n\n");
-
-						char nroPaginas = substrings[1] ;
-						enviarMesaje(memoria, nroPaginas);
-
-						char* msj = recibirMensaje(memoria);
-						enviarMesaje(planificador, msj);
-						msj = recibirMensaje(planificador);
-							if (strcmp (msj ,"continuar")==0){
-								return 1 ;
-							}else {return 0;}
-
-					}else if (strcmp(substrings[0] ,"finalizar")==0){
-							//aviso a memoria y a planificador
-							printf("\n\n encontro finalizar\n\n");
-
-							char FinalizarmCod = substrings[1] ;
-							enviarMesaje(memoria, FinalizarmCod);
-
-							char* msj = recibirMensaje(memoria);
-							enviarMesaje(planificador, msj);
-							msj = recibirMensaje(planificador);
-							return 2;}
-			return 2;
-							free(substrings[0]);
-	                    //free(substrings)
-}
-
-
-void abrirmCod(char* path, int memoria, int planificador){
-
-	FILE *archivo;
- 	char caracteres[100];
- 	//caracteres= malloc(sizeof caracteres);
-
- 	archivo = fopen(path,"r");
-
- 				if (archivo == NULL){
-
- 					printf("\nError de apertura del archivo. \n\n");
- 			        }else{
- 			        	int valor = 1;
-
- 					while (feof(archivo) == 0 || valor ==  1)
- 						{
- 							char* cadena = fgets(caracteres,100,archivo);
-
- 							 valor = procesarCadena(cadena, memoria, planificador);
-
-
- 						}
- 			        }
-
- 		//free (caracteres);
-        fclose(archivo);
-        return ;
-}
-
-
-#endif

@@ -17,15 +17,21 @@
 #include <pthread.h>
 #include "hilito.h"
 #include <commons/collections/list.h>
+#include <commons/log.h>
+
+int puerto_escucha_planificador;
+char* ip_conec_plani;
+int puerto_escucha_memoria;
+char* ip_conec_memoria;
 
 typedef struct {
-char* nombreProc;
-int estado;
-int PID;
-int contadorProgram;
-char* path;
-char** instruccionesLeidas ;
-int* nroPag;
+	char* nombreProc;
+	int estado;
+	int PID;
+	int contadorProgram;
+	char* path;
+	char** instruccionesLeidas ;
+	int* nroPag;
 }miestructurita ;
 
 struct param{
@@ -35,37 +41,25 @@ struct param{
 	char* ip_conec_memoria;
 };
 
-int puerto_escucha_planificador;
-char* ip_conec_plani;
-int puerto_escucha_memoria;
-char* ip_conec_memoria;
-
-
-
 int main(void) {
+	t_log* logger= log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
 	ip_conec_plani= malloc(sizeof ip_conec_plani);
 	t_config* config;
 	ip_conec_memoria= malloc(sizeof ip_conec_memoria);
-        	config = config_create("config.cfg");
-		          	if(config != NULL){
-		              	puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
-		                ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
-		                puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
-		                ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
-		          	}
+    config = config_create("config.cfg");
+	if(config != NULL){
+		    puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
+		    ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
+		    puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
+		    ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
+	}
 
 
 	pthread_t hilito;
 	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria};
-
 	pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
-
-
 	pthread_join(hilito, NULL);
 	free ( ip_conec_memoria);
 	free ( ip_conec_plani);
-
-
-
 	return EXIT_SUCCESS;
 }

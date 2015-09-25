@@ -21,27 +21,17 @@
 #include <regex.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
-
 #include <fcntl.h>
-#include <string.h>
 #include <errno.h>
-#include <stdio.h>
-#include <netinet/in.h>
 #include <resolv.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <sys/wait.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include <pthread.h>
 #include <string.h>
 #include <commons/config.h>
-
+#include <commons/log.h>
 
 int conectar_cliente(int puerto,char* ip);
-
 char* recibirMensaje(int socket);
-
 void enviarMesaje(int socket,char* mesaje);
 
 #endif /* CLIENTE_H_ */
