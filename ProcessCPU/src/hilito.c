@@ -113,7 +113,7 @@ void* conectar(struct param *mensa){
 
         FILE * fp;
 
-           fp =fopen (mCod, "r");
+           fp =fopen ( "mCod", "r");
 
         if (fp == NULL){
     		printf("\nError de apertura del archivo. \n\n");
