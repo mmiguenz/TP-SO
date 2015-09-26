@@ -7,6 +7,8 @@
 
 #ifndef LIBSWAP_H_
 #define LIBSWAP_H_
+#include <commons/collections/list.h>
+
 
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes);
 
@@ -19,5 +21,7 @@ int tamaniobuf(char cad[]);
 int esComando(char * comando);
 
 char* crearArchivoSwap(char *nombre_Swap ,long tamanio);
+
+t_list* crear_ListaLibre(int cant_Paginas);
 
 #endif /* LIBSWAP_H_ */

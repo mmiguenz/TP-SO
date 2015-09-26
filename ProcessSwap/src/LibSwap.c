@@ -19,6 +19,24 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <commons/config.h>
+#include <commons/collections/list.h>
+#include "LibSwap.h"
+
+
+// Tratamiento de listas
+	typedef struct
+	{
+		 pid_t pid;
+		 int comienzo;
+		 int cant_paginas;
+	}t_espacio_ocupado;
+
+	typedef struct
+	{
+		 int comienzo;
+		 int cant_paginas;
+	}t_espacio_libre;
+
 
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
 
@@ -70,18 +88,29 @@ int esComando(char * comando){
 	return 0;
 }
 
+
 char* crearArchivoSwap(char *nombre_Swap ,long tamanio)
 {
 	char* pathArchivo=string_new();
-	char* archivoFormatCero= string_from_format("dd if=/dev/zero of=/%s bs=%lu count=1",nombre_Swap,tamanio);
+	char* archivoFormatCero= string_from_format("dd if=/dev/zero of=/home/utnso/git/tp-2015-2c-cascanueces/ProcessSwap/src/%s bs=%lu count=1",nombre_Swap,tamanio);
 
 	if(system(archivoFormatCero)){
-		error_show("Error al crear el Archivo Swap: func crearArchivoSwap en LibSwap.c");
+		perror("Error al crear el Archivo Swap: func crearArchivoSwap en LibSwap.c");
 		return EXIT_FAILURE;
 	}else {
 		pathArchivo=string_from_format("/%s",nombre_Swap);
 	}
 
 	return  pathArchivo;
+}
+
+t_list* crear_ListaLibre(int cant_Paginas)
+{
+ t_list* listaLibre = list_create();
+ t_espacio_libre* particion;
+ particion->comienzo = 1;
+ particion->cant_paginas = cant_Paginas;
+ list_add(listaLibre, particion);
+ return listaLibre;
 }
 
