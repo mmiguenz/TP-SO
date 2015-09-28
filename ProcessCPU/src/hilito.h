@@ -28,21 +28,9 @@
 #include <commons/string.h>
 #include <assert.h>
 #include <commons/log.h>
-#define MAX_PACKAGE_SIZE 1024	//El servidor no admitira paquetes de mas de 1024 bytes
-#define MAXUSERNAME 30
-#define MAX_MESSAGE_SIZE 300
 
-typedef struct _t_Package {
-		char username[MAXUSERNAME];
-		uint32_t username_long;
-		char message[MAX_MESSAGE_SIZE];
-		uint32_t message_long;
-} t_Package;
-
-int procesarCadena(char* cadena, int memoria, int planificador);
-void abrir(char* path);
-//, int memoria, int planificador
-int recieve_and_deserialize(t_Package *,int);
+int procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,char* nombreProc);
+void abrir(char* path, int memoria, int planificador,t_log* logger,char* nombreProc);
 void* conectar();
 
 #endif /* HILITO_H_ */

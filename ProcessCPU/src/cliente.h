@@ -31,7 +31,7 @@
 #include <commons/log.h>
 
 int conectar_cliente(int puerto,char* ip);
-char* recibirMensaje(int socket);
-void enviarMesaje(int socket,char* mesaje);
+char* recibirMensaje(int socket,t_log* logger);
+void enviarMesaje(int socket,char* mesaje,t_log* logger);
 
 #endif /* CLIENTE_H_ */

@@ -23,6 +23,7 @@ int puerto_escucha_planificador;
 char* ip_conec_plani;
 int puerto_escucha_memoria;
 char* ip_conec_memoria;
+t_log* logger;
 
 typedef struct {
 	char* nombreProc;
@@ -32,17 +33,19 @@ typedef struct {
 	char* path;
 	char** instruccionesLeidas ;
 	int* nroPag;
-}miestructurita ;
+}pcb ;
 
 struct param{
 	int puerto_escucha_planificador;
 	char* ip_conec_plani;
 	int puerto_escucha_memoria;
 	char* ip_conec_memoria;
+	t_log* logger;
 };
 
 int main(void) {
-	//t_log* logger= log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
+
+
 	ip_conec_plani= malloc(sizeof ip_conec_plani);
 	t_config* config;
 	ip_conec_memoria= malloc(sizeof ip_conec_memoria);
@@ -52,11 +55,12 @@ int main(void) {
 		    ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
 		    puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
 		    ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
+		    logger = log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
 	}
 
 
 	pthread_t hilito;
-	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria};
+	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger};
 	pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
 	pthread_join(hilito, NULL);
 

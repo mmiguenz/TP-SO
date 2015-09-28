@@ -37,57 +37,111 @@
 #include "cliente.h"
 #include <assert.h>
 #include "hilito.h"
+#include <commons/log.h>
 
 struct param{
 	int puerto_escucha_planificador;
 	char* ip_conec_plani;
 	int puerto_escucha_memoria;
 	char* ip_conec_memoria;
+	t_log* logger;
 };
 
 
 
-int procesarCadena(char* cadena, int memoria, int planificador){
+int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, char* nombreProc){
+
 	char* line = cadena;
-	char** substrings = string_split(line, " ");
-    int valor;
+	//line = (char*)malloc(sizeof(char*));
+
+	char** substrings =malloc(sizeof(char**));
+	substrings = string_split(line, " ");
+
+	int valor;
+
 	if (strcmp( substrings[0] ,"iniciar")==0){
-				printf("\n\n mProc X Iniciado\n\n");
-				//printf("\n\n mProc X Fallo\n\n");
+				printf("mProc %s Iniciado\n\n", nombreProc);
 				printf("Cantidad de paginas %s",substrings[1]);
-				 valor = 1;
+
+				enviarMesaje(memoria, "encontre iniciar\n\n", logger);
+				enviarMesaje(memoria, substrings[1], logger);
+
+				//log_info(logger, "mProc %s Iniciado", nombreProc);
+				//log_info(logger, "Cantidad de paginas %s", substrings[1]);
+
+				int msj;
+				msj = atoi(recibirMensaje(memoria, logger));
+					if (msj == 1){
+						//enviarMesaje(planificador, "hay lugar");
+						printf("Hay lugar\n");
+						//deberia mandarme donde lo guardo
+					//	log_info(logger, "Hay lugar para: %s", nombreProc);
+						valor = 1;
+					}else{
+						printf("No hay lugar\n");
+						printf("mProc %s Fallo\n", nombreProc);
+						//log_info(logger, "mProc %s Fallo\n", nombreProc);
+						valor = 0;
+					}
 	} else if (strcmp ( substrings[0] ,"leer")==0){
-				printf("\n\n mProc X Pagina N leida: contenido\n\n");
-				valor = 1;
+				printf("mProc %s Pagina %s leida: contenido\n", nombreProc,substrings[1]);
+
+				enviarMesaje(memoria, "encontre leer\n", logger);
+				enviarMesaje(memoria, substrings[1], logger);
+
+				//log_info(logger, "mProc %s comienza lectura\n", nombreProc);
+			//	log_info(logger, "Pagina %s\n", substrings[1]);
+
+				int msj = atoi(recibirMensaje(memoria, logger));
+
+				if (msj == 1){
+					//enviarMesaje(planificador, "lei");
+					printf("pudo leer\n");
+					//log_info(logger, "mProc %s pudo leer\n", nombreProc);
+					valor = 1;
+
+				}else{
+					printf("No pudo leer\n");
+					//log_info(logger, "mProc %s Fallo\n", nombreProc);
+					printf("mProc %s Fallo\n", nombreProc);
+					valor = 0;
+				}
+
 	}else if (strcmp(substrings[0] ,"finalizar")==0){
-				printf("\n\n mProc X Finalizado\n\n");
-				valor =1;
+				printf("mProc %s Finalizado\n", nombreProc);
+
+				//log_info(logger, "mProc %s Finalizado\n", nombreProc);
+
+				enviarMesaje(memoria, "Finaliza mProc\n", logger);
+				valor = 1;
+
 	}
-	//free(substrings[0]);
+
+	free(substrings);
+	//free(line);
 	return valor;
 }
 
 
 
-void abrir(char* path){
-	printf("%s  \n \n \n", path);//fanatica de \n
-
-
-    char caracteres[100];
-
-    FILE * fp;
-
-       fp = fopen ("file.txt", "r");
-
-    if (fp == NULL){
+void abrir(char* path, int memoria, int planificador, t_log* logger,
+		char* nombreProc) {
+	char *cadena = (char*) malloc(sizeof(char*));
+	FILE * fp;
+	int valor = 1;
+	fp = fopen(path, "r");
+	if (fp == NULL) {
 		printf("\nError de apertura del archivo. \n\n");
- 	}else{
- 		while (feof(fp) == 0){
- 				char* cadena = fgets(caracteres,100,fp);
- 				printf("%s", cadena);
+	} else {
+		while ((fgets(cadena, 100, fp) != NULL) && (valor == 1)) {
+			printf("%s\n",cadena);
+			//valor = procesarCadena(cadena, memoria, planificador, logger,
+				//	nombreProc);
 		}
-      }
-    fclose(fp);
+		fclose(fp);
+	}
+
+	free(cadena);
 }
 
 
@@ -95,43 +149,37 @@ void* conectar(struct param *mensa){
 
 	int puertoPlanificador = mensa->puerto_escucha_planificador;
 	char* ipPlanificador = mensa ->ip_conec_plani;
+	int puertoMemoria = mensa-> puerto_escucha_memoria;
+	char* ipMemoria = mensa->ip_conec_memoria;
+	t_log* logger = mensa->logger;
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
+	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
+
+
+
 	char* mensaje;
     //  while(1){
-    mensaje = (char*)malloc(sizeof(mensaje));
-    mensaje = "estoy libre";
-    recibirMensaje(planificador);
-    enviarMesaje(planificador, mensaje);
-    char* mCod;
-    mCod = (char*)malloc(100);
-    //mCod = recibirMensaje(planificador);
-    char** substring1=malloc(sizeof(char**));
-    strcpy(mCod,recibirMensaje(planificador));
-    printf("%s",mCod);
-    substring1=string_split(mCod,"$");
-    printf("%s  \n \n \n", substring1[0]);//fanatica de \n
+    mensaje = "estoy libre\n";
+    recibirMensaje(planificador, logger);
+    enviarMesaje(planificador, mensaje, logger);
+    enviarMesaje(memoria, mensaje, logger);
+    //recibirMensaje(memoria, logger);
 
 
-        char *cadena=(char*)malloc(sizeof (char*));
-
-        FILE * fp;
-
-           fp =fopen ( substring1[0] , "r");
-
-        if (fp == NULL){
-    		printf("\nError de apertura del archivo. \n\n");
-     	}else{
-     		while (fgets(cadena,100,fp) != NULL){
-
-     				printf("%s", cadena);
-    		}
-
-          }
-
-free(cadena);
-//fclose(fp);
+    char* mCod = recibirMensaje(planificador, logger);
+    char** substring1 = string_split(mCod,"$");
+    char** substring2 = string_split(mCod,"/");
 
 
-     return EXIT_SUCCESS;
+    abrir(substring1[0], memoria, planificador, logger, substring2[5]);
+
+    string_iterate_lines(substring1, free);
+    string_iterate_lines(substring2, free);
+    free(mCod);
+    free(substring1);
+    free(substring2);
+
+
+    return EXIT_SUCCESS;
 }
 
