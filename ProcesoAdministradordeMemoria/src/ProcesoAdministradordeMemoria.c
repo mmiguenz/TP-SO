@@ -27,19 +27,36 @@
 
 
 
+
+struct conexion_cliente_servidor{
+	int puerto_escucha_swap;
+	char* ip_conec_swap;
+	char* puerto_escucha_memoria;
+};
+
+
+
 int main(void)
 {
 	 char* puerto_escucha_memoria;
-                        	t_config* config;
+	 int puerto_escucha_swap;
+	 char* ip_conec_swap;
+     t_config* config;
 
                         	puerto_escucha_memoria=malloc(sizeof puerto_escucha_memoria);
+                        	puerto_escucha_swap=malloc(sizeof puerto_escucha_swap);
                         	config = config_create("config.cfg");
                         	if(config != NULL){
-                        	puerto_escucha_memoria=config_get_string_value(config, "PORT_ESCUCHA");}
+                        	puerto_escucha_memoria=config_get_string_value(config, "PORT_ESCUCHA");
+                        	puerto_escucha_swap=config_get_int_value(config, "PORT_SWAP");
+                        	ip_conec_swap=config_get_string_value(config,"IP_SWAP");
 
+                        	}
 
-
+                        	struct conexion_cliente_servidor memoriaG = { puerto_escucha_swap,ip_conec_swap, puerto_escucha_memoria};
 	//----------Soy una barra separadora ;)--------------------------------------//
+                        	int swap = conectar_cliente(puerto_escucha_swap, ip_conec_swap);
+
 
                         	 conectar_servidor( puerto_escucha_memoria);
 

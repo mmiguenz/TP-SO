@@ -52,7 +52,7 @@ int main(void)
 		retardo_swat=config_get_int_value(config, "RETARDO_SWAT");
 		retardo_compactacion=config_get_int_value(config, "RETARDO_COMPACTACION");
 	}else{
-		error_show("Error al crear Archivo de configuracion");
+		perror("Error al crear Archivo de configuracion");
 		return EXIT_FAILURE;
 	}
 
