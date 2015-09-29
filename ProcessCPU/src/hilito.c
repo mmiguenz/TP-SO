@@ -47,6 +47,21 @@ struct param{
 	t_log* logger;
 };
 
+typedef struct  {
+	int msgtype;
+	int payload_size;
+}t_msgHeader;
+
+typedef struct {
+char* nombreProc;
+int estado;
+int PID;
+int contadorProgram;
+char* path;
+int cpu_asignada;
+
+}PCB ;
+
 
 
 int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, char* nombreProc){
@@ -164,9 +179,40 @@ void* conectar(struct param *mensa){
     enviarMesaje(planificador, mensaje, logger);
     enviarMesaje(memoria, mensaje, logger);
     //recibirMensaje(memoria, logger);
+    char* buffer;
+    PCB *PcbAux =malloc(sizeof(PCB));
+       t_msgHeader header;
+       memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 
 
-    char* mCod = recibirMensaje(planificador, logger);
+
+       recv(planificador, &header, sizeof( t_msgHeader), 0);
+       printf("El tamaño delmensaje  es: %d\n\n",header.payload_size);
+       //recv(planificador, &PcbAux, header.payload_size, 0);
+       //printf("El nombre del Proceso es:%s", PcbAux->nombreProc);
+       buffer=malloc(header.payload_size+5);
+       recv(planificador, buffer, header.payload_size, 0);
+
+
+
+       int offset=0;
+
+       memcpy(&PcbAux->PID,buffer +offset  ,  sizeof(int));
+      	offset+=sizeof(int);
+      	memcpy(&PcbAux->contadorProgram,buffer +offset, sizeof(int));
+      	offset+=sizeof(int);
+      	memcpy(&PcbAux->cpu_asignada,buffer +offset  ,  sizeof(int));
+       offset+=sizeof(int);
+       PcbAux->path=strdup(buffer+offset);
+       offset+=strlen(PcbAux->path);
+       PcbAux->nombreProc=strdup(buffer +offset);
+
+
+       printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->path);
+
+
+
+/*
     char** substring1 = string_split(mCod,"$");
     char** substring2 = string_split(mCod,"/");
 
@@ -179,7 +225,7 @@ void* conectar(struct param *mensa){
     free(substring1);
     free(substring2);
 
-
+*/
     return EXIT_SUCCESS;
 }
 

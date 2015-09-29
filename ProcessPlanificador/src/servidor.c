@@ -12,6 +12,11 @@ int cpu_asignada;
 
 }PCB ;
 
+typedef struct  {
+	int msgtype;
+	int payload_size;
+}t_msgHeader;
+
 t_queue * fifo_PCB_running; //Cola de pcb que estan corriendose
 char* empaquetate(PCB* pcb);
 /*
@@ -106,10 +111,42 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 					if(queue_size(fifo_PCB)>0){
 					PcbAux=queue_pop(fifo_PCB);
-					char* paquete= (char*)malloc(300);
-					paquete=empaquetate(PcbAux);
+				    char* mensaje;
+				    mensaje= malloc(sizeof( PCB))+sizeof(t_msgHeader) ;
+
+				    printf("\n PCB a mandar \n\n");
+
+				    printf("EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
+				    printf("EL Path es........: %s \n",PcbAux->path);
+				    printf("EL PID es........: %d \n",PcbAux->PID);
+				    printf("----------------------------------- \n");
+
+
+
+				    int offset=0;
+
+					 memcpy(mensaje +offset  , &PcbAux->PID, sizeof(int));
+					 offset+=sizeof(int);
+					 memcpy(mensaje +offset  , &PcbAux->contadorProgram, sizeof(int));
+					 offset+=sizeof(int);
+					 memcpy(mensaje +offset  , &PcbAux->cpu_asignada, sizeof(int));
+					 offset+=sizeof(int);
+					 memcpy(mensaje +offset  , PcbAux->path, strlen(PcbAux->path)+1);
+					 offset+=strlen(PcbAux->path)+1;
+					 memcpy(mensaje +offset  , PcbAux->nombreProc, strlen(PcbAux->nombreProc)+1);
+					 offset+=strlen(PcbAux->nombreProc)+1;
+
+					 t_msgHeader header;
+					 memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+					 header.msgtype = 1;//MSG_PCB;
+					 header.payload_size = offset;
+					//char* paquete= (char*)malloc(300);
+					//paquete=empaquetate(PcbAux);
 					//send(socketCliente[i],paquete,strlen(paquete),0);
-					send(socketCliente[i],PcbAux->path,strlen(PcbAux->path),0);
+					send(socketCliente[i],&header,sizeof(header),0);
+					send(socketCliente[i],mensaje,header.payload_size,0);
+
+
 					PcbAux->cpu_asignada=socketCliente[i];
 					queue_push(fifo_PCB_running,PcbAux);
 					}else{send(socketCliente[i],"La cola esta vacia",strlen("La cola esta vacia"),0);}

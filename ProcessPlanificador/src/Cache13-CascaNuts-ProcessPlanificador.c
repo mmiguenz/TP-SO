@@ -48,11 +48,12 @@ int cpu_asignada;
 PCB *pcb_create(char *name, int estado, char* ruta){
 	PCB *new = malloc( sizeof(PCB) );
 	new->nombreProc = name;
-	new->PID = 0;
-	new->estado=0;
-	new->contadorProgram=0;
-	new->path=malloc(strlen(ruta)+1);
+	new->PID = 56;
+	new->estado=33;
+	new->contadorProgram=2;
+	new->path=malloc(sizeof(char*));
 	new->path=ruta;
+
 	return new;
 }
 
@@ -126,7 +127,7 @@ void *shell(){
     ruta= (char*)malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(substring[0]) + strlen(".cod"));
     strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
     strcat(ruta, substring[0]);
-    strcat(ruta, ".cod$");
+    strcat(ruta, ".cod");
 
     printf("Y su ruta de acceso es: %s \n", ruta);
     nuevoPCB = pcb_create(substring[0],0,ruta);//Creo mi pcb
