@@ -25,16 +25,6 @@ int puerto_escucha_memoria;
 char* ip_conec_memoria;
 t_log* logger;
 
-typedef struct {
-	char* nombreProc;
-	int estado;
-	int PID;
-	int contadorProgram;
-	char* path;
-	char** instruccionesLeidas ;
-	int* nroPag;
-}pcb ;
-
 struct param{
 	int puerto_escucha_planificador;
 	char* ip_conec_plani;
@@ -42,6 +32,8 @@ struct param{
 	char* ip_conec_memoria;
 	t_log* logger;
 };
+
+
 
 int main(void) {
 
@@ -63,7 +55,7 @@ int main(void) {
 	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger};
 	pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
 	pthread_join(hilito, NULL);
-
+	//config_destroy(config);
 	free ( ip_conec_memoria);
 	free ( ip_conec_plani);
 	return EXIT_SUCCESS;

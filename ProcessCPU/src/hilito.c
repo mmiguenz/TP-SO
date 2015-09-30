@@ -47,116 +47,99 @@ struct param{
 	t_log* logger;
 };
 
-typedef struct  {
-	int msgtype;
-	int payload_size;
-}t_msgHeader;
-
-typedef struct {
-char* nombreProc;
-int estado;
-int PID;
-int contadorProgram;
-char* path;
-int cpu_asignada;
-
-}PCB ;
 
 
-
-int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, char* nombreProc){
-
-	char* line = cadena;
+int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PCB* PcbAux){
+	//char* line = cadena;
 	//line = (char*)malloc(sizeof(char*));
-
 	char** substrings =malloc(sizeof(char**));
-	substrings = string_split(line, " ");
-
+	substrings = string_split(cadena, " ");
 	int valor;
+	int instruccion;
 
 	if (strcmp( substrings[0] ,"iniciar")==0){
-				printf("mProc %s Iniciado\n\n", nombreProc);
-				printf("Cantidad de paginas %s",substrings[1]);
+		printf("Encontro en %s Iniciado Cantidad de paginas %s\n\n", PcbAux->nombreProc, substrings[1]);
+		instruccion = 1;
+		int pagina = atoi(substrings[1]);
 
-				enviarMesaje(memoria, "encontre iniciar\n\n", logger);
-				enviarMesaje(memoria, substrings[1], logger);
+		enviarSolicitud (PcbAux->PID, instruccion, pagina , memoria);
+		PROCESO* msj = recibirMsjMemoria(memoria);
 
-				//log_info(logger, "mProc %s Iniciado", nombreProc);
-				//log_info(logger, "Cantidad de paginas %s", substrings[1]);
+		printf("mensaje de la memoria %d",msj->aceptado);
+		if (msj->aceptado == 1){
+			printf("Hay lugar\n");
+			log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
+			log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
+			log_info(logger, "Cantidad de paginas %s", substrings[1]);
+			valor = 1;
+			free(msj);
 
-				int msj;
-				msj = atoi(recibirMensaje(memoria, logger));
-					if (msj == 1){
-						//enviarMesaje(planificador, "hay lugar");
-						printf("Hay lugar\n");
-						//deberia mandarme donde lo guardo
-					//	log_info(logger, "Hay lugar para: %s", nombreProc);
-						valor = 1;
-					}else{
-						printf("No hay lugar\n");
-						printf("mProc %s Fallo\n", nombreProc);
-						//log_info(logger, "mProc %s Fallo\n", nombreProc);
-						valor = 0;
-					}
+		}else{
+			printf("No hay lugar\n");
+			printf("mProc %s Fallo\n", PcbAux->nombreProc);
+			log_info(logger, "mProc %s Fallo\n", PcbAux->nombreProc);
+			//aviso a planificador que fallo
+			valor = 0;
+		}
 	} else if (strcmp ( substrings[0] ,"leer")==0){
-				printf("mProc %s Pagina %s leida: contenido\n", nombreProc,substrings[1]);
+				printf("Encontro en mProc %s Pagina %s leer\n", PcbAux->nombreProc,substrings[1]);
+				instruccion = 2;
+				int pagina = atoi(substrings[1]);
 
-				enviarMesaje(memoria, "encontre leer\n", logger);
-				enviarMesaje(memoria, substrings[1], logger);
+				enviarSolicitud (PcbAux->PID, instruccion, pagina , memoria);
+				PROCESO* msj = recibirMsjMemoria(memoria);
 
-				//log_info(logger, "mProc %s comienza lectura\n", nombreProc);
-			//	log_info(logger, "Pagina %s\n", substrings[1]);
-
-				int msj = atoi(recibirMensaje(memoria, logger));
-
-				if (msj == 1){
-					//enviarMesaje(planificador, "lei");
+				printf("mensaje de memoria %d",msj->aceptado);
+				if (msj->aceptado == 1){
+					log_info(logger, "mProc %s comienza lectura\n", PcbAux->nombreProc);
+					log_info(logger, "En pagina %s\n", substrings[1]);
 					printf("pudo leer\n");
-					//log_info(logger, "mProc %s pudo leer\n", nombreProc);
 					valor = 1;
-
+					free(msj);
 				}else{
 					printf("No pudo leer\n");
-					//log_info(logger, "mProc %s Fallo\n", nombreProc);
-					printf("mProc %s Fallo\n", nombreProc);
+					log_info(logger, "mProc %s Fallo\n",PcbAux->nombreProc);
+					printf("mProc %s Fallo\n", PcbAux->nombreProc);
 					valor = 0;
 				}
 
 	}else if (strcmp(substrings[0] ,"finalizar")==0){
-				printf("mProc %s Finalizado\n", nombreProc);
+				instruccion = 5;
+				printf("mProc %s Finalizado\n", PcbAux->nombreProc);
+				log_info(logger, "mProc %s Finalizado\n", PcbAux->nombreProc);
+				int pagina = atoi(substrings[1]);
 
-				//log_info(logger, "mProc %s Finalizado\n", nombreProc);
-
-				enviarMesaje(memoria, "Finaliza mProc\n", logger);
+				enviarSolicitud (PcbAux->PID, instruccion, pagina, memoria);
+				PROCESO* msj = recibirMsjMemoria(memoria);
 				valor = 1;
-
+				free(msj);
 	}
 
-	free(substrings);
-	//free(line);
-	return valor;
+string_iterate_lines(substrings,(void*) free);
+free(substrings);
+return valor;
 }
 
 
 
-void abrir(char* path, int memoria, int planificador, t_log* logger,
-		char* nombreProc) {
+void abrir(PCB* PcbAux, int memoria, int planificador, t_log* logger) {
 	char *cadena = (char*) malloc(sizeof(char*));
 	FILE * fp;
 	int valor = 1;
-	fp = fopen(path, "r");
+	fp = fopen(PcbAux->path, "r");
+	printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->nombreProc);
 	if (fp == NULL) {
 		printf("\nError de apertura del archivo. \n\n");
 	} else {
 		while ((fgets(cadena, 100, fp) != NULL) && (valor == 1)) {
-			printf("%s\n",cadena);
-			//valor = procesarCadena(cadena, memoria, planificador, logger,
-				//	nombreProc);
+			//printf("%s\n",cadena);
+			valor = procesarCadena(cadena, memoria, planificador, logger, PcbAux);
 		}
 		fclose(fp);
 	}
 
 	free(cadena);
+	return;
 }
 
 
@@ -170,54 +153,51 @@ void* conectar(struct param *mensa){
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
 
-
-
 	char* mensaje;
     //  while(1){
     mensaje = "estoy libre\n";
-    recibirMensaje(planificador, logger);
+    char* aux = recibirMensaje(planificador, logger);
+    free(aux);
     enviarMesaje(planificador, mensaje, logger);
     enviarMesaje(memoria, mensaje, logger);
-    //recibirMensaje(memoria, logger);
+
     char* buffer;
     PCB *PcbAux =malloc(sizeof(PCB));
-       t_msgHeader header;
-       memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+    t_msgHeader header;
+    memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 
+    recv(planificador, &header, sizeof( t_msgHeader), 0);
+    printf("El tamaño delmensaje  es: %d\n\n",header.payload_size);
+    //recv(planificador, &PcbAux, header.payload_size, 0);
+    //printf("El nombre del Proceso es:%s", PcbAux->nombreProc);
+    buffer=malloc(header.payload_size+5);
+    recv(planificador, buffer, header.payload_size, 0);
 
+    int offset=0;
+    memcpy(&PcbAux->PID,buffer +offset  ,  sizeof(int));
+    offset+=sizeof(int);
+    memcpy(&PcbAux->contadorProgram,buffer +offset, sizeof(int));
+    offset+=sizeof(int);
+    memcpy(&PcbAux->cpu_asignada,buffer +offset  ,  sizeof(int));
+    offset+=sizeof(int);
+    PcbAux->path=strdup(buffer+offset);
+    offset+=strlen(PcbAux->path)+1;
+    PcbAux->nombreProc=strdup(buffer +offset);
 
-       recv(planificador, &header, sizeof( t_msgHeader), 0);
-       printf("El tamaño delmensaje  es: %d\n\n",header.payload_size);
-       //recv(planificador, &PcbAux, header.payload_size, 0);
-       //printf("El nombre del Proceso es:%s", PcbAux->nombreProc);
-       buffer=malloc(header.payload_size+5);
-       recv(planificador, buffer, header.payload_size, 0);
+    printf("este es el pid s %d\n", PcbAux->PID);
+    printf("este es el contador %d\n",PcbAux->contadorProgram);
+    printf("cpu %d\n",PcbAux->cpu_asignada);
+    printf("el nombre  del proceso es %s\n", PcbAux->nombreProc);
+    printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->path);
 
-
-
-       int offset=0;
-
-       memcpy(&PcbAux->PID,buffer +offset  ,  sizeof(int));
-      	offset+=sizeof(int);
-      	memcpy(&PcbAux->contadorProgram,buffer +offset, sizeof(int));
-      	offset+=sizeof(int);
-      	memcpy(&PcbAux->cpu_asignada,buffer +offset  ,  sizeof(int));
-       offset+=sizeof(int);
-       PcbAux->path=strdup(buffer+offset);
-       offset+=strlen(PcbAux->path);
-       PcbAux->nombreProc=strdup(buffer +offset);
-
-
-       printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->path);
-
-
+    abrir(PcbAux, memoria, planificador, logger);
 
 /*
     char** substring1 = string_split(mCod,"$");
     char** substring2 = string_split(mCod,"/");
 
 
-    abrir(substring1[0], memoria, planificador, logger, substring2[5]);
+
 
     string_iterate_lines(substring1, free);
     string_iterate_lines(substring2, free);
@@ -226,6 +206,7 @@ void* conectar(struct param *mensa){
     free(substring2);
 
 */
+    free(buffer);
     return EXIT_SUCCESS;
 }
 

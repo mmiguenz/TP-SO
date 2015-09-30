@@ -30,8 +30,22 @@
 #include <commons/config.h>
 #include <commons/log.h>
 
+typedef struct {
+char* nombreProc;
+int aceptado;
+int instrucciones;
+int pagina;
+int pid;
+int contadorProgram;
+char* lugarEnMemoria;
+char* contenido;
+}PROCESO;
+
 int conectar_cliente(int puerto,char* ip);
 char* recibirMensaje(int socket,t_log* logger);
 void enviarMesaje(int socket,char* mesaje,t_log* logger);
+
+void enviarSolicitud (int pid,int instruccion, int nroPag,int socket);
+PROCESO* recibirMsjMemoria(int memoria);
 
 #endif /* CLIENTE_H_ */

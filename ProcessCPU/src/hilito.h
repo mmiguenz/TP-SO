@@ -29,8 +29,22 @@
 #include <assert.h>
 #include <commons/log.h>
 
-int procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,char* nombreProc);
-void abrir(char* path, int memoria, int planificador,t_log* logger,char* nombreProc);
+typedef struct  {
+	int msgtype;
+	int payload_size;
+}t_msgHeader;
+
+typedef struct {
+char* nombreProc;
+int estado;
+int PID;
+int contadorProgram;
+char* path;
+int cpu_asignada;
+}PCB ;
+
+int procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux);
+void abrir(PCB* PcbAux, int memoria, int planificador,t_log* logger);
 void* conectar();
 
 #endif /* HILITO_H_ */

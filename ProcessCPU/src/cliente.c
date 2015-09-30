@@ -10,6 +10,14 @@
 #include <sys/socket.h>
 #include "cliente.h"
 #include <commons/config.h>
+#include <commons/log.h>
+
+typedef struct  {
+	int msgtype;
+	int pagina;
+	int pid;
+}t_msgHeaderMemoria;
+
 
 int conectar_cliente(int puerto,char* ip){
 	struct sockaddr_in dire_serv;
@@ -18,7 +26,11 @@ int conectar_cliente(int puerto,char* ip){
 	dire_serv.sin_port = htons(puerto);
 	int planificador = socket(AF_INET, SOCK_STREAM, 0);
 	if (connect(planificador, (void*) &dire_serv, sizeof(dire_serv)) > 0) {
-				perror("No se pudo conectar");
+				//log_info(logger, "No se pudo conectar");
+				perror("No se pudo conectar %s");
+
+	//}else{
+//		log_info(logger, "Se conecto a %s");
 	}
 
 	return planificador	;
@@ -44,4 +56,50 @@ void enviarMesaje(int socket,char* mensaje,t_log* logger) {
 	return;
 }
 
+void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
+		t_msgHeaderMemoria header;
+		memset(&header, 0, sizeof(t_msgHeaderMemoria));
+
+		header.msgtype = instruccion;
+		/*header.msgtype = 2;leer
+		 * header.msgtype = 3;escribir
+		 * header.msgtype =4;entrada salida
+		 * header.msgtype = 5;finalizar
+		 * */
+		header.pagina = nroPag;
+		header.pid = nroPag;
+
+		printf("pagina %d",header.pagina);
+		printf("tipo de instruccion  %d \n",header.msgtype);
+		printf("nombre de proc %d \n ",header.pid);
+
+		send(socket,&header,sizeof(t_msgHeaderMemoria),0);
+		return;
+}
+PROCESO* recibirMsjMemoria(int memoria){
+    char* buffer;
+    PROCESO *Aux =malloc(sizeof(PROCESO));
+    buffer=malloc(sizeof(PROCESO));
+
+    recv(memoria, buffer, sizeof(PROCESO), 0);
+
+    int offset=0;
+    Aux->nombreProc=strdup(buffer+offset);
+    offset+=strlen(Aux->nombreProc)+1;
+    memcpy(&Aux->aceptado,buffer +offset, sizeof(int));
+    offset+=sizeof(int);
+    memcpy(&Aux->instrucciones,buffer +offset, sizeof(int));
+    offset+=sizeof(int);
+    memcpy(&Aux->pagina,buffer +offset, sizeof(int));
+    offset+=sizeof(int);
+	memcpy(&Aux->pid,buffer +offset, sizeof(int));
+	offset+=sizeof(int);
+	memcpy(&Aux->contadorProgram,buffer +offset, sizeof(int));
+	offset+=sizeof(int);
+    Aux->lugarEnMemoria=strdup(buffer +offset);
+    offset+=strlen(Aux->lugarEnMemoria)+1;
+    Aux->contenido=strdup(buffer+offset);
+    free(Aux);
+    return(Aux);
+}
 #endif /* CLIENTE_C_ */
