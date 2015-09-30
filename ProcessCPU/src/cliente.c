@@ -67,7 +67,7 @@ void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
 		 * header.msgtype = 5;finalizar
 		 * */
 		header.pagina = nroPag;
-		header.pid = nroPag;
+		header.pid = pid;
 
 		printf("pagina %d",header.pagina);
 		printf("tipo de instruccion  %d \n",header.msgtype);
@@ -99,7 +99,7 @@ PROCESO* recibirMsjMemoria(int memoria){
     Aux->lugarEnMemoria=strdup(buffer +offset);
     offset+=strlen(Aux->lugarEnMemoria)+1;
     Aux->contenido=strdup(buffer+offset);
-    free(Aux);
+    free(buffer);
     return(Aux);
 }
 #endif /* CLIENTE_C_ */
