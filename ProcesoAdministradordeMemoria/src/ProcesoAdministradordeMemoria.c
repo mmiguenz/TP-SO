@@ -42,6 +42,7 @@ int main(void)
 	 int puerto_escucha_swap;
 	 char* ip_conec_swap;
      t_config* config;
+    // t_log* logger;
 
                         	puerto_escucha_memoria=malloc(sizeof puerto_escucha_memoria);
                         	puerto_escucha_swap=malloc(sizeof puerto_escucha_swap);
@@ -50,15 +51,15 @@ int main(void)
                         	puerto_escucha_memoria=config_get_string_value(config, "PORT_ESCUCHA");
                         	puerto_escucha_swap=config_get_int_value(config, "PORT_SWAP");
                         	ip_conec_swap=config_get_string_value(config,"IP_SWAP");
+                        	//logger = log_create("log.txt", "Administrador de memoria",false, LOG_LEVEL_INFO);
 
                         	}
 
-                        	struct conexion_cliente_servidor memoriaG = { puerto_escucha_swap,ip_conec_swap, puerto_escucha_memoria};
+                        	//struct conexion_cliente_servidor memoriaG = { puerto_escucha_swap,ip_conec_swap, puerto_escucha_memoria};
 	//----------Soy una barra separadora ;)--------------------------------------//
                         	int swap = conectar_cliente(puerto_escucha_swap, ip_conec_swap);
 
-
-                        	 conectar_servidor( puerto_escucha_memoria);
+                        	 conectar_servidor(puerto_escucha_memoria, swap);
 
 
 

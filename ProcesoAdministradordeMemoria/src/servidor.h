@@ -61,6 +61,8 @@ int dameMaximo (int *tabla, int n);
 void compactaClaves (int *tabla, int *n);
 
 
-void conectar_servidor(char* puerto_escucha_planif);
+void conectar_servidor(char* puerto_escucha_planif, int swap);
+
+int procesarCadena(char* cadena, int swap, int cpu);
 
 #endif /* SERVIDOR_H_ */
