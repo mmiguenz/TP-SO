@@ -112,7 +112,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					if(queue_size(fifo_PCB)>0){
 					PcbAux=queue_pop(fifo_PCB);
 				    char* mensaje;
-				    mensaje= malloc(sizeof( PCB))+sizeof(t_msgHeader) ;
+				    mensaje= malloc(sizeof(PCB))+sizeof(t_msgHeader) ;
 
 				    printf("\n PCB a mandar \n\n");
 

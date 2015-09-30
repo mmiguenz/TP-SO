@@ -47,6 +47,7 @@ int cpu_asignada;
 
 PCB *pcb_create(char *name, int estado, char* ruta){
 	PCB *new = malloc( sizeof(PCB) );
+	new->nombreProc=malloc(sizeof(char*));
 	new->nombreProc = name;
 	new->PID = 56;
 	new->estado=33;

@@ -174,41 +174,41 @@ void* conectar(struct param *mensa){
 
 	char* mensaje;
     //  while(1){
-    mensaje = "estoy libre\n";
-    recibirMensaje(planificador, logger);
-    enviarMesaje(planificador, mensaje, logger);
-    enviarMesaje(memoria, mensaje, logger);
-    //recibirMensaje(memoria, logger);
+    mensaje = malloc(sizeof(char*));
+    mensaje = "estoy libre";
     char* buffer;
+    recibirMensaje(planificador,logger);
+    enviarMesaje(planificador, mensaje, logger);
+
     PCB *PcbAux =malloc(sizeof(PCB));
-       t_msgHeader header;
-       memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+    t_msgHeader header;
+    memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 
 
 
-       recv(planificador, &header, sizeof( t_msgHeader), 0);
-       printf("El tamaño delmensaje  es: %d\n\n",header.payload_size);
-       //recv(planificador, &PcbAux, header.payload_size, 0);
-       //printf("El nombre del Proceso es:%s", PcbAux->nombreProc);
-       buffer=malloc(header.payload_size+5);
-       recv(planificador, buffer, header.payload_size, 0);
+    recv(planificador, &header, sizeof( t_msgHeader), 0);
+    printf("El tamaño delmensaje  es: %d\n\n",header.payload_size);
+    //recv(planificador, &PcbAux, header.payload_size, 0);
+    //printf("El nombre del Proceso es:%s", PcbAux->nombreProc);
+    buffer=malloc(header.payload_size+5);
+    recv(planificador, buffer, header.payload_size, 0);
 
 
 
-       int offset=0;
+    int offset=0;
 
-       memcpy(&PcbAux->PID,buffer +offset  ,  sizeof(int));
-      	offset+=sizeof(int);
-      	memcpy(&PcbAux->contadorProgram,buffer +offset, sizeof(int));
-      	offset+=sizeof(int);
-      	memcpy(&PcbAux->cpu_asignada,buffer +offset  ,  sizeof(int));
-       offset+=sizeof(int);
-       PcbAux->path=strdup(buffer+offset);
-       offset+=strlen(PcbAux->path);
-       PcbAux->nombreProc=strdup(buffer +offset);
+    memcpy(&PcbAux->PID,buffer +offset  ,  sizeof(int));
+   	offset+=sizeof(int);
+   	memcpy(&PcbAux->contadorProgram,buffer +offset, sizeof(int));
+   	offset+=sizeof(int);
+   	memcpy(&PcbAux->cpu_asignada,buffer +offset  ,  sizeof(int));
+    offset+=sizeof(int);
+    PcbAux->path=strdup(buffer+offset);
+    offset+=strlen(PcbAux->path)+1;
+    PcbAux->nombreProc=strdup(buffer +offset);
 
 
-       printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->path);
+    printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->nombreProc);
 
 
 
