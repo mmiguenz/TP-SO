@@ -155,17 +155,30 @@ void* conectar(struct param *mensa){
 
 	char* mensaje;
     //  while(1){
+<<<<<<< HEAD
     mensaje = "estoy libre\n";
     char* aux = recibirMensaje(planificador, logger);
     free(aux);
     enviarMesaje(planificador, mensaje, logger);
     enviarMesaje(memoria, mensaje, logger);
 
+=======
+    mensaje = malloc(sizeof(char*));
+    mensaje = "estoy libre";
+>>>>>>> 4cf720b821b04980a639b04dfc6e1265584ea587
     char* buffer;
+    recibirMensaje(planificador,logger);
+    enviarMesaje(planificador, mensaje, logger);
+
     PCB *PcbAux =malloc(sizeof(PCB));
     t_msgHeader header;
     memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 4cf720b821b04980a639b04dfc6e1265584ea587
     recv(planificador, &header, sizeof( t_msgHeader), 0);
     printf("El tamaño delmensaje  es: %d\n\n",header.payload_size);
     //recv(planificador, &PcbAux, header.payload_size, 0);
@@ -173,17 +186,30 @@ void* conectar(struct param *mensa){
     buffer=malloc(header.payload_size+5);
     recv(planificador, buffer, header.payload_size, 0);
 
+<<<<<<< HEAD
     int offset=0;
     memcpy(&PcbAux->PID,buffer +offset  ,  sizeof(int));
     offset+=sizeof(int);
     memcpy(&PcbAux->contadorProgram,buffer +offset, sizeof(int));
     offset+=sizeof(int);
     memcpy(&PcbAux->cpu_asignada,buffer +offset  ,  sizeof(int));
+=======
+
+
+    int offset=0;
+
+    memcpy(&PcbAux->PID,buffer +offset  ,  sizeof(int));
+   	offset+=sizeof(int);
+   	memcpy(&PcbAux->contadorProgram,buffer +offset, sizeof(int));
+   	offset+=sizeof(int);
+   	memcpy(&PcbAux->cpu_asignada,buffer +offset  ,  sizeof(int));
+>>>>>>> 4cf720b821b04980a639b04dfc6e1265584ea587
     offset+=sizeof(int);
     PcbAux->path=strdup(buffer+offset);
     offset+=strlen(PcbAux->path)+1;
     PcbAux->nombreProc=strdup(buffer +offset);
 
+<<<<<<< HEAD
     printf("este es el pid s %d\n", PcbAux->PID);
     printf("este es el contador %d\n",PcbAux->contadorProgram);
     printf("cpu %d\n",PcbAux->cpu_asignada);
@@ -191,6 +217,12 @@ void* conectar(struct param *mensa){
     printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->path);
 
     abrir(PcbAux, memoria, planificador, logger);
+=======
+
+    printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->nombreProc);
+
+
+>>>>>>> 4cf720b821b04980a639b04dfc6e1265584ea587
 
 /*
     char** substring1 = string_split(mCod,"$");

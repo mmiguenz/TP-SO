@@ -5,7 +5,7 @@
  * Cuando un cliente se conecta, le atiende y lo añade al select() y vuelta
  * a empezar.
  */
-void conectar_servidor(char* puerto_escucha_memoria)
+void conectar_servidor(char* puerto_escucha_memoria, int swap)
 {
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -78,11 +78,8 @@ void conectar_servidor(char* puerto_escucha_memoria)
 				if ((recv(socketCliente[i],buffer,50,0)) > 0){
 					printf ("Cliente %d envía %s\n", i+1, buffer);
 
-					char*mensaje=malloc(sizeof(char*));
+					procesarCadena(buffer,swap,socketCliente[i]);
 
-					fgets(mensaje,50,stdin);
-
-					send(socketCliente[(numeroClientes)-1],mensaje,strlen(mensaje),0);
 
 				}
 
@@ -103,7 +100,7 @@ void conectar_servidor(char* puerto_escucha_memoria)
 			nuevoCliente (socketServidor, socketCliente, &numeroClientes);
 
 
-				send(socketCliente[(numeroClientes)-1],"Te conectaste con el planificador",strlen("Te conectaste con el planificador"),0);
+				send(socketCliente[(numeroClientes)-1],"Te conectaste con el Administrador de memoria",strlen("Te conectaste con el Administrador de memoria"),0);
 				//free(mensaje);
 				//mensaje=malloc(sizeof(char*));
 
@@ -401,3 +398,77 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
 
 	return listener;
 }
+
+int procesarCadena(char* cadena, int swap, int cpu){
+
+	char* line = cadena;
+	//line = (char*)malloc(sizeof(char*));
+
+	char* substrings =malloc(sizeof(char*));
+	substrings = string_split(line, " ");
+
+	int valor;
+
+
+	if (strcmp( substrings[0] ,"iniciar")==0){
+
+				enviarMesaje(swap,substrings[1]);
+
+				//log_info(logger, "mProc %s Iniciado", nombreProc);
+				//log_info(logger, "Cantidad de paginas %s", substrings[1]);
+
+				int msj;
+				msj = atoi(recibirMensaje(swap));
+					if (msj == 1){
+						//enviarMesaje(planificador, "hay lugar");
+						printf("mproc X - iniciado \n");
+						enviarMesaje(cpu, msj);
+						//deberia mandarme donde lo guardo
+					//	log_info(logger, "Hay lugar para: %s", nombreProc);
+						valor = 1;
+					}else{
+						printf("mproc X - fallo\n");
+						enviarMesaje(cpu, msj);
+						//log_info(logger, "mProc %s Fallo\n", nombreProc);
+						valor = 0;
+					}
+	} else if (strcmp ( substrings[0] ,"leer")==0){
+
+				printf("mProc %s Pagina %s leida: contenido\n",substrings[1]);
+
+				enviarMesaje(swap, "leer\n"+ substrings[1]);
+
+
+				//log_info(logger, "mProc %s comienza lectura\n", nombreProc);
+			//	log_info(logger, "Pagina %s\n", substrings[1]);
+
+				int msj = atoi(recibirMensaje(swap));
+
+				if (msj == 1){
+
+					printf("pudo leer\n");
+					enviarMesaje(cpu, msj);
+					valor = 1;
+
+				}else{
+					printf("No pudo leer\n");
+					printf("mProc %s Fallo\n");
+					enviarMesaje(cpu, msj);
+					valor = 0;
+				}
+
+	}else if (strcmp(substrings[0] ,"finalizar")==0){
+				printf("mProc %s Finalizado\n");
+
+				//log_info(logger, "mProc %s Finalizado\n", nombreProc);
+
+				enviarMesaje(swap, "Finaliza mProc\n");
+				valor = 1;
+
+	}
+
+	free(substrings);
+	//free(line);
+	return valor;
+}
+
