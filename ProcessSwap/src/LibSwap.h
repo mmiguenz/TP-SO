@@ -20,7 +20,7 @@ int tamaniobuf(char cad[]);
 
 int esComando(char * comando);
 
-char* crearArchivoSwap(char *nombre_Swap ,long tamanio);
+char* crearArchivoSwap(char *nombre_Swap ,int tam_Pag,int cant_Pag);
 
 t_list* crear_ListaLibre(int cant_Paginas);
 

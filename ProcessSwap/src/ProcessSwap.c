@@ -57,7 +57,9 @@ int main(void)
 	}
 
 	//Obtiene el path del archivo creado.
-	char* pathArchivoSwap=crearArchivoSwap(nombre_swap,cant_pag*tam_pag);
+	char* pathArchivoSwap=crearArchivoSwap(nombre_swap,tam_pag,cant_pag);
+
+	t_list* listaEspaciosLibres = crear_ListaLibre(cant_pag);
 
 
 	//----------Soy una barra separadora ;)--------------------------------------//
