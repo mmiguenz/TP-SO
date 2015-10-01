@@ -43,8 +43,8 @@ char* path;
 int cpu_asignada;
 }PCB ;
 
-int procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux);
-void abrir(PCB* PcbAux, int memoria, int planificador,t_log* logger);
+int procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux, int retardo);
+void abrir(PCB* PcbAux, int memoria, int planificador,t_log* logger, int retardo);
 void* conectar();
 
 #endif /* HILITO_H_ */

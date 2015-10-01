@@ -31,13 +31,10 @@
 #include <commons/log.h>
 
 typedef struct {
-char* nombreProc;
 int aceptado;
 int instrucciones;
 int pagina;
 int pid;
-int contadorProgram;
-char* lugarEnMemoria;
 char* contenido;
 }PROCESO;
 

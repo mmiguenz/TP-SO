@@ -24,6 +24,7 @@ char* ip_conec_plani;
 int puerto_escucha_memoria;
 char* ip_conec_memoria;
 t_log* logger;
+int retardo;
 
 struct param{
 	int puerto_escucha_planificador;
@@ -31,6 +32,7 @@ struct param{
 	int puerto_escucha_memoria;
 	char* ip_conec_memoria;
 	t_log* logger;
+	int retardo;
 };
 
 
@@ -48,11 +50,12 @@ int main(void) {
 		    puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
 		    ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
 		    logger = log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
+		    retardo = config_get_int_value(config, "RETARDO");
 	}
 
 
 	pthread_t hilito;
-	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger};
+	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo};
 	pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
 	pthread_join(hilito, NULL);
 	//config_destroy(config);

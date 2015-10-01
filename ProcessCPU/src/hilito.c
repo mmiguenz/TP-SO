@@ -45,11 +45,12 @@ struct param{
 	int puerto_escucha_memoria;
 	char* ip_conec_memoria;
 	t_log* logger;
+	int retardo;
 };
 
 
 
-int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PCB* PcbAux){
+int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 	//char* line = cadena;
 	//line = (char*)malloc(sizeof(char*));
 	char** substrings =malloc(sizeof(char**));
@@ -72,14 +73,19 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 			log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
 			log_info(logger, "Cantidad de paginas %s", substrings[1]);
 			valor = 1;
-
-
+			t_msgHeader header;
+			memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+			header.msgtype = 2;
+			header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+			send(planificador, &header, sizeof( t_msgHeader), 0);
+			sleep(retardo);
 		}else{
 			printf("No hay lugar\n");
 			printf("mProc %s Fallo\n", PcbAux->nombreProc);
 			log_info(logger, "mProc %s Fallo\n", PcbAux->nombreProc);
 			//aviso a planificador que fallo
 			valor = 0;
+			sleep(retardo);
 
 		}free(msj);
 	} else if (strcmp ( substrings[0] ,"leer")==0){
@@ -97,11 +103,13 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 					printf("pudo leer\n");
 					valor = 1;
 					free(msj);
+					sleep(retardo);
 				}else{
 					printf("No pudo leer\n");
 					log_info(logger, "mProc %s Fallo\n",PcbAux->nombreProc);
 					printf("mProc %s Fallo\n", PcbAux->nombreProc);
 					valor = 0;
+					sleep(retardo);
 				}
 
 	}else if (strcmp(substrings[0] ,"finalizar")==0){
@@ -114,6 +122,12 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 				PROCESO* msj = recibirMsjMemoria(memoria);
 				valor = 1;
 				free(msj);
+				t_msgHeader header;
+				memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+				header.msgtype = 3;
+				header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+				send(planificador, &header, sizeof( t_msgHeader), 0);
+				sleep(retardo);
 	}
 
 string_iterate_lines(substrings,(void*) free);
@@ -123,8 +137,8 @@ return valor;
 
 
 
-void abrir(PCB* PcbAux, int memoria, int planificador, t_log* logger) {
-	char *cadena = (char*) malloc(sizeof(char*));
+void abrir(PCB* PcbAux, int memoria, int planificador, t_log* logger, int retardo) {
+	char *cadena = malloc(sizeof(char*));
 	FILE * fp;
 	int valor = 1;
 	fp = fopen(PcbAux->path, "r");
@@ -134,7 +148,7 @@ void abrir(PCB* PcbAux, int memoria, int planificador, t_log* logger) {
 	} else {
 		while ((fgets(cadena, 100, fp) != NULL) && (valor == 1)) {
 			//printf("%s\n",cadena);
-			valor = procesarCadena(cadena, memoria, planificador, logger, PcbAux);
+			valor = procesarCadena(cadena, memoria, planificador, logger, PcbAux, retardo);
 		}
 		fclose(fp);
 	}
@@ -151,6 +165,7 @@ void* conectar(struct param *mensa){
 	int puertoMemoria = mensa-> puerto_escucha_memoria;
 	char* ipMemoria = mensa->ip_conec_memoria;
 	t_log* logger = mensa->logger;
+	int retardo = mensa->retardo;
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
 
@@ -162,19 +177,21 @@ void* conectar(struct param *mensa){
     char* aux = recibirMensaje(planificador, logger);
     free(aux);
 
-    enviarMesaje(planificador, mensaje, logger);
+    t_msgHeader header2;
+    memset(&header2, 0, sizeof(t_msgHeader));
+    header2.msgtype = 0; //significa estoy libre
+    header2.payload_size = planificador;
+    send(planificador, &header2, sizeof( t_msgHeader), 0);
+
     enviarMesaje(memoria, mensaje, logger);
-    free(mensaje);
 
     char* buffer;
     PCB *PcbAux =malloc(sizeof(PCB));
     t_msgHeader header;
     memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-
     recv(planificador, &header, sizeof( t_msgHeader), 0);
     printf("El tamaño delmensaje  es: %d\n\n",header.payload_size);
-    //recv(planificador, &PcbAux, header.payload_size, 0);
-    //printf("El nombre del Proceso es:%s", PcbAux->nombreProc);
+
     buffer=malloc(header.payload_size+5);
     recv(planificador, buffer, header.payload_size, 0);
     int offset=0;
@@ -195,7 +212,7 @@ void* conectar(struct param *mensa){
     printf("el nombre  del proceso es %s\n", PcbAux->nombreProc);
     printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->path);
 
-    abrir(PcbAux, memoria, planificador, logger);
+    abrir(PcbAux, memoria, planificador, logger, retardo);
 
 
     printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->nombreProc);

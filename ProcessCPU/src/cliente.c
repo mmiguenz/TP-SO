@@ -77,15 +77,14 @@ void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
 		return;
 }
 PROCESO* recibirMsjMemoria(int memoria){
-    char* buffer;
+
+	char* buffer;
     PROCESO *Aux =malloc(sizeof(PROCESO));
     buffer=malloc(sizeof(PROCESO));
 
     recv(memoria, buffer, sizeof(PROCESO), 0);
 
     int offset=0;
-    Aux->nombreProc=strdup(buffer+offset);
-    offset+=strlen(Aux->nombreProc)+1;
     memcpy(&Aux->aceptado,buffer +offset, sizeof(int));
     offset+=sizeof(int);
     memcpy(&Aux->instrucciones,buffer +offset, sizeof(int));
@@ -94,12 +93,10 @@ PROCESO* recibirMsjMemoria(int memoria){
     offset+=sizeof(int);
 	memcpy(&Aux->pid,buffer +offset, sizeof(int));
 	offset+=sizeof(int);
-	memcpy(&Aux->contadorProgram,buffer +offset, sizeof(int));
-	offset+=sizeof(int);
-    Aux->lugarEnMemoria=strdup(buffer +offset);
-    offset+=strlen(Aux->lugarEnMemoria)+1;
     Aux->contenido=strdup(buffer+offset);
+
     free(buffer);
-    return(Aux);
+    return Aux;
 }
+
 #endif /* CLIENTE_C_ */
