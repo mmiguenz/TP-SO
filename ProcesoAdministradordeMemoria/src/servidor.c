@@ -73,16 +73,15 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 			{
 				/* Se lee lo enviado por el cliente y se escribe en pantalla */
 
-				//buffer=malloc(sizeof(char*));
-
-				if ((recv(socketCliente[i],buffer,50,0)) > 0){
-					printf ("Cliente %d envía %s\n", i+1, buffer);
-
-
-
-
-					//procesarCadena(buffer,swap,socketCliente[i]);
-
+				t_msgHeaderMemoria encabezado;
+				 memset(&encabezado, 0, sizeof(t_msgHeaderMemoria));
+				if ((recv(socketCliente[i],&encabezado,sizeof(t_msgHeaderMemoria),0)) > 0){
+				PROCESO *procesoAux =malloc(sizeof(PROCESO));
+				procesoAux=recibirMsjCPU(&encabezado);
+				//procesarcadena(socketCliente[i],swap,procesoAux)
+				//send(swap);
+				//recv(swap);
+				enviarMsjCPU(socketCliente[i],procesoAux);
 
 				}
 
@@ -481,56 +480,37 @@ int procesarCadena(char* cadena, int swap, int cpu){
 	return valor;
 }
 */
-void recibirMsjCPU(int cpu){
+PROCESO* recibirMsjCPU(t_msgHeaderMemoria encabezado){
 
 
-	    char* buffer;
-	    PROCESO *procesoAux =malloc(sizeof(PROCESO));
-	    t_msgHeaderMemoria encabezado;
-	    memset(&encabezado, 0, sizeof(t_msgHeaderMemoria)); // Ahora el struct tiene cero en todos sus miembros
+		PROCESO *procesoAux =malloc(sizeof(PROCESO));
 
-	    recv(cpu, &encabezado, sizeof(t_msgHeaderMemoria), 0);
-	    printf("El tamaño delmensaje  es: %d\n\n",encabezado.pagina);
-	    buffer=malloc(sizeof(encabezado));
-	    recv(cpu, buffer, sizeof(encabezado), 0);
-	    int offset=0;
-	   // memcpy(&procesoAux->instrucciones,buffer +offset ,  sizeof(int));
-	    //offset+=sizeof(int);
-	    memcpy(&procesoAux->aceptado,buffer +offset, sizeof(int));
-	    offset+=sizeof(int);
-	  //  memcpy(&procesoAux->pagina,buffer +offset  ,  sizeof(int));
-	   // offset+=sizeof(int);
-	    memcpy(&procesoAux->pid,buffer +offset  ,  sizeof(int));
-	    offset+=sizeof(int);
-	    procesoAux->contenido=strdup(buffer+offset);
-	    offset+=strlen(procesoAux->contenido)+1;
+
+		procesoAux->pid=encabezado->pid;
+
+
+
+
+	    return procesoAux;
 
 }
 
- void enviarMsjCPU(int cpu){
+ void enviarMsjCPU(int cpu, PROCESO procesoAux){
 
-		PROCESO* procesoAux= malloc(sizeof(PROCESO));
 
 	    char* mensaje;
 	    mensaje= malloc(sizeof(PROCESO));
-	    procesoAux->aceptado = 1;
-	    procesoAux->pid = 1;
-	    procesoAux->contenido = "hola gigi";
+	    procesoAux->aceptado =1;
+	    procesoAux->contenido = " hola flor ";
 
 	    int offset=0;
 		 memcpy(mensaje +offset  , &procesoAux->aceptado, sizeof(int));
 		 offset+=sizeof(int);
-		 //memcpy(mensaje +offset  , &procesoAux->instrucciones, sizeof(int));
-		// offset+=sizeof(int);
-		// memcpy(mensaje +offset  , &procesoAux->pagina, sizeof(int));
-		// offset+=sizeof(int);
 		 memcpy(mensaje +offset  , &procesoAux->pid, sizeof(int));
 		 offset+=sizeof(int);
 		 memcpy(mensaje +offset  , procesoAux->contenido, strlen(procesoAux->contenido)+1);
 		 offset+=strlen(procesoAux->contenido)+1;
-
-		// send(cpu,&encabezado,sizeof(encabezado),0);
 		send(cpu,mensaje,sizeof(mensaje),0);
-		free(procesoAux);
+		free(mensaje);
 		}
 

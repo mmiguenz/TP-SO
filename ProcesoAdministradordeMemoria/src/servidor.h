@@ -40,7 +40,7 @@ typedef struct  {
  * Devuelve el descriptor del socket que atiende a ese servicio o -1 si ha habido error.
  */
 int Abre_Socket_Inet (char* puerto_escucha_planif);
-void enviarMsjCPU(int cpu);
+void enviarMsjCPU(int cpu, PROCESO procesoAux);
 
 /**
  * Acepta un cliente para un socket INET.
@@ -69,5 +69,7 @@ void compactaClaves (int *tabla, int *n);
 void conectar_servidor(char* puerto_escucha_planif, int swap);
 
 int procesarCadena(char* cadena, int swap, int cpu);
+
+PROCESO* recibirMsjCPU(t_msgHeaderMemoria encabezado);
 
 #endif /* SERVIDOR_H_ */
