@@ -112,7 +112,7 @@ void *shell(){
 	char* comando = malloc(sizeof(char*));
 	char* ruta =  string_new();;
 	PCB* nuevoPCB=malloc(sizeof(PCB));
-	char** substring =malloc(sizeof(char**));
+	char** substring;// =malloc(sizeof(char**));
 
 	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V1.0----------------\n");
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
@@ -124,15 +124,19 @@ void *shell(){
     substring= string_split(comando, " ");
     if(!strcmp(substring[0], "correr")){
     printf("\n El mProc que eligio es %s \n",substring[1]);
-    substring=string_split(substring[1],"\n");
-    ruta= (char*)malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(substring[0]) + strlen(".cod"));
+    comando =strdup(substring[1]);
+    string_iterate_lines(substring, (void*) free);
+    free(substring);
+    substring=string_split(comando,"\n");
+    ruta= malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(substring[0]) + strlen(".cod"));
     strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
     strcat(ruta, substring[0]);
     strcat(ruta, ".cod");
 
     printf("Y su ruta de acceso es: %s \n", ruta);
     nuevoPCB = pcb_create(substring[0],0,ruta);//Creo mi pcb
-
+    string_iterate_lines(substring, (void*) free);
+    free(substring);
     queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
    // sem_post(&haveData);
     }

@@ -3921,3 +3921,5 @@
 [INFO] 02:02:23:894 PLANIFICADOR/(3694:3694): Se conecto exitosamente el CPU: -1
 [INFO] 02:02:23:898 PLANIFICADOR/(3694:3694): Se conecto exitosamente el CPU: -1
 [INFO] 02:02:23:901 PLANIFICADOR/(3694:3694): Se conecto exitosamente el CPU: -1
+[INFO] 00:42:26:764 PLANIFICADOR/(3738:3738): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:42:50:889 PLANIFICADOR/(3738:3738): Se conecto exitosamente el CPU: 5

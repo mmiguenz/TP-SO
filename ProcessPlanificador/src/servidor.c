@@ -95,24 +95,23 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 			{
 				/* Se lee lo enviado por el cliente y se escribe en pantalla */
 
-				buffer=(char*)malloc(sizeof(char*));
+				buffer=malloc(sizeof(char*));
 
 
 				if ((recv(socketCliente[i],buffer,30,0)) > 0){
 
-					char** substringaux=(char**)malloc(sizeof (char**));
+					char** substringaux;//=malloc(sizeof (char**));
 					substringaux=	string_split(buffer,"\n");
-
+					free(buffer);
 					printf ("Cliente %d envía %s\n", i, substringaux[0]);
-					free(substringaux);
 
 
-					PCB* PcbAux = malloc(sizeof(PCB));
+					PCB* PcbAux= malloc(sizeof(PCB));
 
 					if(queue_size(fifo_PCB)>0){
 					PcbAux=queue_pop(fifo_PCB);
 				    char* mensaje;
-				    mensaje= malloc(sizeof(PCB))+sizeof(t_msgHeader) ;
+				    mensaje= malloc(sizeof(PCB*))+sizeof(t_msgHeader) ;
 
 				    printf("\n PCB a mandar \n\n");
 
@@ -137,18 +136,18 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					 offset+=strlen(PcbAux->nombreProc)+1;
 
 					 t_msgHeader header;
+
 					 memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 					 header.msgtype = 1;//MSG_PCB;
 					 header.payload_size = offset;
-					//char* paquete= (char*)malloc(300);
-					//paquete=empaquetate(PcbAux);
-					//send(socketCliente[i],paquete,strlen(paquete),0);
-					send(socketCliente[i],&header,sizeof(header),0);
+					 send(socketCliente[i],&header,sizeof(header),0);
 					send(socketCliente[i],mensaje,header.payload_size,0);
 
 
 					PcbAux->cpu_asignada=socketCliente[i];
 					queue_push(fifo_PCB_running,PcbAux);
+					free(PcbAux);
+
 					}else{send(socketCliente[i],"La cola esta vacia",strlen("La cola esta vacia"),0);}
 				}
 
@@ -160,6 +159,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					printf ("Cliente %d ha cerrado la conexión\n", i+1);
 					log_info(logger, "Se ha cerrado la conexion con el CPU: %d", socketCliente[i]);
 					socketCliente[i] = -1;
+					free(buffer);
 				}
 			}
 		}
@@ -171,7 +171,6 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 //(numeroClientes)-1
 					 log_info(logger, "Se conecto exitosamente el CPU: %d", socketCliente[i]);
-				//free(mensaje);
 				//mensaje=malloc(sizeof(char*));
 
 	}}
