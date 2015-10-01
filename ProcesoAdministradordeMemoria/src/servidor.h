@@ -5,9 +5,6 @@
  *      Author: utnso
  */
 
-
-
-
 #ifndef SERVIDOR_H_
 #define SERVIDOR_H_
 #include <sys/time.h>
@@ -23,7 +20,19 @@
 #include <stdio.h>
 
 
+typedef struct {
+int aceptado;
+int instrucciones;
+int pagina;
+int pid;
+char* contenido;
+}PROCESO;
 
+typedef struct  {
+	int msgtype;
+	int pagina;
+	int pid;
+}t_msgHeaderMemoria;
 
 /**
  * Abre un socket INET para atender al servicio cuyo nombre es Servicio.
@@ -48,10 +57,6 @@ int Lee_Socket (int fd, char *Datos, int Longitud);
  * Devuelve el número de bytes escritos o -1 si ha habido error. */
 
 int Escribe_Socket (int fd, char *Datos, int Longitud);
-
-
-
-
 
 #define MAX_CLIENTES 10
 

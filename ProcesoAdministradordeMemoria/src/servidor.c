@@ -78,6 +78,9 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 				if ((recv(socketCliente[i],buffer,50,0)) > 0){
 					printf ("Cliente %d envía %s\n", i+1, buffer);
 
+
+
+
 					procesarCadena(buffer,swap,socketCliente[i]);
 
 
@@ -402,41 +405,47 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
 int procesarCadena(char* cadena, int swap, int cpu){
 
 	char* line = cadena;
-	//line = (char*)malloc(sizeof(char*));
 
-	char* substrings =malloc(sizeof(char*));
-	substrings = string_split(line, " ");
+
+	char** substring =malloc(sizeof(char**));
+	substring = string_split(line, " ");
+
+
+
+
 
 	int valor;
 
 
-	if (strcmp( substrings[0] ,"iniciar")==0){
-
-				enviarMesaje(swap,substrings[1]);
-
-				//log_info(logger, "mProc %s Iniciado", nombreProc);
-				//log_info(logger, "Cantidad de paginas %s", substrings[1]);
+	if (strcmp( substring[0] ,"iniciar")==0){
 
 				int msj;
+				char* msjswap;
+				msjswap= (char*)malloc(strlen(substring[0])+strlen(substring[1])+ strlen(" "));
+					    strcpy(msjswap,substring[0]);
+					    strcat(msjswap, " ");
+					    strcat(msjswap, substring[1]);
+					    enviarMesaje(swap,msjswap);
+
+
 				msj = atoi(recibirMensaje(swap));
 					if (msj == 1){
-						//enviarMesaje(planificador, "hay lugar");
 						printf("mproc X - iniciado \n");
-						enviarMesaje(cpu, msj);
+						enviarMesaje(cpu, "mproc X - iniciado \n");
 						//deberia mandarme donde lo guardo
 					//	log_info(logger, "Hay lugar para: %s", nombreProc);
 						valor = 1;
 					}else{
 						printf("mproc X - fallo\n");
-						enviarMesaje(cpu, msj);
+						enviarMesaje(cpu, "mproc X - fallo\n");
 						//log_info(logger, "mProc %s Fallo\n", nombreProc);
 						valor = 0;
 					}
-	} else if (strcmp ( substrings[0] ,"leer")==0){
+	} else if (strcmp ( substring[0] ,"leer")==0){
 
-				printf("mProc %s Pagina %s leida: contenido\n",substrings[1]);
+				printf("mProc %s Pagina %s leida: contenido\n",substring[1]);
 
-				enviarMesaje(swap, "leer\n"+ substrings[1]);
+				enviarMesaje(swap, "leer\n"+ substring[1]);
 
 
 				//log_info(logger, "mProc %s comienza lectura\n", nombreProc);
@@ -457,7 +466,7 @@ int procesarCadena(char* cadena, int swap, int cpu){
 					valor = 0;
 				}
 
-	}else if (strcmp(substrings[0] ,"finalizar")==0){
+	}else if (strcmp(substring[0] ,"finalizar")==0){
 				printf("mProc %s Finalizado\n");
 
 				//log_info(logger, "mProc %s Finalizado\n", nombreProc);
@@ -467,8 +476,67 @@ int procesarCadena(char* cadena, int swap, int cpu){
 
 	}
 
-	free(substrings);
+	free(substring);
 	//free(line);
 	return valor;
 }
 
+recibirMsjCPU(int cpu){
+
+
+	    char* buffer;
+	    PROCESO *procesoAux =malloc(sizeof(PROCESO));
+	    t_msgHeaderMemoria encabezado;
+	    memset(&encabezado, 0, sizeof(t_msgHeaderMemoria)); // Ahora el struct tiene cero en todos sus miembros
+
+	    recv(cpu, &encabezado, sizeof(t_msgHeaderMemoria), 0);
+	    printf("El tamaño delmensaje  es: %d\n\n",encabezado.pagina);
+	    buffer=malloc(sizeog(encabezado));
+	    recv(cpu, buffer, sizeof(encabezado), 0);
+	    int offset=0;
+	    memcpy(&procesoAux->instrucciones,buffer +offset ,  sizeof(int));
+	    offset+=sizeof(int);
+	    memcpy(&procesoAux->aceptado,buffer +offset, sizeof(int));
+	    offset+=sizeof(int);
+	    memcpy(&procesoAux->pagina,buffer +offset  ,  sizeof(int));
+	    offset+=sizeof(int);
+	    memcpy(&procesoAux->pid,buffer +offset  ,  sizeof(int));
+	    offset+=sizeof(int);
+	    procesoAux->contenido=strdup(buffer+offset);
+	    offset+=strlen(procesoAux->contenido)+1;
+
+}
+
+ enviarMsjCPU(int cpu){
+
+	{
+
+		PROCESO* procesoAux= malloc(sizeof(PROCESO));
+		t_msgHeaderMemoria encabezado;
+
+	    char* mensaje;
+	    mensaje= malloc(sizeof(PROCESO*))+sizeof(t_msgHeaderMemoria) ;
+
+	    int offset=0;
+
+		 memcpy(mensaje +offset  , &procesoAux->aceptado, sizeof(int));
+		 offset+=sizeof(int);
+		 memcpy(mensaje +offset  , &procesoAux->instrucciones, sizeof(int));
+		 offset+=sizeof(int);
+		 memcpy(mensaje +offset  , &procesoAux->pagina, sizeof(int));
+		 offset+=sizeof(int);
+		 memcpy(mensaje +offset  , procesoAux->pid, sizeof(int));
+		 offset+=sizeof(int);
+		 memcpy(mensaje +offset  , procesoAux->contenido, strlen(procesoAux->contenido)+1);
+		 offset+=strlen(procesoAux->contenido)+1;
+
+
+		 memset(&encabezado, 0, sizeof(t_msgHeaderMemoria)); // Ahora el struct tiene cero en todos sus miembros
+		 encabezado.msgtype = 1;//MSG_PCB;
+		 encabezado.pagina = offset;
+		 encabezado.pid = offset;
+		 send(cpu,&encabezado,sizeof(encabezado),0);
+		send(cpu,mensaje,encabezado.pagina,0);
+		free(procesoAux);
+		}
+}

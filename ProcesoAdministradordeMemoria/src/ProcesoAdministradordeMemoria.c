@@ -27,17 +27,15 @@
 
 
 
-
-struct conexion_cliente_servidor{
+/*struct conexion_cliente_servidor{
 	int puerto_escucha_swap;
 	char* ip_conec_swap;
 	char* puerto_escucha_memoria;
-};
+}conexion;*/
 
 
 
-int main(void)
-{
+ int main(void){
 	 char* puerto_escucha_memoria;
 	 int puerto_escucha_swap;
 	 char* ip_conec_swap;
