@@ -119,6 +119,9 @@ t_list* crear_ListaLibre(int cant_Paginas)
 	return lista_Libre;
 }
 
-
+// ejemplo del transform de list_maps
+//char* _get_name(t_person* person) {
+//                    return person->name;
+//                }
 
 
