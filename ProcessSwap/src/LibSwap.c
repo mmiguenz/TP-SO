@@ -88,29 +88,37 @@ int esComando(char * comando){
 	return 0;
 }
 
-
-char* crearArchivoSwap(char *nombre_Swap ,long tamanio)
+// Crea el archivo de inicializacion de Swap, lo inicializa con barra ceros
+// y devuelve el path del archivo creado.
+char* crearArchivoSwap(char *nombre_Swap ,int tam_Pag,int cant_Pag)
 {
 	char* pathArchivo=string_new();
-	char* archivoFormatCero= string_from_format("dd if=/dev/zero of=/home/utnso/git/tp-2015-2c-cascanueces/ProcessSwap/src/%s bs=%lu count=1",nombre_Swap,tamanio);
+	char* archivoFormatCero= string_from_format("dd if=/dev/zero of=/home/utnso/git/tp-2015-2c-cascanueces/ProcessSwap/src/%s bs=%lu count=%lu",nombre_Swap,tam_Pag, cant_Pag);
 
 	if(system(archivoFormatCero)){
 		perror("Error al crear el Archivo Swap: func crearArchivoSwap en LibSwap.c");
 		return EXIT_FAILURE;
 	}else {
-		pathArchivo=string_from_format("/%s",nombre_Swap);
+		pathArchivo=string_from_format("dd if=/dev/zero of=/home/utnso/git/tp-2015-2c-cascanueces/ProcessSwap/src/%s",nombre_Swap);
 	}
 
 	return  pathArchivo;
 }
 
+
+// Crea un lista de espacios Libres. iniciliaza la particion
+// y la agrega a la lista de espacios libres
+// Devolviendo la lista de espacio libres.
 t_list* crear_ListaLibre(int cant_Paginas)
 {
- t_list* listaLibre = list_create();
- t_espacio_libre* particion;
- particion->comienzo = 1;
- particion->cant_paginas = cant_Paginas;
- list_add(listaLibre, particion);
- return listaLibre;
+	t_espacio_libre* particion;
+	particion->comienzo = 1;
+	particion->cant_paginas = cant_Paginas;
+	t_list* lista_Libre = list_create();
+	list_add(lista_Libre, particion);
+	return lista_Libre;
 }
+
+
+
 
