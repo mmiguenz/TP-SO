@@ -67,8 +67,6 @@ void* shell();
 
 int tamaniobuf(char cad[]);
 
-int esComando(char * comando);
-
 
 
 int main(void)
@@ -108,11 +106,15 @@ int main(void)
 }
 
 
+
+/*Shell funcion que se carga en el hilo y va aceptando procesos----->>*/
+
 void *shell(){
-	char* comando = malloc(sizeof(char*));
+	char comando[15]; //= malloc(sizeof(char*));
+	char proceso[15];
+
 	char* ruta =  string_new();;
 	PCB* nuevoPCB=malloc(sizeof(PCB));
-	char** substring;// =malloc(sizeof(char**));
 
 	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V1.0----------------\n");
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
@@ -120,23 +122,41 @@ void *shell(){
 
     while(1){
     printf("Por favor ingrese el mProc que desea correr:  \n");
-    fgets(comando,50,stdin);
-    substring= string_split(comando, " ");
-    if(!strcmp(substring[0], "correr")){
-    printf("\n El mProc que eligio es %s \n",substring[1]);
-    comando =strdup(substring[1]);
-    string_iterate_lines(substring, (void*) free);
-    free(substring);
-    substring=string_split(comando,"\n");
-    ruta= malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(substring[0]) + strlen(".cod"));
+
+    /*-----------------Leo el Comando---------------------------------*/
+    int i =0;
+    scanf("%c",&comando[i]);
+    while (comando[i]!=' '){
+    	i++;
+    scanf("%c",&comando[i]);
+    }
+    comando[i]='\0';
+    /*---------------Leo El proceso ---------------------------------*/
+    i =0;
+        scanf("%c",&proceso[i]);
+        while (proceso[i]!='\n'){
+        	i++;
+        scanf("%c",&proceso[i]);
+        }
+        proceso[i]='\0';
+
+    /*------------------Verifico el comando que sea correcto--------*/
+    if(!strcmp(comando, "correr")){
+    printf("\n El mProc que eligio es %s \n",proceso);
+
+
+    /*----------------Genero la ruta del proceso--------------------*/
+    ruta= malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(proceso) + strlen(".cod"));
     strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
-    strcat(ruta, substring[0]);
+    strcat(ruta, proceso);
     strcat(ruta, ".cod");
 
     printf("Y su ruta de acceso es: %s \n", ruta);
-    nuevoPCB = pcb_create(substring[0],0,ruta);//Creo mi pcb
-    string_iterate_lines(substring, (void*) free);
-    free(substring);
+
+    /*-----------------Creo mi PCB----------------------------------*/
+
+    nuevoPCB = pcb_create(proceso,0,ruta);//Creo mi pcb
+
     queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
    // sem_post(&haveData);
     }
@@ -150,43 +170,3 @@ void *shell(){
 
 
 
-
-
-
-
-
-int tamaniobuf(char cad[])
-{
-   int pos = -1;
-   int len = strlen( cad);
-int i;
-   for( i = 0; pos == -1 && i < len; i++){ // si quitas la condición pos == -1
-            // te devuelve la última posición encontrada (si es que hay más de 1)
-      if(*(cad+i) == '\0')
-         pos = i+1;
-   }
-   return pos;
-}
-
-int esComando(char * comando){
-
-if(strcmp(comando,"Correr Programa")){
-return 1;
-}
-return 0;
-}
-
-
-/*
-static void log_in_disk(char* temp_file) {
-    t_log* logger = log_create("log.txt", "PLANIFICADOR",true, LOG_LEVEL_INFO);
-
-    log_trace(logger, "LOG A NIVEL %s", "TRACE");
-    log_debug(logger, "LOG A NIVEL %s", "DEBUG");
-    log_info(logger, "LOG A NIVEL %s", "INFO");
-    log_warning(logger, "LOG A NIVEL %s", "WARNING");
-    log_error(logger, "LOG A NIVEL %s", "ERROR");
-
- ;
-}
-*/
