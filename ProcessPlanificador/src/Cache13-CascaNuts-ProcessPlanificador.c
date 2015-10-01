@@ -65,8 +65,6 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 
 void* shell();
 
-int tamaniobuf(char cad[]);
-
 
 
 int main(void)

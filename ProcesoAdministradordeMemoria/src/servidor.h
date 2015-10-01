@@ -22,8 +22,8 @@
 
 typedef struct {
 int aceptado;
-int instrucciones;
-int pagina;
+//int instrucciones;
+//int pagina;
 int pid;
 char* contenido;
 }PROCESO;
@@ -40,7 +40,7 @@ typedef struct  {
  * Devuelve el descriptor del socket que atiende a ese servicio o -1 si ha habido error.
  */
 int Abre_Socket_Inet (char* puerto_escucha_planif);
-
+void enviarMsjCPU(int cpu);
 
 /**
  * Acepta un cliente para un socket INET.
