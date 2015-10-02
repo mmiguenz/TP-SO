@@ -405,7 +405,7 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
 PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 
 
-	    PROCESO *procesoAux =malloc(sizeof(PROCESO));
+	    PROCESO *procesoAux =malloc(sizeof(PROCESO*));
 
 	if (encabezado.msgtype ==1){
 				int msj;
@@ -420,7 +420,8 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 				printf("mproc X - iniciado \n");
 				procesoAux->aceptado=1;
 				procesoAux->pid=encabezado.pid;
-				procesoAux->contenido="holi flor";
+				procesoAux->contenido=malloc(sizeof(char*));
+				procesoAux->contenido="holi flor ";
 
 
 						//enviarMesaje(cpu, "mproc X - iniciado \n");
@@ -435,8 +436,6 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 						//procesoAux->contenido="chau flor";
 
 						//log_info(logger, "mProc %s Fallo\n", nombreProc);
-
-
 
 			if (encabezado.msgtype==2){
 
@@ -454,7 +453,6 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 				procesoAux->aceptado=1;
 				procesoAux->pid=encabezado.pid;
 				procesoAux->contenido="estacionaste bien flor";
-
 					printf("pudo leer\n");
 					//enviarMesaje(cpu, msj);
 
@@ -465,13 +463,14 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 					//enviarMesaje(cpu, msj);
 				//}
 			 if (encabezado.msgtype==3){
-				printf("mProc %s Finalizado\n");
+				printf("mProc Finalizado\n");
 
 				//log_info(logger, "mProc %s Finalizado\n", nombreProc);
 
 				//enviarMesaje(swap, "Finaliza mProc\n");
 				procesoAux->aceptado=1;
 				procesoAux->pid=encabezado.pid;
+				procesoAux->contenido=malloc(sizeof(char*));
 				procesoAux->contenido="fallo";
 
 			 }
