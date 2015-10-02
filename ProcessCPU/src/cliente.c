@@ -71,7 +71,7 @@ void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
 
 		printf("pagina %d",header.pagina);
 		printf("tipo de instruccion  %d \n",header.msgtype);
-		printf("nombre de proc %d \n ",header.pid);
+		printf("PID de proc %d \n ",header.pid);
 
 		send(socket,&header,sizeof(t_msgHeaderMemoria),0);
 		return;
@@ -86,10 +86,6 @@ PROCESO* recibirMsjMemoria(int memoria){
 
     int offset=0;
     memcpy(&Aux->aceptado,buffer +offset, sizeof(int));
-    offset+=sizeof(int);
-    memcpy(&Aux->instrucciones,buffer +offset, sizeof(int));
-    offset+=sizeof(int);
-    memcpy(&Aux->pagina,buffer +offset, sizeof(int));
     offset+=sizeof(int);
 	memcpy(&Aux->pid,buffer +offset, sizeof(int));
 	offset+=sizeof(int);

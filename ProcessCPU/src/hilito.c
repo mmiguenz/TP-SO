@@ -54,14 +54,17 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 	//char* line = cadena;
 	//line = (char*)malloc(sizeof(char*));
 	char** substrings =malloc(sizeof(char**));
+	char** substrings2 =malloc(sizeof(char**)); // NO PARA ESCRIBIR!!!!!!!!!!
 	substrings = string_split(cadena, " ");
+	substrings2 = string_split(substrings[1], ";");
 	int valor;
 	int instruccion;
 
 	if (strcmp( substrings[0] ,"iniciar")==0){
 		printf("Encontro en %s Iniciado Cantidad de paginas %s\n\n", PcbAux->nombreProc, substrings[1]);
 		instruccion = 1;
-		int pagina = atoi(substrings[1]);
+
+		int pagina = atoi(substrings2[0]);
 
 		enviarSolicitud (PcbAux->PID, instruccion, pagina , memoria);
 		PROCESO* msj = recibirMsjMemoria(memoria);
@@ -91,7 +94,7 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 	} else if (strcmp ( substrings[0] ,"leer")==0){
 				printf("Encontro en mProc %s Pagina %s leer\n", PcbAux->nombreProc,substrings[1]);
 				instruccion = 2;
-				int pagina = atoi(substrings[1]);
+				int pagina = atoi(substrings2[0]);
 
 				enviarSolicitud (PcbAux->PID, instruccion, pagina , memoria);
 				PROCESO* msj = recibirMsjMemoria(memoria);
@@ -131,6 +134,7 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 	}
 
 string_iterate_lines(substrings,(void*) free);
+string_iterate_lines(substrings2,(void*) free);
 free(substrings);
 return valor;
 }
@@ -142,7 +146,6 @@ void abrir(PCB* PcbAux, int memoria, int planificador, t_log* logger, int retard
 	FILE * fp;
 	int valor = 1;
 	fp = fopen(PcbAux->path, "r");
-	printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->nombreProc);
 	if (fp == NULL) {
 		printf("\nError de apertura del archivo. \n\n");
 	} else {
@@ -168,6 +171,7 @@ void* conectar(struct param *mensa){
 	int retardo = mensa->retardo;
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
+	log_info(logger, "me conecte con memoria");
 
 	char* mensaje;
     //  while(1){
@@ -206,19 +210,13 @@ void* conectar(struct param *mensa){
     PcbAux->nombreProc=strdup(buffer +offset);
 
 
-    printf("este es el pid s %d\n", PcbAux->PID);
+    printf("este es el pid  %d\n", PcbAux->PID);
     printf("este es el contador %d\n",PcbAux->contadorProgram);
     printf("cpu %d\n",PcbAux->cpu_asignada);
     printf("el nombre  del proceso es %s\n", PcbAux->nombreProc);
-    printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->path);
+    printf("El path %s\n", PcbAux->path);
 
     abrir(PcbAux, memoria, planificador, logger, retardo);
-
-
-    printf("Recibi correctamente y el nombre  del proceso es %s\n", PcbAux->nombreProc);
-
-
-
 
 /*
     char** substring1 = string_split(mCod,"$");

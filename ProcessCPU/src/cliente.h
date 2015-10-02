@@ -32,8 +32,6 @@
 
 typedef struct {
 int aceptado;
-int instrucciones;
-int pagina;
 int pid;
 char* contenido;
 }PROCESO;
