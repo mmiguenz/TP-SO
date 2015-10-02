@@ -40,7 +40,7 @@ int conectar_cliente(int puerto,char* ip){
 
 char* recibirMensaje(int socket,t_log* logger) {
 	char* mensaje;
-	mensaje = (char*)malloc(100);
+	mensaje = malloc(100);
 	if (recv(socket, mensaje, 100, 0) > 0){
 			printf("Recibi mensaje: %s \n", mensaje);
 	}else 	{
@@ -79,18 +79,19 @@ void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
 PROCESO* recibirMsjMemoria(int memoria){
 
 	char* buffer;
-    PROCESO *Aux =malloc(sizeof(PROCESO));
-    buffer=malloc(sizeof(PROCESO));
+    PROCESO *Aux =malloc(sizeof(PROCESO*));
+    buffer=malloc(sizeof(PROCESO*));
 
-    recv(memoria, buffer, sizeof(PROCESO), 0);
+    recv(memoria, buffer, sizeof(PROCESO*), 0);
 
     int offset=0;
     memcpy(&Aux->aceptado,buffer +offset, sizeof(int));
     offset+=sizeof(int);
+
 	memcpy(&Aux->pid,buffer +offset, sizeof(int));
 	offset+=sizeof(int);
-    Aux->contenido=strdup(buffer+offset);
-
+    //Aux->contenido=strdup(buffer+offset);
+	printf("aceptado es %d", Aux->aceptado);
     free(buffer);
     return Aux;
 }

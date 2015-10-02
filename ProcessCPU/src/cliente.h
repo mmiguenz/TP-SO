@@ -33,7 +33,7 @@
 typedef struct {
 int aceptado;
 int pid;
-char* contenido;
+//char* contenido;
 }PROCESO;
 
 int conectar_cliente(int puerto,char* ip);

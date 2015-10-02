@@ -72,10 +72,10 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 		printf("mensaje de la memoria %d",msj->aceptado);
 		if (msj->aceptado == 1){
 			printf("Hay lugar\n");
-			log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
-			log_info(logger, "El pid es %s", PcbAux->PID);
-			log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
-			log_info(logger, "Cantidad de paginas %s", substrings[1]);
+			//log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
+			//log_info(logger, "El pid es %s", PcbAux->PID);
+			//log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
+			//log_info(logger, "Cantidad de paginas %s", substrings[1]);
 			valor = 1;
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
@@ -83,15 +83,16 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 			header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
 			send(planificador, &header, sizeof( t_msgHeader), 0);
 			sleep(retardo);
+
 		}else{
 			printf("No hay lugar\n");
 			printf("mProc %s Fallo\n", PcbAux->nombreProc);
-			log_info(logger, "mProc %s Fallo\n", PcbAux->nombreProc);
+			//log_info(logger, "mProc %s Fallo\n", PcbAux->nombreProc);
 			//aviso a planificador que fallo
 			valor = 0;
 			sleep(retardo);
 
-		}free(msj);
+		}
 	} else if (strcmp ( substrings[0] ,"leer")==0){
 				printf("Encontro en mProc %s Pagina %s leer\n", PcbAux->nombreProc,substrings[1]);
 				instruccion = 2;
@@ -102,16 +103,16 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 
 				printf("mensaje de memoria %d",msj->aceptado);
 				if (msj->aceptado == 1){
-					log_info(logger, "El pid es %s", PcbAux->PID);
-					log_info(logger, "mProc %s comienza lectura\n", PcbAux->nombreProc);
-					log_info(logger, "En pagina %s\n", substrings[1]);
+					//log_info(logger, "El pid es %s", PcbAux->PID);
+					//log_info(logger, "mProc %s comienza lectura\n", PcbAux->nombreProc);
+					//log_info(logger, "En pagina %s\n", substrings[1]);
 					printf("pudo leer\n");
 					valor = 1;
-					free(msj);
+
 					sleep(retardo);
 				}else{
 					printf("No pudo leer\n");
-					log_info(logger, "mProc %s Fallo\n",PcbAux->nombreProc);
+					//log_info(logger, "mProc %s Fallo\n",PcbAux->nombreProc);
 					printf("mProc %s Fallo\n", PcbAux->nombreProc);
 					valor = 0;
 					sleep(retardo);
@@ -121,16 +122,15 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 				instruccion = 5;
 				printf("mProc %s Finalizado\n", PcbAux->nombreProc);
 
-				log_info(logger, "mProc %s Finalizado\n", PcbAux->nombreProc);
-				log_info(logger, "El pid es %s", PcbAux->PID);
-
+				//log_info(logger, "mProc %s Finalizado\n", PcbAux->nombreProc);
+				//log_info(logger, "El pid es %s", PcbAux->PID);
 				int pagina = 0;
 
 				enviarSolicitud (PcbAux->PID, instruccion, pagina, memoria);
 				PROCESO* msj = recibirMsjMemoria(memoria);
 
 				valor = 1;
-				free(msj);
+
 
 				t_msgHeader header;
 				memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
@@ -178,14 +178,9 @@ void* conectar(struct param *mensa){
 	int retardo = mensa->retardo;
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
-	log_info(logger, "me conecte con memoria");
 
-	char* mensaje;
     //  while(1){
-
-    //mensaje = "estoy libre\n";
-
-    char* aux = recibirMensaje(planificador, logger);
+	char* aux = recibirMensaje(planificador, logger);
     free(aux);
 
     t_msgHeader header2;
@@ -195,7 +190,7 @@ void* conectar(struct param *mensa){
 
     send(planificador, &header2, sizeof( t_msgHeader), 0);
 
-    //enviarMesaje(memoria, mensaje, logger);
+
 
     char* buffer;
     PCB *PcbAux =malloc(sizeof(PCB));

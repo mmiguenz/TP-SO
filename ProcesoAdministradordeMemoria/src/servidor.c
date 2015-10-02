@@ -12,7 +12,7 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 	int numeroClientes = 0;			/* Número clientes conectados */
 	fd_set descriptoresLectura;	/* Descriptores de interes para select() */
-	char* buffer;							/* Buffer para leer de los socket */
+	//char* buffer;							/* Buffer para leer de los socket */
 	int maximo;							/* Número de descriptor más grande */
 	int i;								/* Para bubles */
 
@@ -408,7 +408,7 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 	    PROCESO *procesoAux =malloc(sizeof(PROCESO*));
 
 	if (encabezado.msgtype ==1){
-				int msj;
+				//int msj;
 				//char* msjswap;
 				//msjswap= malloc(sizeof(msjswap));
 					//    strcpy(msjswap,encabezado.msgtype);
@@ -420,8 +420,10 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 				printf("mproc X - iniciado \n");
 				procesoAux->aceptado=1;
 				procesoAux->pid=encabezado.pid;
-				procesoAux->contenido=malloc(sizeof(char*));
-				procesoAux->contenido="holi flor ";
+
+				printf("aceptado %d", procesoAux->aceptado);
+				//procesoAux->contenido=malloc(sizeof(char*));
+				//procesoAux->contenido="holi flor ";
 
 
 						//enviarMesaje(cpu, "mproc X - iniciado \n");
@@ -452,8 +454,10 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 				//if (msj == 1){
 				procesoAux->aceptado=1;
 				procesoAux->pid=encabezado.pid;
-				procesoAux->contenido="estacionaste bien flor";
-					printf("pudo leer\n");
+				//procesoAux->contenido="estacionaste bien flor";
+
+					printf("aceptado %d", procesoAux->aceptado);
+					printf("pid proceso %d", procesoAux->pid);
 					//enviarMesaje(cpu, msj);
 
 
@@ -470,8 +474,8 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 				//enviarMesaje(swap, "Finaliza mProc\n");
 				procesoAux->aceptado=1;
 				procesoAux->pid=encabezado.pid;
-				procesoAux->contenido=malloc(sizeof(char*));
-				procesoAux->contenido="fallo";
+				//procesoAux->contenido=malloc(sizeof(char*));
+				//procesoAux->contenido="fallo";
 
 			 }
 
@@ -492,9 +496,11 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 		 offset+=sizeof(int);
 		 memcpy(mensaje +offset  , &procesoAux->pid, sizeof(int));
 		 offset+=sizeof(int);
-		 memcpy(mensaje +offset  , procesoAux->contenido, strlen(procesoAux->contenido)+1);
-		 offset+=strlen(procesoAux->contenido)+1;
-		send(cpu,mensaje,sizeof(mensaje),0);
+		// memcpy(mensaje +offset  , procesoAux->contenido, strlen(procesoAux->contenido)+1);
+		 //offset+=strlen(procesoAux->contenido)+1;
+		 printf("aceptada es %d",procesoAux->aceptado);
+		send(cpu,mensaje,offset,0);
+				return ;
 
  }
 

@@ -24,6 +24,8 @@
 #include <net/if.h>
 #include <commons/config.h>
 #include "servidor.h"
+#include "Cliente.h"
+
 
 
 
@@ -43,8 +45,7 @@
     // t_log* logger;
 
                         	puerto_escucha_memoria=malloc(sizeof puerto_escucha_memoria);
-                        	puerto_escucha_swap=malloc(sizeof puerto_escucha_swap);
-                        	config = config_create("config.cfg");
+                        	    	config = config_create("config.cfg");
                         	if(config != NULL){
                         	puerto_escucha_memoria=config_get_string_value(config, "PORT_ESCUCHA");
                         	puerto_escucha_swap=config_get_int_value(config, "PORT_SWAP");
@@ -58,8 +59,6 @@
                         	int swap = conectar_cliente(puerto_escucha_swap, ip_conec_swap);
 
                         	 conectar_servidor(puerto_escucha_memoria, swap);
-
-
-
-}
+                        	 return EXIT_SUCCESS;
+ }
 

@@ -40,9 +40,9 @@ struct param{
 int main(void) {
 
 
-	ip_conec_plani= malloc(sizeof ip_conec_plani);
+	ip_conec_plani= malloc(sizeof (ip_conec_plani));
 	t_config* config;
-	ip_conec_memoria= malloc(sizeof ip_conec_memoria);
+	ip_conec_memoria= malloc(sizeof (ip_conec_memoria));
     config = config_create("config.cfg");
 	if(config != NULL){
 		    puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
