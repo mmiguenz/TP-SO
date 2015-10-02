@@ -76,9 +76,9 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 				t_msgHeaderMemoria encabezado;
 				 memset(&encabezado, 0, sizeof(t_msgHeaderMemoria));
 				if ((recv(socketCliente[i],&encabezado,sizeof(t_msgHeaderMemoria),0)) > 0){
-				PROCESO *procesoAux =malloc(sizeof(PROCESO));
-				procesoAux=recibirMsjCPU(&encabezado);
-				//procesarcadena(socketCliente[i],swap,procesoAux)
+				PROCESO* procesoAux=malloc(sizeof(PROCESO));
+
+				procesoAux=procesarCadena(socketCliente[i],swap,encabezado);
 				//send(swap);
 				//recv(swap);
 				enviarMsjCPU(socketCliente[i],procesoAux);
@@ -400,49 +400,46 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
 
 	return listener;
 }
-/*
-int procesarCadena(char* cadena, int swap, int cpu){
 
-	char* line = cadena;
+PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 
 
-	char** substring =malloc(sizeof(char**));
-	substring = string_split(line, " ");
+	    PROCESO *procesoAux =malloc(sizeof(PROCESO));
 
-
-
-
-
-	int valor;
-
-
-	if (strcmp( substring[0] ,"iniciar")==0){
-
+	if (encabezado.msgtype ==1){
 				int msj;
-				char* msjswap;
-				msjswap= (char*)malloc(strlen(substring[0])+strlen(substring[1])+ strlen(" "));
-					    strcpy(msjswap,substring[0]);
-					    strcat(msjswap, " ");
-					    strcat(msjswap, substring[1]);
-					    enviarMesaje(swap,msjswap);
+				//char* msjswap;
+				//msjswap= malloc(sizeof(msjswap));
+					//    strcpy(msjswap,encabezado.msgtype);
+					  //  strcat(msjswap, " ");
+					    //strcat(msjswap, encabezado.pagina);
+					    //enviarMesaje(swap,msjswap);
+				//msj = atoi(recibirMensaje(swap));
+					//if (msj == 1){
+				printf("mproc X - iniciado \n");
+				procesoAux->aceptado=1;
+				procesoAux->pid=encabezado.pid;
+				procesoAux->contenido="holi flor";
 
 
-				msj = atoi(recibirMensaje(swap));
-					if (msj == 1){
-						printf("mproc X - iniciado \n");
-						enviarMesaje(cpu, "mproc X - iniciado \n");
+						//enviarMesaje(cpu, "mproc X - iniciado \n");
 						//deberia mandarme donde lo guardo
 					//	log_info(logger, "Hay lugar para: %s", nombreProc);
-						valor = 1;
-					}else{
-						printf("mproc X - fallo\n");
-						enviarMesaje(cpu, "mproc X - fallo\n");
-						//log_info(logger, "mProc %s Fallo\n", nombreProc);
-						valor = 0;
-					}
-	} else if (strcmp ( substring[0] ,"leer")==0){
 
-				printf("mProc %s Pagina %s leida: contenido\n",substring[1]);
+		}else{
+						printf("mproc X - fallo\n");
+
+						procesoAux->aceptado=0;
+						procesoAux->pid=encabezado.pid;
+						procesoAux->contenido="chau flor";
+
+						//log_info(logger, "mProc %s Fallo\n", nombreProc);
+
+					}
+
+			if (encabezado.msgtype==2){
+
+				printf("mProc %s Pagina %s leida: contenido\n", encabezado.pagina);
 
 				//enviarMesaje(swap, "leer\n"+ substring[1]);
 
@@ -450,58 +447,38 @@ int procesarCadena(char* cadena, int swap, int cpu){
 				//log_info(logger, "mProc %s comienza lectura\n", nombreProc);
 			//	log_info(logger, "Pagina %s\n", substrings[1]);
 
-				int msj = atoi(recibirMensaje(swap));
+			//	int msj = atoi(recibirMensaje(swap));
 
-				if (msj == 1){
+				//if (msj == 1){
 
 					printf("pudo leer\n");
-					enviarMesaje(cpu, msj);
-					valor = 1;
+					//enviarMesaje(cpu, msj);
+
 
 				}else{
 					printf("No pudo leer\n");
 					printf("mProc %s Fallo\n");
-					enviarMesaje(cpu, msj);
-					valor = 0;
+					//enviarMesaje(cpu, msj);
 				}
-
-	}else if (strcmp(substring[0] ,"finalizar")==0){
+			 if (encabezado.msgtype==3){
 				printf("mProc %s Finalizado\n");
 
 				//log_info(logger, "mProc %s Finalizado\n", nombreProc);
 
 				enviarMesaje(swap, "Finaliza mProc\n");
-				valor = 1;
+			 }
 
-	}
-
-	free(substring);
 	//free(line);
-	return valor;
-}
-*/
-PROCESO* recibirMsjCPU(t_msgHeaderMemoria encabezado){
-
-
-		PROCESO *procesoAux =malloc(sizeof(PROCESO));
-
-
-		procesoAux->pid=encabezado->pid;
-
-
-
-
-	    return procesoAux;
-
+	return procesoAux;
 }
 
- void enviarMsjCPU(int cpu, PROCESO procesoAux){
+
+
+ void enviarMsjCPU(int cpu, PROCESO *procesoAux){
 
 
 	    char* mensaje;
-	    mensaje= malloc(sizeof(PROCESO));
-	    procesoAux->aceptado =1;
-	    procesoAux->contenido = " hola flor ";
+	    mensaje= malloc(sizeof(procesoAux));
 
 	    int offset=0;
 		 memcpy(mensaje +offset  , &procesoAux->aceptado, sizeof(int));
@@ -512,5 +489,6 @@ PROCESO* recibirMsjCPU(t_msgHeaderMemoria encabezado){
 		 offset+=strlen(procesoAux->contenido)+1;
 		send(cpu,mensaje,sizeof(mensaje),0);
 		free(mensaje);
-		}
+
+ }
 
