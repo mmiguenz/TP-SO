@@ -1,6 +1,9 @@
 #include "servidor.h"
 
 
+#include <semaphore.h>
+sem_t sem_productor;
+sem_t sem_consumidor;
 
 typedef struct {
 char* nombreProc;
@@ -107,6 +110,8 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					PCB* PcbAux= malloc(sizeof(PCB));
 
 					//if(queue_size(fifo_PCB)>0){
+
+					sem_wait(&sem_consumidor);
 					PcbAux=queue_pop(fifo_PCB);
 					char* mensaje;
 					mensaje= malloc(sizeof(PCB*))+sizeof(t_msgHeader) ;

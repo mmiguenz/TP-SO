@@ -30,7 +30,8 @@
 
 t_queue * fifo_PCB_ready;//Cola de pcb que estan listo para ejecutar
 
-
+sem_t sem_productor;
+sem_t sem_consumidor;
 
 typedef struct {
 char* nombreProc;
@@ -156,7 +157,7 @@ void *shell(){
     nuevoPCB = pcb_create(proceso,0,ruta);//Creo mi pcb
 
     queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
-   // sem_post(&haveData);
+    sem_post(&sem_consumidor);
     }
     else{printf("el comando ingresado es incorrecto \n");}
 

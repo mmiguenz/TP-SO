@@ -5,6 +5,7 @@
  * Cuando un cliente se conecta, le atiende y lo añade al select() y vuelta
  * a empezar.
  */
+
 void conectar_servidor(char* puerto_escucha_memoria, int swap)
 {
 	int socketServidor;				/* Descriptor del socket servidor */
