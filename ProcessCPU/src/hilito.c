@@ -73,6 +73,7 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 		if (msj->aceptado == 1){
 			printf("Hay lugar\n");
 			log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
+			log_info(logger, "El pid es %s", PcbAux->PID);
 			log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
 			log_info(logger, "Cantidad de paginas %s", substrings[1]);
 			valor = 1;
@@ -101,6 +102,7 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 
 				printf("mensaje de memoria %d",msj->aceptado);
 				if (msj->aceptado == 1){
+					log_info(logger, "El pid es %s", PcbAux->PID);
 					log_info(logger, "mProc %s comienza lectura\n", PcbAux->nombreProc);
 					log_info(logger, "En pagina %s\n", substrings[1]);
 					printf("pudo leer\n");
@@ -118,13 +120,18 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 	}else if (strcmp(substrings[0] ,"finalizar")==0){
 				instruccion = 5;
 				printf("mProc %s Finalizado\n", PcbAux->nombreProc);
+
 				log_info(logger, "mProc %s Finalizado\n", PcbAux->nombreProc);
-				int pagina = atoi(substrings[1]);
+				log_info(logger, "El pid es %s", PcbAux->PID);
+
+				int pagina = 0;
 
 				enviarSolicitud (PcbAux->PID, instruccion, pagina, memoria);
 				PROCESO* msj = recibirMsjMemoria(memoria);
+
 				valor = 1;
 				free(msj);
+
 				t_msgHeader header;
 				memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 				header.msgtype = 3;

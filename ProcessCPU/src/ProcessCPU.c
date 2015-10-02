@@ -52,7 +52,7 @@ int main(void) {
 		    logger = log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
 		    retardo = config_get_int_value(config, "RETARDO");
 	}
-
+	//printf("The ID of this thread is: %u\n", (unsigned int)pthread_self());
 
 	pthread_t hilito;
 	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo};
