@@ -176,7 +176,7 @@ void* conectar(struct param *mensa){
 	char* mensaje;
     //  while(1){
 
-    mensaje = "estoy libre\n";
+    //mensaje = "estoy libre\n";
 
     char* aux = recibirMensaje(planificador, logger);
     free(aux);
@@ -185,9 +185,10 @@ void* conectar(struct param *mensa){
     memset(&header2, 0, sizeof(t_msgHeader));
     header2.msgtype = 0; //significa estoy libre
     header2.payload_size = planificador;
+
     send(planificador, &header2, sizeof( t_msgHeader), 0);
 
-    enviarMesaje(memoria, mensaje, logger);
+    //enviarMesaje(memoria, mensaje, logger);
 
     char* buffer;
     PCB *PcbAux =malloc(sizeof(PCB));
