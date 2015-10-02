@@ -486,7 +486,7 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 
 
 	    char* mensaje;
-	    mensaje= malloc(sizeof(procesoAux));
+	    mensaje= malloc(sizeof(PROCESO*));
 
 	    int offset=0;
 		 memcpy(mensaje +offset  , &procesoAux->aceptado, sizeof(int));
@@ -496,7 +496,6 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 		 memcpy(mensaje +offset  , procesoAux->contenido, strlen(procesoAux->contenido)+1);
 		 offset+=strlen(procesoAux->contenido)+1;
 		send(cpu,mensaje,sizeof(mensaje),0);
-		free(mensaje);
 
  }
 
