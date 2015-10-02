@@ -50,7 +50,7 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 	PCB *new = malloc( sizeof(PCB) );
 	new->nombreProc=malloc(sizeof(char*));
 	new->nombreProc = name;
-	new->PID = 56;
+	new->PID = rand();
 	new->estado=33;
 	new->contadorProgram=2;
 	new->path=malloc(sizeof(char*));

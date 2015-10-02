@@ -36,7 +36,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 	int numeroClientes = 0;			/* Número clientes conectados */
 	fd_set descriptoresLectura;	/* Descriptores de interes para select() */
-	char* buffer;							/* Buffer para leer de los socket */
+	//char* buffer;							/* Buffer para leer de los socket */
 	int maximo;							/* Número de descriptor más grande */
 	int i;								/* Para bubles */
 
@@ -139,7 +139,18 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					PcbAux->cpu_asignada=socketCliente[i];
 					queue_push(fifo_PCB_running,PcbAux);
 					free(PcbAux);
-					}}
+					break;
+					}
+					case 1:{
+						printf("El proceso inicio correctamente");
+						log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
+
+						//queue_push(fifo_PCB_running,PcbAux);
+							//				free(PcbAux);
+
+											break;
+					}
+					}
 
 
 
@@ -151,10 +162,10 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					/* Se indica que el cliente ha cerrado la conexión y se
 					 * marca con -1 el descriptor para que compactaClaves() lo
 					 * elimine */
-					printf ("Cliente %d ha cerrado la conexión\n", i+1);
+					printf ("Cliente %d ha cerrado la conexión\n", socketCliente[i]);
 					log_info(logger, "Se ha cerrado la conexion con el CPU: %d", socketCliente[i]);
 					socketCliente[i] = -1;
-					free(buffer);
+
 				}
 			}
 		}
@@ -196,7 +207,7 @@ void nuevoCliente (int servidor, int *clientes, int *nClientes)
 	Escribe_Socket (clientes[(*nClientes)-1], "Te conectaste al planificador", strlen("Te conectaste al planificador"));
 
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
-	printf ("Aceptado cliente %d\n", *nClientes);
+	printf ("Aceptado cpu %d\n", *nClientes);
 	return;
 }
 
