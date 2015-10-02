@@ -427,20 +427,20 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 						//deberia mandarme donde lo guardo
 					//	log_info(logger, "Hay lugar para: %s", nombreProc);
 
-		}else{
-						printf("mproc X - fallo\n");
+		}
+						//printf("mproc X - fallo\n");
 
-						procesoAux->aceptado=0;
-						procesoAux->pid=encabezado.pid;
-						procesoAux->contenido="chau flor";
+						//procesoAux->aceptado=0;
+						//procesoAux->pid=encabezado.pid;
+						//procesoAux->contenido="chau flor";
 
 						//log_info(logger, "mProc %s Fallo\n", nombreProc);
 
-					}
+
 
 			if (encabezado.msgtype==2){
 
-				printf("mProc %s Pagina %s leida: contenido\n", encabezado.pagina);
+				printf("mProc  Pagina %d leida: contenido %s \n", encabezado.pagina,"estacionaste bien flor ");
 
 				//enviarMesaje(swap, "leer\n"+ substring[1]);
 
@@ -451,22 +451,29 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 			//	int msj = atoi(recibirMensaje(swap));
 
 				//if (msj == 1){
+				procesoAux->aceptado=1;
+				procesoAux->pid=encabezado.pid;
+				procesoAux->contenido="estacionaste bien flor";
 
 					printf("pudo leer\n");
 					//enviarMesaje(cpu, msj);
 
 
-				}else{
-					printf("No pudo leer\n");
-					printf("mProc %s Fallo\n");
+				}//else{
+					//printf("No pudo leer\n");
+					//printf("mProc %s Fallo\n");
 					//enviarMesaje(cpu, msj);
-				}
+				//}
 			 if (encabezado.msgtype==3){
 				printf("mProc %s Finalizado\n");
 
 				//log_info(logger, "mProc %s Finalizado\n", nombreProc);
 
-				enviarMesaje(swap, "Finaliza mProc\n");
+				//enviarMesaje(swap, "Finaliza mProc\n");
+				procesoAux->aceptado=1;
+				procesoAux->pid=encabezado.pid;
+				procesoAux->contenido="fallo";
+
 			 }
 
 	//free(line);
