@@ -67,10 +67,14 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 		int pagina = atoi(substrings2[0]);
 
 		enviarSolicitud (PcbAux->PID, instruccion, pagina , memoria);
-		PROCESO* msj = recibirMsjMemoria(memoria);
 
-		printf("mensaje de la memoria %d",msj->aceptado);
-		if (msj->aceptado == 1){
+		PROCESO msj = recibirMsjMemoria(memoria);
+
+		printf("mensaje de la memoria %d",msj.aceptado);
+
+		switch(msj.aceptado){
+		case 1:{
+
 			printf("Hay lugar\n");
 			//log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
 			//log_info(logger, "El pid es %s", PcbAux->PID);
@@ -83,26 +87,29 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 			header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
 			send(planificador, &header, sizeof( t_msgHeader), 0);
 			sleep(retardo);
-
-		}else{
+			break;
+		}
+		case 0:{
 			printf("No hay lugar\n");
 			printf("mProc %s Fallo\n", PcbAux->nombreProc);
 			//log_info(logger, "mProc %s Fallo\n", PcbAux->nombreProc);
 			//aviso a planificador que fallo
 			valor = 0;
 			sleep(retardo);
-
-		}
+			break;
+		}}
 	} else if (strcmp ( substrings[0] ,"leer")==0){
 				printf("Encontro en mProc %s Pagina %s leer\n", PcbAux->nombreProc,substrings[1]);
 				instruccion = 2;
 				int pagina = atoi(substrings2[0]);
 
 				enviarSolicitud (PcbAux->PID, instruccion, pagina , memoria);
-				PROCESO* msj = recibirMsjMemoria(memoria);
+				PROCESO msj;
+				memset(&msj,0,sizeof(PROCESO));
+				msj= recibirMsjMemoria(memoria);
 
-				printf("mensaje de memoria %d",msj->aceptado);
-				if (msj->aceptado == 1){
+				printf("mensaje de memoria %d",msj.aceptado);
+				if (msj.aceptado == 1){
 					//log_info(logger, "El pid es %s", PcbAux->PID);
 					//log_info(logger, "mProc %s comienza lectura\n", PcbAux->nombreProc);
 					//log_info(logger, "En pagina %s\n", substrings[1]);
@@ -127,7 +134,7 @@ int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PC
 				int pagina = 0;
 
 				enviarSolicitud (PcbAux->PID, instruccion, pagina, memoria);
-				PROCESO* msj = recibirMsjMemoria(memoria);
+				PROCESO msj = recibirMsjMemoria(memoria);
 
 				valor = 1;
 
@@ -149,7 +156,7 @@ return valor;
 
 
 void abrir(PCB* PcbAux, int memoria, int planificador, t_log* logger, int retardo) {
-	char *cadena = malloc(sizeof(char*));
+	char cadena[100];//= malloc(sizeof(char*));
 	FILE * fp;
 	int valor = 1;
 	fp = fopen(PcbAux->path, "r");
@@ -163,7 +170,7 @@ void abrir(PCB* PcbAux, int memoria, int planificador, t_log* logger, int retard
 		fclose(fp);
 	}
 
-	free(cadena);
+	//free(cadena);
 	return;
 }
 
@@ -179,7 +186,7 @@ void* conectar(struct param *mensa){
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
 
-    //  while(1){
+      while(1){
 	char* aux = recibirMensaje(planificador, logger);
     free(aux);
 
@@ -232,10 +239,10 @@ void* conectar(struct param *mensa){
     string_iterate_lines(substring2, free);
     free(mCod);
     free(substring1);
-    free(substring2);
+    free(substring2);*/
+	 free(buffer);
+}
 
-*/
-    free(buffer);
     return EXIT_SUCCESS;
 }
 

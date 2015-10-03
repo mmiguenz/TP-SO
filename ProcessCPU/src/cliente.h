@@ -41,6 +41,6 @@ char* recibirMensaje(int socket,t_log* logger);
 void enviarMesaje(int socket,char* mesaje,t_log* logger);
 
 void enviarSolicitud (int pid,int instruccion, int nroPag,int socket);
-PROCESO* recibirMsjMemoria(int memoria);
+PROCESO recibirMsjMemoria(int memoria);
 
 #endif /* CLIENTE_H_ */

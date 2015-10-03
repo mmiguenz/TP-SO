@@ -77,11 +77,13 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 				t_msgHeaderMemoria encabezado;
 				 memset(&encabezado, 0, sizeof(t_msgHeaderMemoria));
 				if ((recv(socketCliente[i],&encabezado,sizeof(t_msgHeaderMemoria),0)) > 0){
-				PROCESO* procesoAux=malloc(sizeof(PROCESO));
+				PROCESO procesoAux;//=malloc(sizeof(PROCESO));
 
 				procesoAux=procesarCadena(socketCliente[i],swap,encabezado);
 				//send(swap);
 				//recv(swap);
+
+				printf("-----------Le mando %d, %d \n\n",procesoAux.aceptado,procesoAux.pid);
 				enviarMsjCPU(socketCliente[i],procesoAux);
 
 				}
@@ -402,11 +404,11 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
 	return listener;
 }
 
-PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
+PROCESO procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
+printf("El header type es:----- %d\n",encabezado.msgtype);
 
-
-	    PROCESO *procesoAux =malloc(sizeof(PROCESO*));
-
+	    PROCESO procesoAux ;//=malloc(sizeof(PROCESO*));
+	   // memset(&procesoAux,0,sizeof(PROCESO*));
 	if (encabezado.msgtype ==1){
 				//int msj;
 				//char* msjswap;
@@ -418,10 +420,10 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 				//msj = atoi(recibirMensaje(swap));
 					//if (msj == 1){
 				printf("mproc X - iniciado \n");
-				procesoAux->aceptado=1;
-				procesoAux->pid=encabezado.pid;
+				procesoAux.aceptado=1;
+				procesoAux.pid=encabezado.pid;
 
-				printf("aceptado %d", procesoAux->aceptado);
+				printf("aceptado %d", procesoAux.aceptado);
 				//procesoAux->contenido=malloc(sizeof(char*));
 				//procesoAux->contenido="holi flor ";
 
@@ -441,7 +443,7 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 
 			if (encabezado.msgtype==2){
 
-				printf("mProc  Pagina %d leida: contenido %s \n", encabezado.pagina,"estacionaste bien flor ");
+				printf("mProc  Pagina %d leida: contenido %s \n", encabezado.pagina,"datosvariosharcodeados");
 
 				//enviarMesaje(swap, "leer\n"+ substring[1]);
 
@@ -452,12 +454,12 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 			//	int msj = atoi(recibirMensaje(swap));
 
 				//if (msj == 1){
-				procesoAux->aceptado=1;
-				procesoAux->pid=encabezado.pid;
+				procesoAux.aceptado=1;
+				procesoAux.pid=encabezado.pid;
 				//procesoAux->contenido="estacionaste bien flor";
 
-					printf("aceptado %d", procesoAux->aceptado);
-					printf("pid proceso %d", procesoAux->pid);
+					printf("aceptado %d", procesoAux.aceptado);
+					printf("pid proceso %d----legue", procesoAux.pid);
 					//enviarMesaje(cpu, msj);
 
 
@@ -472,8 +474,8 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 				//log_info(logger, "mProc %s Finalizado\n", nombreProc);
 
 				//enviarMesaje(swap, "Finaliza mProc\n");
-				procesoAux->aceptado=1;
-				procesoAux->pid=encabezado.pid;
+				procesoAux.aceptado=1;
+				procesoAux.pid=encabezado.pid;
 				//procesoAux->contenido=malloc(sizeof(char*));
 				//procesoAux->contenido="fallo";
 
@@ -485,22 +487,23 @@ PROCESO *procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 
 
 
- void enviarMsjCPU(int cpu, PROCESO *procesoAux){
+ void enviarMsjCPU(int cpu, PROCESO procesoAux){
 
 
-	    char* mensaje;
-	    mensaje= malloc(sizeof(PROCESO*));
-
+	   // char* mensaje;
+	    //mensaje= malloc(sizeof(PROCESO*));
+	    /*
 	    int offset=0;
 		 memcpy(mensaje +offset  , &procesoAux->aceptado, sizeof(int));
 		 offset+=sizeof(int);
 		 memcpy(mensaje +offset  , &procesoAux->pid, sizeof(int));
-		 offset+=sizeof(int);
+		 offset+=sizeof(int);*/
 		// memcpy(mensaje +offset  , procesoAux->contenido, strlen(procesoAux->contenido)+1);
 		 //offset+=strlen(procesoAux->contenido)+1;
-		 printf("aceptada es %d",procesoAux->aceptado);
-		send(cpu,mensaje,offset,0);
-				return ;
+		 printf("aceptada es %d",procesoAux.aceptado);
+		 send(cpu,&procesoAux,sizeof(procesoAux),0);
+		 //send(cpu,mensaje,offset,0);
+				//return ;
 
  }
 

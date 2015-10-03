@@ -76,14 +76,16 @@ void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
 		send(socket,&header,sizeof(t_msgHeaderMemoria),0);
 		return;
 }
-PROCESO* recibirMsjMemoria(int memoria){
-
+PROCESO recibirMsjMemoria(int memoria){
+	/*
 	char* buffer;
     PROCESO *Aux =malloc(sizeof(PROCESO*));
     buffer=malloc(sizeof(PROCESO*));
-
-    recv(memoria, buffer, sizeof(PROCESO*), 0);
-
+	*/
+	 PROCESO proceso;
+	 memset(&proceso, 0, sizeof(PROCESO));
+    recv(memoria, &proceso, sizeof(PROCESO), 0);
+/*
     int offset=0;
     memcpy(&Aux->aceptado,buffer +offset, sizeof(int));
     offset+=sizeof(int);
@@ -92,8 +94,8 @@ PROCESO* recibirMsjMemoria(int memoria){
 	offset+=sizeof(int);
     //Aux->contenido=strdup(buffer+offset);
 	printf("aceptado es %d", Aux->aceptado);
-    free(buffer);
-    return Aux;
+    free(buffer);*/
+    return proceso;
 }
 
 #endif /* CLIENTE_C_ */

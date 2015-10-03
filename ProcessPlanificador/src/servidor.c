@@ -108,13 +108,16 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					case 0 : {
 					printf ("CPU %d esta libre\n", header.payload_size);
 					PCB* PcbAux= malloc(sizeof(PCB));
+					PcbAux->nombreProc=malloc(sizeof(char*));
+					PcbAux->path=malloc(sizeof(char*));
 
-					//if(queue_size(fifo_PCB)>0){
+
 
 					sem_wait(&sem_consumidor);
 					PcbAux=queue_pop(fifo_PCB);
 					char* mensaje;
-					mensaje= malloc(sizeof(PCB*))+sizeof(t_msgHeader) ;
+					mensaje= malloc(sizeof(PCB)+sizeof(t_msgHeader))+10000 ;
+
 					printf("\n PCB a mandar \n\n");
 					printf("EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
 					printf("EL Path es........: %s \n",PcbAux->path);
@@ -139,9 +142,10 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					PcbAux->cpu_asignada=socketCliente[i];
 					queue_push(fifo_PCB_running,PcbAux);
 					free(PcbAux);
+
 					break;
 					}
-					case 1:{
+					case 2:{
 						printf("El proceso inicio correctamente");
 						log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
 
