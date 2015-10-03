@@ -60,7 +60,18 @@ int main(void)
 	char* pathArchivoSwap=crearArchivoSwap(nombre_swap,tam_pag,cant_pag);
 
 	t_list* listaEspaciosLibres = crear_ListaLibre(cant_pag);
+	int espacio_libre = total_Libres(listaEspaciosLibres);
+	t_list* espacio_ocupado= crear_ListaOcupados();
 
+	//Probando funcionalidad
+	//recibir_Solicitud(5,8,espacio_libre,espacio_ocupado);
+/*
+ * typedef struct  {
+		int msgtype;
+		int pagina;
+		int pid;
+	}t_msgHeaderSwap
+*/
 
 	//----------Soy una barra separadora ;)--------------------------------------//
 

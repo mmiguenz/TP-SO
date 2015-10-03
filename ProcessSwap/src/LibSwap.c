@@ -23,19 +23,7 @@
 #include "LibSwap.h"
 
 
-// Tratamiento de listas
-	typedef struct
-	{
-		 pid_t pid;
-		 int comienzo;
-		 int cant_paginas;
-	}t_espacio_ocupado;
 
-	typedef struct
-	{
-		 int comienzo;
-		 int cant_paginas;
-	}t_espacio_libre;
 
 
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
@@ -123,5 +111,104 @@ t_list* crear_ListaLibre(int cant_Paginas)
 //char* _get_name(t_person* person) {
 //                    return person->name;
 //                }
+
+t_list* crear_ListaOcupados()
+{
+	t_list* lista_Ocupados = list_create();
+	return lista_Ocupados;
+}
+
+
+
+
+
+
+t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas)
+	{
+		bool hay_Espacio(t_espacio_libre* espacio) {
+			return (espacio->cant_paginas >= paginas);
+		}
+
+		t_espacio_libre* espacio;
+
+
+		espacio=list_find( list_Libre,(void*) hay_Espacio);
+		if(espacio == NULL)
+		{
+			printf("No hay Espacio");
+
+		}
+		return espacio;
+	}
+
+
+void recibir_Solicitud(int pagina,int pid,t_list* list_Libres,t_list* list_Ocupados)
+	{
+		if(total_Libres(list_Libres)>=pagina){
+			t_espacio_libre* espacio = encontrar_Espacio(list_Libres, pagina);
+			if(espacio == NULL)
+				{
+					// ver la funcionalidadde compactar y rebuscar el espacio libre
+				}
+			else
+				{
+					asignar_espacio_actualizar(pid,pagina,espacio,list_Libres,list_Ocupados);
+				}
+		}
+		else
+		{
+			// Notificar a la memoria que no se puede recibir el proceso.
+		}
+
+	}
+
+// devuelve el total de espacio libre de la lista
+int total_Libres(t_list* espacio_Libre)
+{
+	//funcion que devuelve la catidad de pagina de una lista libre.
+	int fun_pag(t_espacio_libre* espacio)
+	{
+		return espacio->cant_paginas;
+	}
+
+	t_list* listPag= list_map(espacio_Libre, (void*) *fun_pag);
+	int count_libre=0;
+	while(listPag->head!=NULL)
+	{
+		count_libre +=(int)listPag->head->data;
+		listPag->head= listPag->head->next;
+
+	}
+	list_destroy(listPag);
+	return count_libre;
+}
+
+
+void asignar_espacio_actualizar(pid_t pid, int paginas,t_espacio_libre* espacio, t_list* list_libre,t_list* list_Ocupado)
+{
+	t_espacio_ocupado* proceso_enCurso=malloc(sizeof(t_espacio_ocupado));
+	proceso_enCurso-> pid = pid;
+	proceso_enCurso-> comienzo = espacio->comienzo;
+	proceso_enCurso-> cant_paginas = espacio->cant_paginas;
+
+	list_add(list_Ocupado, proceso_enCurso);
+
+	bool validar_Espacio (t_espacio_libre* hueco)
+	{
+
+		return (hueco->cant_paginas == espacio->cant_paginas && hueco->comienzo == espacio->comienzo);
+	}
+	if(paginas == espacio->cant_paginas)
+	{
+		list_remove_by_condition(list_libre,(void*)validar_Espacio);
+	}
+	else
+	{
+		espacio->comienzo = espacio->comienzo+paginas;
+		espacio->cant_paginas = espacio->cant_paginas-paginas;
+	}
+}
+
+
 
 
