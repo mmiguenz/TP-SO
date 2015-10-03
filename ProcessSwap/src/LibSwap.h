@@ -46,7 +46,8 @@ t_list* crear_ListaOcupados();
 
 int total_Libres(t_list* espacio_Libre);
 t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas);
-void recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres,t_list* list_Ocupados);
-void asignar_espacio_actualizar(pid_t pid, int paginas,t_espacio_libre* espacio, t_list* list_libre,t_list* list_Ocupado);
+t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres,t_list* list_Ocupados);
+t_espacio_ocupado* asignar_espacio_actualizar(pid_t pid, int paginas,t_espacio_libre* espacio, t_list* list_libre,t_list* list_Ocupado);
+
 
 #endif /* LIBSWAP_H_ */

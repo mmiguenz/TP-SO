@@ -41,7 +41,7 @@ PROCESOSWAP;
 
 
 int conectar_cliente(int puerto,char* ip);
-char* recibirMensaje(int socket);
+void recibirMensaje(int socket, t_espacio_ocupado* listaDePaginas);
 void enviarMensaje(int socket,t_msgHeaderMemoria encabezado);
 
 #endif /* CLIENTE_H_ */

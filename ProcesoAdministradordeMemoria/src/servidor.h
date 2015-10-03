@@ -32,6 +32,14 @@ typedef struct  {
 	int pid;
 }t_msgHeaderMemoria;
 
+//estructura para recibir desde swap.
+typedef struct
+{
+	 pid_t pid;
+	 int comienzo;
+	 int cant_paginas;
+}t_espacio_ocupado;
+
 /**
  * Abre un socket INET para atender al servicio cuyo nombre es Servicio.
  * El Servicio debe estar dado de alta en /etc/services como tcp.

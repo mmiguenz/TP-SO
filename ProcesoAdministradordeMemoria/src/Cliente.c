@@ -23,15 +23,14 @@ int conectar_cliente(int puerto,char* ip){
 
 }
 
-char* recibirMensaje(int socket) {
-	char* mensaje;
-	mensaje = (char*)malloc(sizeof(char*));
-	if (recv(socket, mensaje,100,0)> 0){
-			printf("Recibi mensaje: %s \n", mensaje);
+void recibirMensaje(int socket, t_espacio_ocupado* listaDePaginas) {
+
+	if (recv(socket, listaDePaginas,100,0)> 0){
+			printf("Recibi mensaje:  \n");
 	}else 	{
 		printf("Falle");
 	}
-	return mensaje;
+	//return mensaje;
  }
 
 void enviarMensaje(int socket,t_msgHeaderMemoria encabezado) {
