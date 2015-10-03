@@ -181,6 +181,7 @@ int main(void)
                         PROCESOSWAP procesoAux;
 
                         recv(newfd, &procesoAux,sizeof(PROCESOSWAP),0);
+                        printf("Recibi msj de memoria PID : %d \n",procesoAux.pid);
                         recibir_Solicitud(procesoAux,espacio_libre,espacio_ocupado);
                         send (newfd,1,sizeof(int),0);
                         printf("Recibi mensaje: %d  del administrador de memoria.\n",procesoAux.msgtype);
