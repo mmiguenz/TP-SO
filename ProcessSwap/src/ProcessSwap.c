@@ -26,6 +26,7 @@
 
 
 
+
 int main(void)
 {
 	//Espacio para la configuracion del entorno---------------------------<<
@@ -176,9 +177,14 @@ int main(void)
                                 get_in_addr((struct sockaddr*)&remoteaddr),
                                 remoteIP, INET6_ADDRSTRLEN),
                             newfd);
-                        char mensaje[1000]="";
-                        recv(newfd, mensaje,sizeof mensaje,0);
-                        printf("Recibi mensaje: %s  del administrador de memoria.\n", mensaje);
+
+                        PROCESOSWAP procesoAux;
+
+                        recv(newfd, &procesoAux,sizeof(PROCESOSWAP),0);
+                        recibir_Solicitud(procesoAux,espacio_libre,espacio_ocupado);
+                        send (newfd,1,sizeof(int),0);
+                        printf("Recibi mensaje: %d  del administrador de memoria.\n",procesoAux.msgtype);
+
                     }
                 } else {
                     // handle data from a client

@@ -29,10 +29,20 @@
 #include <string.h>
 #include <commons/config.h>
 #include <commons/log.h>
+#include "servidor.h"
+
+typedef struct  {
+int msgtype;
+int pagina;
+int contenido;}
+
+PROCESOSWAP;
+
+
 
 int conectar_cliente(int puerto,char* ip);
 char* recibirMensaje(int socket);
-void enviarMesaje(int socket,char* mesaje);
+void enviarMensaje(int socket,t_msgHeaderMemoria encabezado);
 
 #endif /* CLIENTE_H_ */
 

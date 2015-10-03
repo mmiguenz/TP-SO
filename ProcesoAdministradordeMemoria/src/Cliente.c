@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include "Cliente.h"
 #include <commons/config.h>
+#include "servidor.h"
 
 int conectar_cliente(int puerto,char* ip){
 	struct sockaddr_in dire_serv;
@@ -31,10 +32,11 @@ char* recibirMensaje(int socket) {
 		printf("Falle");
 	}
 	return mensaje;
-}
-void enviarMesaje(int socket,char* mensaje) {
-	send(socket, mensaje,strlen (mensaje)+1,0);
-	printf("Envie mensaje: %s \n", mensaje);
+ }
+
+void enviarMensaje(int socket,t_msgHeaderMemoria encabezado) {
+	send(socket, &encabezado,sizeof(t_msgHeaderMemoria)+1,0);
+	printf("Envie mensaje a swap  \n");
 	return;
 }
 

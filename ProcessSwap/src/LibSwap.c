@@ -81,13 +81,13 @@ int esComando(char * comando){
 char* crearArchivoSwap(char *nombre_Swap ,int tam_Pag,int cant_Pag)
 {
 	char* pathArchivo=string_new();
-	char* archivoFormatCero= string_from_format("dd if=/dev/zero of=/home/utnso/git/tp-2015-2c-cascanueces/ProcessSwap/src/%s bs=%lu count=%lu",nombre_Swap,tam_Pag, cant_Pag);
+	char* archivoFormatCero= string_from_format("dd if=/dev/zero of=/home/utnso/workspace/prueba/%s bs=%lu count=%lu",nombre_Swap,tam_Pag, cant_Pag);
 
 	if(system(archivoFormatCero)){
 		perror("Error al crear el Archivo Swap: func crearArchivoSwap en LibSwap.c");
 		return EXIT_FAILURE;
 	}else {
-		pathArchivo=string_from_format("dd if=/dev/zero of=/home/utnso/git/tp-2015-2c-cascanueces/ProcessSwap/src/%s",nombre_Swap);
+		pathArchivo=string_from_format("dd if=/dev/zero of=/home/utnso/workspace/prueba/%s",nombre_Swap);
 	}
 
 	return  pathArchivo;
@@ -142,11 +142,11 @@ t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas)
 	}
 
 
-void recibir_Solicitud(int pagina,int pid,t_list* list_Libres,t_list* list_Ocupados)
+void recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres,t_list* list_Ocupados)
 	{
-		if(total_Libres(list_Libres)>=pagina){
-			t_espacio_libre* espacio = encontrar_Espacio(list_Libres, pagina);
-			if(espacio == NULL)
+		/*if(total_Libres(list_Libres)>=pagina){
+			/t_espacio_libre* espacio = encontrar_Espacio(list_Libres, pagina);
+		if(espacio == NULL)
 				{
 					// ver la funcionalidadde compactar y rebuscar el espacio libre
 				}
@@ -159,6 +159,7 @@ void recibir_Solicitud(int pagina,int pid,t_list* list_Libres,t_list* list_Ocupa
 		{
 			// Notificar a la memoria que no se puede recibir el proceso.
 		}
+		*/
 
 	}
 
