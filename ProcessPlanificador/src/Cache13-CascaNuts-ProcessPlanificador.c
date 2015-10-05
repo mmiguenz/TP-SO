@@ -218,14 +218,38 @@ void procesar_comando(char comando[], char proceso[]){
 	case 1:
 	{
 		int pid;
+		PCB* auxPCB=malloc(sizeof(PCB));
+
+
 		pid=recolectar_pid(proceso);
 		printf("El Comando que eligio fue finalizar \n");
 		printf("Y el PID del proceso a finalizar es = %d  \n",pid);
+		int tamanio=queue_size(fifo_PCB_ready);
+		while(tamanio!=0){
+		auxPCB=queue_pop(fifo_PCB_ready);
+		printf("El pid del proceso es: %d \n",auxPCB->PID);
+		if(auxPCB->PID==pid)
+		{printf("Encontre mi al proceso!!!\n");}
+		queue_push(fifo_PCB_ready,auxPCB);
+		tamanio--;
+		}
+
 		break;
 	}
 	case 2:
 	{
 		printf("El comando que eligio fue ps \n");
+		PCB* auxPCB=malloc(sizeof(PCB));
+		int tamanio=queue_size(fifo_PCB_ready);
+		while(tamanio!=0){
+		auxPCB=queue_pop(fifo_PCB_ready);
+		printf("mProc %d: %s -> Listo \n",auxPCB->PID,auxPCB->nombreProc);
+		queue_push(fifo_PCB_ready,auxPCB);
+		tamanio--;
+		}
+
+
+
 		break;
 	}
 	case 3:
@@ -254,6 +278,8 @@ int identificar_comando(char comando[]){
 
 }
 
+
+
 /*
  * Funcion que genera un pcb de proceso dandole un nombre una ruta y un estado
  * devolviendo una estructura de tipo PCB
@@ -261,8 +287,8 @@ int identificar_comando(char comando[]){
 
 PCB *pcb_create(char *name, int estado, char* ruta){
 	PCB *new = malloc( sizeof(PCB) );
-	new->nombreProc=malloc(sizeof(char*));
-	new->nombreProc = name;
+	new->nombreProc=malloc(strlen(name)+1);
+	strcpy(new->nombreProc, name);
 	new->PID = rand();
 	new->estado=0;
 	new->contadorProgram=0;
@@ -271,4 +297,5 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 
 	return new;
 }
+
 
