@@ -1,7 +1,7 @@
 /* ProcessPlanificador
  *
  *  Created on: 6/9/2015
- *      Author: Cascanuts
+ *      Author:Sebastian A. Agosta
  */
 
 
@@ -46,19 +46,13 @@ int cpu_asignada;
 //#include "PCB.h"
 
 
-PCB *pcb_create(char *name, int estado, char* ruta){
-	PCB *new = malloc( sizeof(PCB) );
-	new->nombreProc=malloc(sizeof(char*));
-	new->nombreProc = name;
-	new->PID = rand();
-	new->estado=0;
-	new->contadorProgram=0;
-	new->path=malloc(sizeof(char*));
-	new->path=ruta;
+void recolectar_comando(char comando[15]);
 
-	return new;
-}
+void  recolectar_proceso(char proceso[15]);
 
+void procesar_comando(char comando[15], char proceso[15]);
+
+PCB *pcb_create(char *name, int estado, char* ruta);
 
 #include "servidor.h"
 
@@ -112,8 +106,7 @@ void *shell(){
 	char comando[15]; //= malloc(sizeof(char*));
 	char proceso[15];
 
-	char* ruta =  string_new();;
-	PCB* nuevoPCB=malloc(sizeof(PCB));
+
 
 	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V1.0----------------\n");
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
@@ -122,7 +115,24 @@ void *shell(){
     while(1){
     printf("Por favor ingrese el mProc que desea correr:  \n");
 
-    /*-----------------Leo el Comando---------------------------------*/
+    recolectar_comando(comando);
+
+    recolectar_proceso(proceso);
+
+    procesar_comando(comando, proceso);
+
+    }
+
+
+}
+
+/*
+ * Funcion que  toma por pantalla el comando caracter por caracter
+ *formando mi comando
+ *tomo como premisa que los mismos no superaran los 15 caracteres.
+ */
+void recolectar_comando(char comando[])
+{   /*-----------------Leo el Comando---------------------------------*/
     int i =0;
     scanf("%c",&comando[i]);
     while (comando[i]!=' '){
@@ -130,42 +140,79 @@ void *shell(){
     scanf("%c",&comando[i]);
     }
     comando[i]='\0';
-    /*---------------Leo El proceso ---------------------------------*/
-    i =0;
-        scanf("%c",&proceso[i]);
-        while (proceso[i]!='\n'){
-        	i++;
-        scanf("%c",&proceso[i]);
-        }
-        proceso[i]='\0';
-
-    /*------------------Verifico el comando que sea correcto--------*/
-    if(!strcmp(comando, "correr")){
-    printf("\n El mProc que eligio es %s \n",proceso);
 
 
-    /*----------------Genero la ruta del proceso--------------------*/
-    ruta= malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(proceso) + strlen(".cod"));
-    strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
-    strcat(ruta, proceso);
-    strcat(ruta, ".cod");
+ }
 
-    printf("Y su ruta de acceso es: %s \n", ruta);
+/*
+ * Funcion que  toma por pantalla el proceso caracter por caracter
+ *formando mi comando
+ *tomo como premisa que los mismos no superaran los 15 caracteres.
+ */
+void  recolectar_proceso(char proceso[]){
+	   /*---------------Leo El proceso ---------------------------------*/
+	    int i =0;
+	        scanf("%c",&proceso[i]);
+	        while (proceso[i]!='\n'){
+	        	i++;
+	        scanf("%c",&proceso[i]);
+	        }
+	        proceso[i]='\0';
 
-    /*-----------------Creo mi PCB----------------------------------*/
+}
 
-    nuevoPCB = pcb_create(proceso,0,ruta);//Creo mi pcb
+/*
+ * Funcion que  toma como parametros el comando y el proceso
+ * verifica que comando es y actua de acuerdo al mismo con el proceso
+ * seleccionado
+ */
 
-    queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
-    sem_post(&sem_consumidor);
-    }
-    else{printf("el comando ingresado es incorrecto \n");}
+void procesar_comando(char comando[], char proceso[]){
+
+	char* ruta =  string_new();
+
+	PCB* nuevoPCB=malloc(sizeof(PCB));
+
+	/*------------------Verifico el comando que sea correcto--------*/
+	    if(!strcmp(comando, "correr")){
+	    printf("\n El mProc que eligio es %s \n",proceso);
 
 
-    }
+	    /*----------------Genero la ruta del proceso--------------------*/
+	    ruta= malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(proceso) + strlen(".cod"));
+	    strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
+	    strcat(ruta, proceso);
+	    strcat(ruta, ".cod");
+
+	    printf("Y su ruta de acceso es: %s \n", ruta);
+
+	    /*-----------------Creo mi PCB----------------------------------*/
+
+	    nuevoPCB = pcb_create(proceso,0,ruta);//Creo mi pcb
+
+	    queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
+	    sem_post(&sem_consumidor);
+	    }
+	    else{printf("el comando ingresado es incorrecto \n");}
 
 
 }
 
+/*
+ * Funcion que genera un pcb de proceso dandole un nombre una ruta y un estado
+ * devolviendo una estructura de tipo PCB
+ */
 
+PCB *pcb_create(char *name, int estado, char* ruta){
+	PCB *new = malloc( sizeof(PCB) );
+	new->nombreProc=malloc(sizeof(char*));
+	new->nombreProc = name;
+	new->PID = rand();
+	new->estado=0;
+	new->contadorProgram=0;
+	new->path=malloc(sizeof(char*));
+	new->path=ruta;
+
+	return new;
+}
 

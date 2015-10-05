@@ -98,25 +98,25 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 			{
 				/* Se lee lo enviado por el cliente y se escribe en pantalla */
 				 t_msgHeader header;
-				 memset(&header, 0, sizeof(t_msgHeader));
+				 header.msgtype=0;
+				 header.payload_size=0;
+				 //memset(&header, 0, sizeof(t_msgHeader));
 
 
 
 				if ((recv(socketCliente[i],&header,sizeof(header),0)) > 0){
-
+					printf("-------------------EL MSJ type es %d \n",header.msgtype);
 					switch(header.msgtype){
 					case 0 : {
 					printf ("CPU %d esta libre\n", header.payload_size);
-					PCB* PcbAux= malloc(sizeof(PCB));
-					PcbAux->nombreProc=malloc(sizeof(char*));
-					PcbAux->path=malloc(sizeof(char*));
+					PCB* PcbAux;
 
 
 
 					sem_wait(&sem_consumidor);
 					PcbAux=queue_pop(fifo_PCB);
 					char* mensaje;
-					mensaje= malloc(sizeof(PCB)+sizeof(t_msgHeader))+10000 ;
+					mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+strlen(PcbAux->path)+strlen(PcbAux->nombreProc)+2+sizeof(t_msgHeader));
 
 					printf("\n PCB a mandar \n\n");
 					printf("EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
@@ -124,11 +124,11 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					printf("EL PID es........: %d \n",PcbAux->PID);
 					printf("----------------------------------- \n");
 					int offset=0;
-					memcpy(mensaje +offset  , &PcbAux->PID, sizeof(int));
+					memcpy(mensaje +offset  , &(PcbAux->PID), sizeof(int));
 					offset+=sizeof(int);
-					memcpy(mensaje +offset  , &PcbAux->contadorProgram, sizeof(int));
+					memcpy(mensaje +offset  , &(PcbAux->contadorProgram), sizeof(int));
 					offset+=sizeof(int);
-					memcpy(mensaje +offset  , &PcbAux->cpu_asignada, sizeof(int));
+					memcpy(mensaje +offset  , &(PcbAux->cpu_asignada), sizeof(int));
 					offset+=sizeof(int);
 					memcpy(mensaje +offset  , PcbAux->path, strlen(PcbAux->path)+1);
 					offset+=strlen(PcbAux->path)+1;
@@ -141,19 +141,29 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					send(socketCliente[i],mensaje,header.payload_size,0);
 					PcbAux->cpu_asignada=socketCliente[i];
 					queue_push(fifo_PCB_running,PcbAux);
+					free(mensaje);
 					free(PcbAux);
 
 					break;
 					}
-					case 2:{
-						printf("El proceso inicio correctamente");
+					case 2 : {
+						printf("El proceso inicio correctamente \n");
 						log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
 
 						//queue_push(fifo_PCB_running,PcbAux);
 							//				free(PcbAux);
 
-											break;
+						break;
 					}
+					case 3 : {
+											printf("El proceso finalizo correctamente \n");
+											log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
+
+											//queue_push(fifo_PCB_running,PcbAux);
+												//				free(PcbAux);
+
+											break;
+										}
 					}
 
 
