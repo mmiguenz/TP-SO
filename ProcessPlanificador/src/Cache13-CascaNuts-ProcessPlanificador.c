@@ -50,9 +50,13 @@ void recolectar_comando(char comando[15]);
 
 void  recolectar_proceso(char proceso[15]);
 
+int  recolectar_pid(char proceso[]);
+
 void procesar_comando(char comando[15], char proceso[15]);
 
 PCB *pcb_create(char *name, int estado, char* ruta);
+
+int identificar_comando(char comando[]);
 
 #include "servidor.h"
 
@@ -70,7 +74,7 @@ int main(void)
 	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
 
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
-
+	int quantum=0;
 	char* puerto_escucha_planif;
                         	t_config* config;
 
@@ -78,6 +82,7 @@ int main(void)
                         	config = config_create("config.cfg");
                         	if(config != NULL){
                         	puerto_escucha_planif=config_get_string_value(config, "PORT");
+                        	quantum=config_get_int_value(config,"QUANTUM");
                         	 log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
                         	}
 //------------------Soy una barra separadora ;p------------------------------------//
@@ -108,16 +113,15 @@ void *shell(){
 
 
 
-	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V1.0----------------\n");
+	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V2.6----------------\n");
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
+	printf("----o bien los comandos que desea que realize el planificador------------\n");
 	printf("--------------------------------------------------------------------------\n\n\n\n");
 
     while(1){
-    printf("Por favor ingrese el mProc que desea correr:  \n");
+    printf("Por favor ingrese el comando que desea ejecutar:  \n");
 
     recolectar_comando(comando);
-
-    recolectar_proceso(proceso);
 
     procesar_comando(comando, proceso);
 
@@ -135,7 +139,7 @@ void recolectar_comando(char comando[])
 {   /*-----------------Leo el Comando---------------------------------*/
     int i =0;
     scanf("%c",&comando[i]);
-    while (comando[i]!=' '){
+    while ((comando[i]!=' ') & (comando[i]!='\n')){
     	i++;
     scanf("%c",&comando[i]);
     }
@@ -161,6 +165,21 @@ void  recolectar_proceso(char proceso[]){
 
 }
 
+
+int  recolectar_pid(char proceso[]){
+	   /*---------------Leo El pid ---------------------------------*/
+
+	int i =0;
+	        scanf("%c",&proceso[i]);
+	        while (proceso[i]!='\n'){
+	        	i++;
+	        scanf("%c",&proceso[i]);
+	        }
+	        proceso[i]='\0';
+	        return atoi(proceso);
+}
+
+
 /*
  * Funcion que  toma como parametros el comando y el proceso
  * verifica que comando es y actua de acuerdo al mismo con el proceso
@@ -173,27 +192,64 @@ void procesar_comando(char comando[], char proceso[]){
 
 	PCB* nuevoPCB=malloc(sizeof(PCB));
 
-	/*------------------Verifico el comando que sea correcto--------*/
-	    if(!strcmp(comando, "correr")){
-	    printf("\n El mProc que eligio es %s \n",proceso);
+
+	switch(identificar_comando(comando)){
+	case 0:{
+		recolectar_proceso(proceso);
 
 
-	    /*----------------Genero la ruta del proceso--------------------*/
-	    ruta= malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(proceso) + strlen(".cod"));
-	    strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
-	    strcat(ruta, proceso);
-	    strcat(ruta, ".cod");
 
-	    printf("Y su ruta de acceso es: %s \n", ruta);
+    /*----------------Genero la ruta del proceso--------------------*/
+    ruta= malloc(1+strlen("/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/") + strlen(proceso) + strlen(".cod"));
+    strcpy(ruta, "/home/utnso/workspace/tp-2015-2c-cascanueces/Procesos/");
+    strcat(ruta, proceso);
+    strcat(ruta, ".cod");
 
-	    /*-----------------Creo mi PCB----------------------------------*/
+    printf("Y su ruta de acceso es: %s \n", ruta);
 
-	    nuevoPCB = pcb_create(proceso,0,ruta);//Creo mi pcb
+    /*-----------------Creo mi PCB----------------------------------*/
 
-	    queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
-	    sem_post(&sem_consumidor);
-	    }
-	    else{printf("el comando ingresado es incorrecto \n");}
+    nuevoPCB = pcb_create(proceso,0,ruta);//Creo mi pcb
+
+    queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
+    sem_post(&sem_consumidor);
+    break;
+    }
+	case 1:
+	{
+		int pid;
+		pid=recolectar_pid(proceso);
+		printf("El Comando que eligio fue finalizar \n");
+		printf("Y el PID del proceso a finalizar es = %d  \n",pid);
+		break;
+	}
+	case 2:
+	{
+		printf("El comando que eligio fue ps \n");
+		break;
+	}
+	case 3:
+	{
+		printf("El comando que eligio fue cpu \n");
+		break;
+	}
+	case -1:
+	{
+		printf("No reconozco ese comando tipee de nuevo \n");
+	}
+	}
+
+}
+
+int identificar_comando(char comando[]){
+	int com =-1;
+
+	if(!strcmp(comando, "correr")){com=0;}
+	if(!strcmp(comando, "finalizar")){com=1;}
+	if(!strcmp(comando, "ps")){com=2;}
+	if(!strcmp(comando, "cpu")){com=3;}
+
+	return com;
 
 
 }
