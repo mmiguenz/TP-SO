@@ -44,7 +44,16 @@ int cpu_asignada;
 }PCB ;
 
 int procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux, int retardo);
-void abrir(PCB* PcbAux, int memoria, int planificador,t_log* logger, int retardo);
+
+int recolectar_instruccion(char* cadena,char comando[15],int punta);
+
+int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo);
+
+int recolectar_pagina(char* cadena, int punta, char pagina[3]);
+
+int identificar_instruccion(char comando[15]);
+
+void abrir(PCB* PcbAux, char buffer[1500]);
 void* conectar();
 
 #endif /* HILITO_H_ */

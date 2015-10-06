@@ -50,129 +50,55 @@ struct param{
 
 
 
-int procesarCadena(char* cadena, int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
-	//char* line = cadena;
-	//line = (char*)malloc(sizeof(char*));
-	char** substrings =malloc(sizeof(char**));
-	char** substrings2 =malloc(sizeof(char**)); // NO PARA ESCRIBIR!!!!!!!!!!
-	substrings = string_split(cadena, " ");
-	substrings2 = string_split(substrings[1], ";");
-	int valor;
-	int instruccion;
+int procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 
-	if (strcmp( substrings[0] ,"iniciar")==0){
-		printf("Encontro en %s Iniciado Cantidad de paginas %s\n\n", PcbAux->nombreProc, substrings[1]);
-		instruccion = 1;
+	int valor=1;
 
-		int pagina = atoi(substrings2[0]);
+	int punta=0;
 
-		enviarSolicitud (PcbAux->PID, instruccion, pagina , memoria);
+	int tamBuff=strlen(cadena);
+	char comando[15];
+	char pagina[3];
 
-		PROCESO msj = recibirMsjMemoria(memoria);
-
-		printf("mensaje de la memoria %d",msj.aceptado);
-
-		switch(msj.aceptado){
-		case 1:{
-
-			printf("Hay lugar\n");
-			//log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
-			//log_info(logger, "El pid es %s", PcbAux->PID);
-			//log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
-			//log_info(logger, "Cantidad de paginas %s", substrings[1]);
-			valor = 1;
-			t_msgHeader header;
-			memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-			header.msgtype = 2;
-			header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
-			send(planificador, &header, sizeof( t_msgHeader), 0);
-			sleep(retardo);
-			break;
-		}
-		case 0:{
-			printf("No hay lugar\n");
-			printf("mProc %s Fallo\n", PcbAux->nombreProc);
-			//log_info(logger, "mProc %s Fallo\n", PcbAux->nombreProc);
-			//aviso a planificador que fallo
-			valor = 0;
-			sleep(retardo);
-			break;
-		}}
-	} else if (strcmp ( substrings[0] ,"leer")==0){
-				printf("Encontro en mProc %s Pagina %s leer\n", PcbAux->nombreProc,substrings[1]);
-				instruccion = 2;
-				int pagina = atoi(substrings2[0]);
-
-				enviarSolicitud (PcbAux->PID, instruccion, pagina , memoria);
-				PROCESO msj;
-				memset(&msj,0,sizeof(PROCESO));
-				msj= recibirMsjMemoria(memoria);
-
-				printf("mensaje de memoria %d",msj.aceptado);
-				if (msj.aceptado == 1){
-					//log_info(logger, "El pid es %s", PcbAux->PID);
-					//log_info(logger, "mProc %s comienza lectura\n", PcbAux->nombreProc);
-					//log_info(logger, "En pagina %s\n", substrings[1]);
-					printf("pudo leer\n");
-					valor = 1;
-
-					sleep(retardo);
-				}else{
-					printf("No pudo leer\n");
-					//log_info(logger, "mProc %s Fallo\n",PcbAux->nombreProc);
-					printf("mProc %s Fallo\n", PcbAux->nombreProc);
-					valor = 0;
-					sleep(retardo);
-				}
-
-	}else if (strcmp(substrings[0] ,"finalizar")==0){
-				instruccion = 5;
-				printf("mProc %s Finalizado\n", PcbAux->nombreProc);
-
-				//log_info(logger, "mProc %s Finalizado\n", PcbAux->nombreProc);
-				//log_info(logger, "El pid es %s", PcbAux->PID);
-				int pagina = 0;
-
-				enviarSolicitud (PcbAux->PID, instruccion, pagina, memoria);
-				PROCESO msj = recibirMsjMemoria(memoria);
-
-				valor = 1;
-
-
-				t_msgHeader header;
-				memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-				header.msgtype = 3;
-				header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
-				send(planificador, &header, sizeof( t_msgHeader), 0);
-				sleep(retardo);
+	while(punta<(tamBuff-1))
+	{
+		int aux;
+	aux= recolectar_instruccion(cadena,comando, punta);
+	punta=aux;
+	printf("La punta es %d, y la instruccion es: %s \n", punta,comando);
+	aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo);
+	punta=aux;
 	}
-
-string_iterate_lines(substrings,(void*) free);
-string_iterate_lines(substrings2,(void*) free);
-free(substrings);
 return valor;
 }
 
 
 
-void abrir(PCB* PcbAux, int memoria, int planificador, t_log* logger, int retardo) {
-	char cadena[100];//= malloc(sizeof(char*));
-	FILE * fp;
-	int valor = 1;
-	fp = fopen(PcbAux->path, "r");
-	if (fp == NULL) {
-		printf("\nError de apertura del archivo. \n\n");
-	} else {
-		while ((fgets(cadena, 100, fp) != NULL) && (valor == 1)) {
-			//printf("%s\n",cadena);
-			valor = procesarCadena(cadena, memoria, planificador, logger, PcbAux, retardo);
-		}
-		fclose(fp);
-	}
+void abrir(PCB* PcbAux, char buffer[1500])
+{
+		FILE * fp;
+		fp = fopen(PcbAux->path, "r");
+		int len;
+		if( fp == NULL )
+		   {
+		      perror ("Error opening file");
+		    }
+		 fseek(fp, 0, SEEK_END);
+		 len = ftell(fp);
+		 printf("El tamaño del mCod es:%d \n", len);
+		 //char* buffer = malloc(len+10);
+		 fseek(fp, 0, SEEK_SET);
+		 if (len != fread(buffer, sizeof(char), len+10, fp))
+		   	{
+		   		free(buffer);
 
-	//free(cadena);
-	return;
-}
+		   	}
+
+	fclose(fp);
+
+	 strcat(buffer,"\n finalizar;");
+
+	}
 
 
 void* conectar(struct param *mensa){
@@ -225,24 +151,176 @@ void* conectar(struct param *mensa){
     printf("cpu %d\n",PcbAux->cpu_asignada);
     printf("el nombre  del proceso es %s\n", PcbAux->nombreProc);
     printf("El path %s\n", PcbAux->path);
+    char archivoProc[1500];
+    abrir(PcbAux,archivoProc);
 
-    abrir(PcbAux, memoria, planificador, logger, retardo);
+    printf("El archivo es: \n %s",archivoProc);
+    procesarCadena(archivoProc, memoria, planificador,logger, PcbAux, retardo);
 
-/*
-    char** substring1 = string_split(mCod,"$");
-    char** substring2 = string_split(mCod,"/");
-
-
-
-
-    string_iterate_lines(substring1, free);
-    string_iterate_lines(substring2, free);
-    free(mCod);
-    free(substring1);
-    free(substring2);*/
 	 free(buffer);
 }
 
     return EXIT_SUCCESS;
 }
 
+
+
+
+
+int recolectar_instruccion(char* cadena,char comando[15],int punta)
+{
+	 int i =0;
+
+	    while ((cadena[punta]!=' ') & (cadena[punta]!=';')){
+
+	    comando[i]=cadena[punta];
+	    i++;
+	    punta++;
+	    }
+	    comando[i]='\0';
+	    return punta;
+	}
+
+int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo)
+{
+	int instruccion;
+
+	switch(identificar_instruccion(comando))
+	{
+	case 0://Iniciar
+	{
+		instruccion = 1;
+
+		int aux=recolectar_pagina(cadena,punta,pagina);
+		punta=aux+1;
+		int paginas = atoi(pagina);
+
+		printf("El comando es Iniciar y la cantidad de paginas es %d \n", paginas);
+
+
+		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
+
+		PROCESO msj = recibirMsjMemoria(memoria);
+
+		printf("mensaje de la memoria %d \n",msj.aceptado);
+
+		if(msj.aceptado==1)
+		{
+			printf("Hay lugar\n");
+			//log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
+			//log_info(logger, "El pid es %s", PcbAux->PID);
+			//log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
+			//log_info(logger, "Cantidad de paginas %s", substrings[1]);
+			t_msgHeader header;
+			memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+			header.msgtype = 2;
+			header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+			send(planificador, &header, sizeof( t_msgHeader), 0);
+			sleep(retardo);
+
+		}
+
+
+
+
+		break;
+	}
+	case 1://Leer
+		{
+		instruccion = 2;
+		punta=recolectar_pagina(cadena,punta,pagina) + 1;
+		int paginas = atoi(pagina);
+
+		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
+
+		PROCESO msj = recibirMsjMemoria(memoria);
+
+		printf("mensaje de la memoria %d \n",msj.aceptado);
+
+		if(msj.aceptado==1)
+		{
+			printf("Pude leer\n");
+			//log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
+			//log_info(logger, "El pid es %s", PcbAux->PID);
+			//log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
+			//log_info(logger, "Cantidad de paginas %s", substrings[1]);
+			t_msgHeader header;
+			memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+			header.msgtype = 2;
+			header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+			send(planificador, &header, sizeof( t_msgHeader), 0);
+			sleep(retardo);
+
+		}
+		break;
+	}
+	case 2://Finalizar
+	{
+		instruccion = 3;
+		printf("Encontre Finalizar");
+		punta+=200;
+		enviarSolicitud (PcbAux->PID, instruccion, 0 , memoria);
+
+				PROCESO msj = recibirMsjMemoria(memoria);
+
+				printf("mensaje de la memoria %d \n",msj.aceptado);
+
+				if(msj.aceptado==1)
+				{
+					printf("El proceso Pudo finalizar\n");
+					//log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
+					//log_info(logger, "El pid es %s", PcbAux->PID);
+					//log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
+					//log_info(logger, "Cantidad de paginas %s", substrings[1]);
+					t_msgHeader header;
+					memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+					header.msgtype = 2;
+					header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+					send(planificador, &header, sizeof( t_msgHeader), 0);
+					sleep(retardo);
+
+				}
+
+
+		break;
+
+	}
+	case -1://Error
+		{
+			printf("Error de sentencias!!!");
+			punta++;
+			break;
+		}
+	}
+	return punta;
+}
+
+
+
+int recolectar_pagina(char cadena[1500], int punta, char pagina[3])
+{
+	   int i =0;
+
+		        while (cadena[punta]!=';'){
+		        pagina[i]=cadena[punta];
+		        punta++; i++;
+		        }
+		        pagina[i]='\0';
+		        punta++;
+
+	return punta;
+}
+
+
+int identificar_instruccion(char comando[15])
+{
+	int instruccion = -1;
+
+	if(!strcmp(comando, "iniciar")){instruccion=0;}
+	if(!strcmp(comando, "leer")){instruccion=1;}
+	if(!strcmp(comando, "finalizar")){instruccion=2;}
+
+	return instruccion;
+
+
+	}

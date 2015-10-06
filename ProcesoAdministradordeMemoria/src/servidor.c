@@ -409,11 +409,11 @@ PROCESO procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
 printf("El header type es:----- %d\n",encabezado.msgtype);
 		t_espacio_ocupado* listaDePaginas;
 	    PROCESO procesoAux ;
-	if (encabezado.msgtype ==1){
+	if (encabezado.msgtype == 1){
 				procesoAux.aceptado=1;
 				procesoAux.pid=encabezado.pid;
-				enviarMensaje(swap,encabezado);
-				recibirMensaje(swap, listaDePaginas);
+				//enviarMensaje(swap,encabezado);
+				//recibirMensaje(swap, listaDePaginas);
 				printf("mproc X - iniciado \n");
 
 				printf("aceptado %d", procesoAux.aceptado);
