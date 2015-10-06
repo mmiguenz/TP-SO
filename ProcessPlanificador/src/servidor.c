@@ -156,7 +156,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 						break;
 					}
 					case 3 : {
-											printf("El proceso finalizo correctamente \n");
+											printf("El proceso %d finalizo correctamente \n",header.payload_size);
 											log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
 
 											//queue_push(fifo_PCB_running,PcbAux);

@@ -244,11 +244,11 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			//log_info(logger, "El pid es %s", PcbAux->PID);
 			//log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
 			//log_info(logger, "Cantidad de paginas %s", substrings[1]);
-			t_msgHeader header;
-			memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-			header.msgtype = 2;
-			header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
-			send(planificador, &header, sizeof( t_msgHeader), 0);
+			//t_msgHeader header;
+			//memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+			//header.msgtype = 2;
+			//header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+			//send(planificador, &header, sizeof( t_msgHeader), 0);
 			sleep(retardo);
 
 		}
@@ -274,7 +274,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 					//log_info(logger, "Cantidad de paginas %s", substrings[1]);
 					t_msgHeader header;
 					memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-					header.msgtype = 2;
+					header.msgtype = 3;
 					header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
 					send(planificador, &header, sizeof( t_msgHeader), 0);
 					sleep(retardo);
