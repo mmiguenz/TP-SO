@@ -1,5 +1,7 @@
 #include "servidor.h"
 #include "Cliente.h"
+#include "EstructurasParaMemoria.h"
+
 /*
  * Programa principal.
  * Crea un socket servidor y se mete en un select() a la espera de clientes.
@@ -7,7 +9,7 @@
  * a empezar.
  */
 
-void conectar_servidor(char* puerto_escucha_memoria, int swap)
+void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre, int marcosPorProceso,int Cant_Marcos)
 {
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -78,9 +80,9 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 				t_msgHeaderMemoria encabezado;
 				 memset(&encabezado, 0, sizeof(t_msgHeaderMemoria));
 				if ((recv(socketCliente[i],&encabezado,sizeof(t_msgHeaderMemoria),0)) > 0){
-				PROCESO procesoAux;//=malloc(sizeof(PROCESO));
+				PROCESO procesoAux;
 
-				procesoAux=procesarCadena(socketCliente[i],swap,encabezado);
+				procesoAux=procesarCadena(socketCliente[i],swap,encabezado,memoriaLibre,marcosPorProceso,Cant_Marcos);
 				//send(swap);
 				//recv(swap);
 
@@ -94,7 +96,7 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 					/* Se indica que el cliente ha cerrado la conexión y se
 					 * marca con -1 el descriptor para que compactaClaves() lo
 					 * elimine */
-					printf ("Cliente %d ha cerrado la conexión\n", i+1);
+					printf ("Cliente %d ha cerrado la conexión \n\n", i+1);
 					socketCliente[i] = -1;
 				}
 			}
@@ -136,7 +138,7 @@ void nuevoCliente (int servidor, int *clientes, int *nClientes)
 	Escribe_Socket (clientes[(*nClientes)-1], (char *)nClientes, sizeof(int));
 
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
-	printf ("Aceptado cliente %d\n", *nClientes);
+	printf ("Aceptado cliente %d \n\n", *nClientes);
 	return;
 }
 
@@ -390,7 +392,7 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
 
     // if we got here, it means we didn't get bound
     if (p == NULL) {
-        fprintf(stderr, "selectserver: failed to bind\n");
+        fprintf(stderr, "selectserver: fallo la conexion \n");
 
     }
 
@@ -405,34 +407,29 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
 	return listener;
 }
 
-PROCESO procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado){
-printf("El header type es:----- %d\n",encabezado.msgtype);
+PROCESO procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado, int* memoriaLibre, int marcosPorProceso,int Cant_Marcos){
+printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 		t_espacio_ocupado* listaDePaginas;
 	    PROCESO procesoAux ;
+	    PROCESOSWAP procesoswap;
 	if (encabezado.msgtype == 1){
-				procesoAux.aceptado=1;
-				procesoAux.pid=encabezado.pid;
-				//enviarMensaje(swap,encabezado);
-				//recibirMensaje(swap, listaDePaginas);
-				printf("mproc X - iniciado \n");
+				printf("Se esta creando el proceso %d con: %d paginas\n", encabezado.pid, encabezado.pagina);
+				if (MarcosLibres(encabezado.pagina,Cant_Marcos,memoriaLibre)==1){
+					enviarMensaje(swap,encabezado);
+					recibirMensaje(swap,listaDePaginas);
+					procesoAux.aceptado=0;
+					procesoAux.pid=encabezado.pid;
+					enviarMsjCPU(cpu,procesoAux);
+					inicializarProceso(encabezado.pid, encabezado.pagina, memoriaLibre,marcosPorProceso);
+					printf("Se creado correctamente el proceso %i con: %i paginas\n", encabezado.pid, encabezado.pagina);
+					//log_info(logger, "mProc %s Fallo\n", nombreProc);
+						}
 
-				printf("aceptado %d", procesoAux.aceptado);
-				//procesoAux->contenido=malloc(sizeof(char*));
-				//procesoAux->contenido="holi flor ";
+
+				}
 
 
-						//enviarMesaje(cpu, "mproc X - iniciado \n");
-						//deberia mandarme donde lo guardo
-					//	log_info(logger, "Hay lugar para: %s", nombreProc);
 
-		}
-						//printf("mproc X - fallo\n");
-
-						//procesoAux->aceptado=0;
-						//procesoAux->pid=encabezado.pid;
-						//procesoAux->contenido="chau flor";
-
-						//log_info(logger, "mProc %s Fallo\n", nombreProc);
 
 			if (encabezado.msgtype==2){
 

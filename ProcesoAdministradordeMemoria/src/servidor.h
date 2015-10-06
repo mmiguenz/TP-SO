@@ -71,10 +71,9 @@ void nuevoCliente (int servidor, int *clientes, int *nClientes);
 int dameMaximo (int *tabla, int n);
 void compactaClaves (int *tabla, int *n);
 
+void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre, int marcosPorProceso,int Cant_Marcos);
 
-void conectar_servidor(char* puerto_escucha_planif, int swap);
-
-PROCESO procesarCadena(int cpu, int swap,t_msgHeaderMemoria encabezado);
+PROCESO procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado, int* memoriaLibre, int marcosPorProceso,int Cant_Marcos);
 
 PROCESO recibirMsjCPU(t_msgHeaderMemoria encabezado);
 
