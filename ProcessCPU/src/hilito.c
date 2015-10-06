@@ -112,9 +112,11 @@ void* conectar(struct param *mensa){
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
 
-      while(1){
 	char* aux = recibirMensaje(planificador, logger);
-    free(aux);
+	free(aux);
+      while(1){
+
+
 
     t_msgHeader header2;
     memset(&header2, 0, sizeof(t_msgHeader));
@@ -156,7 +158,6 @@ void* conectar(struct param *mensa){
 
     printf("El archivo es: \n %s",archivoProc);
     procesarCadena(archivoProc, memoria, planificador,logger, PcbAux, retardo);
-
 	 free(buffer);
 }
 
