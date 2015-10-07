@@ -83,13 +83,16 @@ int main(void)
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
 	int quantum=0;
 	char* puerto_escucha_planif;
+	char* planificacion;
                         	t_config* config;
 
                         	puerto_escucha_planif=malloc(sizeof puerto_escucha_planif);
                         	config = config_create("config.cfg");
                         	if(config != NULL){
                         	puerto_escucha_planif=config_get_string_value(config, "PORT");
-                        	quantum=config_get_int_value(config,"QUANTUM");
+                        	planificacion=config_get_string_value(config,"CONFIGURACION");
+                        	if(!strcmp(planificacion,"ROUNDROBIN")){quantum=config_get_int_value(config,"QUANTUM");};
+
                         	 log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
                         	}
 //------------------Soy una barra separadora ;p------------------------------------//
