@@ -21,9 +21,15 @@
 #include <commons/config.h>
 #include <commons/collections/list.h>
 #include "LibSwap.h"
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/mman.h>
 
 
 
+int tam_Pagina , cant_Pagina, tamanio_Total;
+char* ruta_Swap;
 
 
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
@@ -82,14 +88,16 @@ char* crearArchivoSwap(char *nombre_Swap ,int tam_Pag,int cant_Pag)
 {
 	char* pathArchivo=string_new();
 	char* archivoFormatCero= string_from_format("dd if=/dev/zero of=/home/utnso/%s bs=%lu count=%lu",nombre_Swap,tam_Pag, cant_Pag);
-
+	tam_Pagina=tam_Pag;
+	cant_Pagina=cant_Pag;
+	tamanio_Total=tam_Pagina*cant_Pagina;
 	if(system(archivoFormatCero)){
 		perror("Error al crear el Archivo Swap: func crearArchivoSwap en LibSwap.c");
 		return EXIT_FAILURE;
 	}else {
-		pathArchivo=string_from_format("dd if=/dev/zero of=/home/utnso/%s",nombre_Swap);
+		pathArchivo=string_from_format("/home/utnso/%s",nombre_Swap);
 	}
-
+	ruta_Swap=pathArchivo;
 	return  pathArchivo;
 }
 
@@ -119,10 +127,6 @@ t_list* crear_ListaOcupados()
 }
 
 
-
-
-
-
 t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas)
 	{
 		bool hay_Espacio(t_espacio_libre* espacio) {
@@ -146,6 +150,7 @@ t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres
 	{
 		int paginas_requeridas=procesoSwap.pagina;
 		int pid=procesoSwap.pid;
+		t_espacio_ocupado* proceso_ocuado=malloc(sizeof(t_espacio_ocupado));
 		switch ( procesoSwap.msgtype ) {
 		case 1://Iniciar
 			if(total_Libres(list_Libres)>=paginas_requeridas){
@@ -156,7 +161,7 @@ t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres
 					}
 				else
 					{
-						return asignar_espacio_actualizar(pid,paginas_requeridas,espacio,list_Libres,list_Ocupados);
+						proceso_ocuado = asignar_espacio_actualizar(pid,paginas_requeridas,espacio,list_Libres,list_Ocupados);
 					}
 			}
 		  break;
@@ -225,6 +230,91 @@ t_espacio_ocupado* asignar_espacio_actualizar(pid_t pid, int paginas,t_espacio_l
 
 	return proceso_enCurso;
 }
+
+t_espacio_ocupado * list_find_Proceso(t_list* Ocupado, pid_t pid)
+{
+	bool validar_proceso(t_espacio_ocupado* proceso)
+	{
+		return(proceso->pid== pid);
+	}
+
+	return list_find(Ocupado, (void*) validar_proceso);
+}
+
+void Eliminar_De_Archivo_Swap(int comienzo, int cant_paginas)
+{
+	//abrir de escritura y lectura
+	int archivo = open(ruta_Swap,02);
+	char* data =mmap((caddr_t)0, cant_paginas*tam_Pagina, PROT_READ|PROT_WRITE ,MAP_SHARED, archivo, comienzo);
+
+	  memset(data,'\0', cant_paginas*tam_Pagina);
+
+	 if (msync(data, cant_paginas*tam_Pagina, MS_SYNC) == -1)
+	 {
+	  perror("Could not sync the file to disk");
+	 }
+	 munmap(data, cant_paginas*tam_Pagina);
+	 close(archivo);
+}
+void ordenarLista(t_list* espacio_Libre)
+{
+	bool comparar_Comienzos(t_espacio_libre* espacio_1, t_espacio_libre* espacio_2)
+	{
+		return(espacio_1->comienzo < espacio_2->comienzo);
+	}
+
+	list_sort(espacio_Libre, (void*) comparar_Comienzos);
+}
+
+
+//revisar: error funcionamiento.
+void consolidar_espacio(t_list* espacio_Libre)
+{
+	ordenarLista(espacio_Libre);
+	t_link_element* aux = espacio_Libre->head;
+	while(aux!=NULL)
+		{
+		t_espacio_libre* actual= aux->data;
+		int comienzo_Actual= actual->comienzo;
+		int cant_paginas_Actual= actual->cant_paginas;
+		int termina_Actual = comienzo_Actual+ cant_paginas_Actual;
+		if(aux->next!=NULL){
+		t_espacio_libre* siguiente= aux->next->data;
+		int comienzoSig= siguiente->comienzo;
+			if(termina_Actual==comienzoSig)
+			{
+				actual->cant_paginas= cant_paginas_Actual+siguiente->cant_paginas;
+
+				t_link_element* temp= aux->next;
+				aux->next=temp->next;
+				free(temp);
+				espacio_Libre->elements_count--;
+			}
+		}
+		aux=aux->next;
+
+		}
+}
+
+void finalizar_Proceso (t_list* espacio_Libre, t_list* espacio_Ocupado, pid_t pid)
+{
+	t_espacio_ocupado* proceso= list_find_Proceso(espacio_Ocupado, pid);
+	t_espacio_libre* espacio_Proceso=malloc(sizeof(t_espacio_libre));
+	espacio_Proceso->comienzo= proceso->comienzo;
+	espacio_Proceso->cant_paginas= proceso->cant_paginas;
+	list_add(espacio_Libre,espacio_Proceso);
+	consolidar_espacio(espacio_Libre);
+
+	bool validar_proceso(t_espacio_ocupado* proceso_ocupa)
+		{
+			return(proceso_ocupa->pid== pid);
+		}
+
+	Eliminar_De_Archivo_Swap(proceso->comienzo, proceso->cant_paginas);
+	list_remove_by_condition(espacio_Ocupado,  (void*) validar_proceso);
+}
+
+
 
 
 
