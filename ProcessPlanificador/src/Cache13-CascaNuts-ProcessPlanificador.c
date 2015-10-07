@@ -58,16 +58,13 @@ PCB *pcb_create(char *name, int estado, char* ruta);
 
 int identificar_comando(char comando[]);
 
-int generar_pid();
-
 #include "servidor.h"
 
 
-int quantum=0;
 
 void* shell();
 
-char* planificacion;
+
 
 int main(void)
 {
@@ -77,7 +74,7 @@ int main(void)
 	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
 
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
-
+	int quantum=0;
 	char* puerto_escucha_planif;
                         	t_config* config;
 
@@ -86,8 +83,7 @@ int main(void)
                         	if(config != NULL){
                         	puerto_escucha_planif=config_get_string_value(config, "PORT");
                         	quantum=config_get_int_value(config,"QUANTUM");
-                        	planificacion=config_get_string_value(config, "PLANIFICACION");
-                        	log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
+                        	 log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
                         	}
 //------------------Soy una barra separadora ;p------------------------------------//
 
@@ -117,12 +113,9 @@ void *shell(){
 
 
 
-	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V2.8----------------\n");
+	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V2.6----------------\n");
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
-	printf("---------o bien los comandos que desea que realize el planificador--------\n");
-	printf("----------Actualmente esta sobre una planificacion %s-----------------\n ",planificacion);
-	if(!strcmp(planificacion,"ROUNDROBIN")){
-	printf("------------Con un Quantum de : %d----------------------------------------\n",quantum);}
+	printf("----o bien los comandos que desea que realize el planificador------------\n");
 	printf("--------------------------------------------------------------------------\n\n\n\n");
 
     while(1){
@@ -296,7 +289,7 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 	PCB *new = malloc( sizeof(PCB) );
 	new->nombreProc=malloc(strlen(name)+1);
 	strcpy(new->nombreProc, name);
-	new->PID = generar_pid();
+	new->PID = rand();
 	new->estado=0;
 	new->contadorProgram=0;
 	new->path=malloc(sizeof(char*));
@@ -306,4 +299,3 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 }
 
 
-int generar_pid(){return (rand()/10000000)+(rand() % 100);}

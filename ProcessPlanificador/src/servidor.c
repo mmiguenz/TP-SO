@@ -5,12 +5,6 @@
 sem_t sem_productor;
 sem_t sem_consumidor;
 
-#define LIBRE 0
-#define INICIO 2
-#define FINALIZO 3
-#define MSG_PCB 1
-
-
 typedef struct {
 char* nombreProc;
 int estado;
@@ -113,7 +107,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 				if ((recv(socketCliente[i],&header,sizeof(header),0)) > 0){
 					printf("-------------------EL MSJ type es %d \n",header.msgtype);
 					switch(header.msgtype){
-					case LIBRE : {
+					case 0 : {
 					printf ("CPU %d esta libre\n", header.payload_size);
 					PCB* PcbAux;
 
@@ -141,7 +135,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					memcpy(mensaje +offset  , PcbAux->nombreProc, strlen(PcbAux->nombreProc)+1);
 					offset+=strlen(PcbAux->nombreProc)+1;
 					memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-					header.msgtype = MSG_PCB;
+					header.msgtype = 1;//MSG_PCB;
 					header.payload_size = offset;
 					send(socketCliente[i],&header,sizeof(header),0);
 					send(socketCliente[i],mensaje,header.payload_size,0);
@@ -152,7 +146,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 					break;
 					}
-					case INICIO : {
+					case 2 : {
 						printf("El proceso inicio correctamente \n");
 						log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
 
@@ -161,7 +155,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 						break;
 					}
-					case FINALIZO : {
+					case 3 : {
 											printf("El proceso %d finalizo correctamente \n",header.payload_size);
 											log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
 
