@@ -43,6 +43,7 @@ int PID;
 int contadorProgram;
 char* path;
 int cpu_asignada;
+int quantum;
 
 }PCB ;
 
@@ -69,6 +70,7 @@ int identificar_comando(char comando[]);
 
 void* shell();
 
+int quantum=0;
 
 
 int main(void)
@@ -77,20 +79,20 @@ int main(void)
 
 	fifo_PCB_ready=queue_create();
 	PCB_running=queue_create();
-
+	char* planificacion;
 	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
 
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
-	int quantum=0;
+
 	char* puerto_escucha_planif;
-	char* planificacion;
+
                         	t_config* config;
 
                         	puerto_escucha_planif=malloc(sizeof puerto_escucha_planif);
                         	config = config_create("config.cfg");
                         	if(config != NULL){
                         	puerto_escucha_planif=config_get_string_value(config, "PORT");
-                        	planificacion=config_get_string_value(config,"CONFIGURACION");
+                        	planificacion=config_get_string_value(config,"PLANIFICACION");
                         	if(!strcmp(planificacion,"ROUNDROBIN")){quantum=config_get_int_value(config,"QUANTUM");};
 
                         	 log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
@@ -310,6 +312,7 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 	new->contadorProgram=0;
 	new->path=malloc(sizeof(char*));
 	new->path=ruta;
+	new->quantum=quantum;
 
 	return new;
 }

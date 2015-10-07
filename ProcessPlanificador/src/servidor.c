@@ -5,6 +5,7 @@
 sem_t sem_productor;
 sem_t sem_consumidor;
 
+
 typedef struct {
 char* nombreProc;
 int estado;
@@ -12,9 +13,9 @@ int PID;
 int contadorProgram;
 char* path;
 int cpu_asignada;
+int quantum;
 
 }PCB ;
-
 typedef struct  {
 	int msgtype;
 	int payload_size;
