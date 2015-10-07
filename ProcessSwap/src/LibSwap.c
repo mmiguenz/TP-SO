@@ -81,13 +81,13 @@ int esComando(char * comando){
 char* crearArchivoSwap(char *nombre_Swap ,int tam_Pag,int cant_Pag)
 {
 	char* pathArchivo=string_new();
-	char* archivoFormatCero= string_from_format("dd if=/dev/zero of=/home/utnso/workspace/prueba/%s bs=%lu count=%lu",nombre_Swap,tam_Pag, cant_Pag);
+	char* archivoFormatCero= string_from_format("dd if=/dev/zero of=/home/utnso/%s bs=%lu count=%lu",nombre_Swap,tam_Pag, cant_Pag);
 
 	if(system(archivoFormatCero)){
 		perror("Error al crear el Archivo Swap: func crearArchivoSwap en LibSwap.c");
 		return EXIT_FAILURE;
 	}else {
-		pathArchivo=string_from_format("dd if=/dev/zero of=/home/utnso/workspace/prueba/%s",nombre_Swap);
+		pathArchivo=string_from_format("dd if=/dev/zero of=/home/utnso/%s",nombre_Swap);
 	}
 
 	return  pathArchivo;
@@ -173,7 +173,9 @@ t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres
 		}
 		return t_espacio_ocupado;
 		*/
+
 	}
+}
 
 // devuelve el total de espacio libre de la lista
 int total_Libres(t_list* espacio_Libre)

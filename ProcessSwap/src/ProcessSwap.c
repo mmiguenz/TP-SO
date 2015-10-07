@@ -47,11 +47,17 @@ int main(void)
 	if(config != NULL){
 		//setea las variables de configuracion.
 		puerto_escucha_swap=config_get_string_value(config, "PORT_SWAP");
+		printf("PuertoSwap %s: \n",puerto_escucha_swap);
 		nombre_swap=config_get_string_value(config, "NOMBRE_SWAT");
+		printf("Nombre de ArchivoSwap: %s \n",nombre_swap);
 		cant_pag=config_get_int_value(config, "CANTIDAD_PAGINAS");
+		printf("Cantidad de paginas del archivo : %d \n",cant_pag);
 		tam_pag=config_get_int_value(config, "TAMANIO_PAGINA");
+		printf("tamaño de las paginas :%d \n",tam_pag);
 		retardo_swat=config_get_int_value(config, "RETARDO_SWAT");
+		printf("Restardo de Swap: %d \n" ,retardo_swat);
 		retardo_compactacion=config_get_int_value(config, "RETARDO_COMPACTACION");
+		printf("Retardo de compactacion: %d \n",retardo_compactacion);
 	}else{
 		perror("Error al crear Archivo de configuracion");
 		return EXIT_FAILURE;
@@ -60,6 +66,7 @@ int main(void)
 	//Obtiene el path del archivo creado.
 	char* pathArchivoSwap=crearArchivoSwap(nombre_swap,tam_pag,cant_pag);
 
+	printf("Path de Archivo creado: %s \n",pathArchivoSwap);
 	t_list* listaEspaciosLibres = crear_ListaLibre(cant_pag);
 	int espacio_libre = total_Libres(listaEspaciosLibres);
 	t_list* espacio_ocupado= crear_ListaOcupados();
@@ -182,7 +189,7 @@ int main(void)
 
                         recv(newfd, &procesoAux,sizeof(PROCESOSWAP),0);
                         printf("Recibi msj de memoria PID : %d \n",procesoAux.pid);
-                        send (newfd,recibir_Solicitud(procesoAux,espacio_libre,espacio_ocupado),sizeof(t_espacio_ocupado),0);
+                        //send (newfd,recibir_Solicitud(procesoAux,espacio_libre,espacio_ocupado),sizeof(t_espacio_ocupado),0);
                         printf("Recibi mensaje: %d  del administrador de memoria.\n",procesoAux.msgtype);
 
                     }
