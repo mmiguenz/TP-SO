@@ -20,7 +20,6 @@ typedef struct  {
 	int payload_size;
 }t_msgHeader;
 
-t_queue * fifo_PCB_running; //Cola de pcb que estan corriendose
 
 /*
  * Programa principal.
@@ -28,10 +27,10 @@ t_queue * fifo_PCB_running; //Cola de pcb que estan corriendose
  * Cuando un cliente se conecta, le atiende y lo añade al select() y vuelta
  * a empezar.
  */
-void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger)
+void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB)
 {
 
-	fifo_PCB_running=queue_create();
+
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 	int numeroClientes = 0;			/* Número clientes conectados */
@@ -109,6 +108,8 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					switch(header.msgtype){
 					case 0 : {
 					printf ("CPU %d esta libre\n", header.payload_size);
+					//
+
 					PCB* PcbAux;
 
 
@@ -140,7 +141,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					send(socketCliente[i],&header,sizeof(header),0);
 					send(socketCliente[i],mensaje,header.payload_size,0);
 					PcbAux->cpu_asignada=socketCliente[i];
-					queue_push(fifo_PCB_running,PcbAux);
+
 					free(mensaje);
 					free(PcbAux);
 
@@ -150,15 +151,17 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 						printf("El proceso inicio correctamente \n");
 						log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
 
-						//queue_push(fifo_PCB_running,PcbAux);
-							//				free(PcbAux);
+
+						//queue_push(running_PCB,PcbAux);
+
 
 						break;
 					}
 					case 3 : {
 											printf("El proceso %d finalizo correctamente \n",header.payload_size);
 											log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
-
+											//PcbAux=queue_pop(running_PCB);
+											//free(PcbAux);
 											//queue_push(fifo_PCB_running,PcbAux);
 												//				free(PcbAux);
 

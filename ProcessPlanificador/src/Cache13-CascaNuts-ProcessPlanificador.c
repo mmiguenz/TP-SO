@@ -29,6 +29,9 @@
 
 
 t_queue * fifo_PCB_ready;//Cola de pcb que estan listo para ejecutar
+t_queue * PCB_running;//Cola de pcb que estan ejecutando
+
+
 
 sem_t sem_productor;
 sem_t sem_consumidor;
@@ -45,6 +48,8 @@ int cpu_asignada;
 
 //#include "PCB.h"
 
+
+int generar_pid();
 
 void recolectar_comando(char comando[15]);
 
@@ -71,6 +76,8 @@ int main(void)
 	//Espacio para la configuracion del entorno---------------------------<<
 
 	fifo_PCB_ready=queue_create();
+	PCB_running=queue_create();
+
 	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
 
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
@@ -95,7 +102,7 @@ int main(void)
 
                         	pthread_create(&hilo_shell, NULL, shell, NULL);
 
-                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger);
+                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger,PCB_running);
 
 
                         	pthread_join(hilo_shell, NULL);
@@ -229,7 +236,7 @@ void procesar_comando(char comando[], char proceso[]){
 		auxPCB=queue_pop(fifo_PCB_ready);
 		printf("El pid del proceso es: %d \n",auxPCB->PID);
 		if(auxPCB->PID==pid)
-		{printf("Encontre mi al proceso!!!\n");}
+		{printf("Encontre  al proceso!!!\n");}
 		queue_push(fifo_PCB_ready,auxPCB);
 		tamanio--;
 		}
@@ -247,7 +254,13 @@ void procesar_comando(char comando[], char proceso[]){
 		queue_push(fifo_PCB_ready,auxPCB);
 		tamanio--;
 		}
-
+		tamanio=queue_size(PCB_running);
+		while(tamanio!=0){
+		auxPCB=queue_pop(PCB_running);
+		printf("mProc %d: %s -> Corriendo \n",auxPCB->PID,auxPCB->nombreProc);
+		queue_push(fifo_PCB_ready,auxPCB);
+		tamanio--;
+		}
 
 
 		break;
@@ -289,7 +302,7 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 	PCB *new = malloc( sizeof(PCB) );
 	new->nombreProc=malloc(strlen(name)+1);
 	strcpy(new->nombreProc, name);
-	new->PID = rand();
+	new->PID = generar_pid();
 	new->estado=0;
 	new->contadorProgram=0;
 	new->path=malloc(sizeof(char*));
@@ -299,3 +312,4 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 }
 
 
+int generar_pid(){return rand()/10000000+rand()%100;}
