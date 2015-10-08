@@ -58,6 +58,7 @@ int Marcoslibres(int cantidadDePaginas, int Cant_Marcos, int* memoriaLibre)
 	return 0;
 }
 
+
 t_list* asignarMarcos_MemoriaPrincipal(t_list* marcosAsignados, int* memoriaLibre, int MarcosPorProceso)
 		{
 			int i;

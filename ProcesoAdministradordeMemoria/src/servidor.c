@@ -85,7 +85,7 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre,
 				procesoAux=procesarCadena(socketCliente[i],swap,encabezado,memoriaLibre,marcosPorProceso,Cant_Marcos,memoria);
 
 				printf("-----------Le mando %d, %d \n\n",procesoAux.aceptado,procesoAux.pid);
-				enviarMsjCPU(socketCliente[i],procesoAux);
+				//enviarMsjCPU(socketCliente[i],procesoAux);
 
 				}
 
@@ -411,6 +411,7 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 		t_espacio_ocupado* listaDePaginas;
 	    PROCESO procesoAux ;
 	    PROCESOSWAP procesoswap;
+	    char* pedido;
 	if (encabezado.msgtype == 1){
 				printf("Se esta creando el proceso %d con: %d paginas\n", encabezado.pid, encabezado.pagina);
 
@@ -421,6 +422,7 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 					procesoAux.pid=encabezado.pid;
 					inicializarProceso(encabezado.pid, encabezado.pagina, memoriaLibre,marcosPorProceso);
 					printf("Se creado correctamente el proceso %i con: %i paginas\n", encabezado.pid, encabezado.pagina);
+					enviarMsjCPU(cpu,procesoAux);
 					//log_info(logger, "mProc %s Fallo\n", nombreProc);
 
 					}
@@ -436,28 +438,32 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 
 				if (encabezado.msgtype==2){
 
-				printf("mProc  Pagina %d leida: contenido %s \n", encabezado.pagina,"datosvariosharcodeados");
-				//enviarMesaje(swap, "leer\n"+ substring[1]);
 
-
-				//log_info(logger, "mProc %s comienza lectura\n", nombreProc);
-			//	log_info(logger, "Pagina %s\n", substrings[1]);
-
-			//	int msj = atoi(recibirMensaje(swap));
-
-				//if (msj == 1){
+				printf("aceptado %d", procesoAux.aceptado);
+				printf("Proceso para leer  %d----legue", procesoAux.pid);
 				procesoAux.aceptado=1;
 				procesoAux.pid=encabezado.pid;
-				//procesoAux->contenido="estacionaste bien flor";
-
-					printf("aceptado %d", procesoAux.aceptado);
-					printf("pid proceso %d----legue", procesoAux.pid);
+				procesoAux.tamanioMsj=strlen("Hola flor!");
+				enviarMensaje(swap,encabezado);
+				recibirMensaje(swap,listaDePaginas);
+				enviarMsjCPU(cpu,procesoAux);
+				send(cpu,"Hola flor!",sizeof("Hola flor!"),0);
+				printf("mProc  Pagina %d leida: contenido %s \n", encabezado.pagina,"datosvariosharcodeados");
 					//enviarMesaje(cpu, msj);
 
-
 				}
+				if (encabezado.msgtype==3){
 
-			 if (encabezado.msgtype==3){
+					procesoAux.aceptado=1;
+					procesoAux.pid=encabezado.pid;
+					procesoAux.tamanioMsj=strlen(pedido);
+
+					enviarMsjCPU(cpu,procesoAux);
+					send(cpu,pedido,sizeof(pedido),0);
+
+					}
+
+			 if (encabezado.msgtype==4){
 				printf("Solicitud de finalizar proceso: %d% \n", encabezado.pid);
 
 						FinalizarProceso(encabezado.pid,memoria);
@@ -468,8 +474,6 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 
 				procesoAux.aceptado=1;
 				procesoAux.pid=encabezado.pid;
-
-
 
 }
 			 return procesoAux;
