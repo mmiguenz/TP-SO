@@ -7,6 +7,7 @@
 #include "EstructurasParaMemoria.h"
 #include <commons/collections/dictionary.h>
 t_dictionary* dicInfoProcesos;
+extern  char** memoria;
 
 
 char ** inicializarMemoriaPrincipal(int Cant_Marcos,int Tamanio_Marco)
@@ -84,6 +85,40 @@ int algoritmo_FirstFit_MEMORIA(int Cant_Marcos, int* memoriaLibre)
 	return -1;
 }
 
+void FinalizarProceso(int pid, char** memoria)
+{
+
+			TABLADEPROCESOS* procesoAux = dictionary_remove(dicInfoProcesos, pid);
+			int i;
+			int totalDePaginas = (*procesoAux).totalDePaginas;
+			int** tablaDePaginas = (*procesoAux).tablaDePaginas;
+			t_list* marcosAsignados = (*procesoAux).marcosAsignados;
+			t_queue * contenidoDeMarcos = (*procesoAux).contenidoDeMarcos;
+
+			//elimina tabla de paginas del proceso
+				for(i=0; i<totalDePaginas; i++)
+				free(tablaDePaginas[i]);
+				free(tablaDePaginas);
+
+			//libero marcos de memoria Principal
+			list_iterate(marcosAsignados, resetearMarco);//ver parametros
+			list_clean(marcosAsignados);
+			list_destroy(marcosAsignados);
+			queue_clean(contenidoDeMarcos);
+			queue_destroy(contenidoDeMarcos);
+			free(procesoAux);
+
+	return;
+}
+
+
+void resetearMarco(void * numeroMarco)
+{
+	int * numMarco = (int*)numeroMarco;
+	//memcpy(memoria[numeroMarco],"Marco Libre" , strlen("Marco Libre"));
+	//memoria[numeroMarco][strlen("Marco Libre")] = '\0';
+	return;
+}
 
 int ** inicializarTLB(int entradas_TLB)
 {
@@ -109,7 +144,7 @@ int ** inicializarTLB(int entradas_TLB)
 
 void inicializarProceso(int PID, int totalDePaginas, int* memoriaLibre, int marcosPorProcesos)
 {
-TABLADEPROCESOS* ProcesoX = malloc(sizeof(TABLADEPROCESOS));
+TABLADEPROCESOS* ProcesoX = malloc(sizeof(TABLADEPROCESOS*));
 
 (*ProcesoX).totalDePaginas = totalDePaginas;
 

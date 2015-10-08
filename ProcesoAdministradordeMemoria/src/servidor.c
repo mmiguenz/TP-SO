@@ -9,7 +9,7 @@
  * a empezar.
  */
 
-void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre, int marcosPorProceso,int Cant_Marcos)
+void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre, int marcosPorProceso,int Cant_Marcos, char** memoria)
 {
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
@@ -82,9 +82,7 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre,
 				if ((recv(socketCliente[i],&encabezado,sizeof(t_msgHeaderMemoria),0)) > 0){
 				PROCESO procesoAux;
 
-				procesoAux=procesarCadena(socketCliente[i],swap,encabezado,memoriaLibre,marcosPorProceso,Cant_Marcos);
-				//send(swap);
-				//recv(swap);
+				procesoAux=procesarCadena(socketCliente[i],swap,encabezado,memoriaLibre,marcosPorProceso,Cant_Marcos,memoria);
 
 				printf("-----------Le mando %d, %d \n\n",procesoAux.aceptado,procesoAux.pid);
 				enviarMsjCPU(socketCliente[i],procesoAux);
@@ -107,12 +105,13 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre,
 		if (FD_ISSET (socketServidor, &descriptoresLectura)){
 			nuevoCliente (socketServidor, socketCliente, &numeroClientes);
 
-
-				send(socketCliente[(numeroClientes)-1],"Te conectaste con el Administrador de memoria",strlen("Te conectaste con el Administrador de memoria"),0);
+				printf("CPU se conecto sin problemas \n");
+				//send(socketCliente[(numeroClientes)-1],"Te conectaste con el Administrador de memoria",strlen("Te conectaste con el Administrador de memoria"),0);
 				//free(mensaje);
 				//mensaje=malloc(sizeof(char*));
 
-	}}
+	}
+	}
 }
 
 /*
@@ -407,34 +406,37 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
 	return listener;
 }
 
-PROCESO procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado, int* memoriaLibre, int marcosPorProceso,int Cant_Marcos){
+PROCESO procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado, int* memoriaLibre, int marcosPorProceso,int Cant_Marcos,char** memoria){
 printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 		t_espacio_ocupado* listaDePaginas;
 	    PROCESO procesoAux ;
 	    PROCESOSWAP procesoswap;
 	if (encabezado.msgtype == 1){
 				printf("Se esta creando el proceso %d con: %d paginas\n", encabezado.pid, encabezado.pagina);
-				if (MarcosLibres(encabezado.pagina,Cant_Marcos,memoriaLibre)==1){
+
+				if (Marcoslibres(encabezado.pagina,Cant_Marcos,memoriaLibre)==1){
 					enviarMensaje(swap,encabezado);
 					recibirMensaje(swap,listaDePaginas);
-					procesoAux.aceptado=0;
+					procesoAux.aceptado=1;
 					procesoAux.pid=encabezado.pid;
-					enviarMsjCPU(cpu,procesoAux);
 					inicializarProceso(encabezado.pid, encabezado.pagina, memoriaLibre,marcosPorProceso);
 					printf("Se creado correctamente el proceso %i con: %i paginas\n", encabezado.pid, encabezado.pagina);
 					//log_info(logger, "mProc %s Fallo\n", nombreProc);
-						}
 
+					}
+				else{
+					procesoAux.aceptado=0;
+					procesoAux.pid=encabezado.pid;
+					printf("No hay suficiente Marcos libres para el proceso: %i con: %i paginas\n", encabezado.pid, encabezado.pagina);
+
+				}
 
 				}
 
 
-
-
-			if (encabezado.msgtype==2){
+				if (encabezado.msgtype==2){
 
 				printf("mProc  Pagina %d leida: contenido %s \n", encabezado.pagina,"datosvariosharcodeados");
-
 				//enviarMesaje(swap, "leer\n"+ substring[1]);
 
 
@@ -453,26 +455,24 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 					//enviarMesaje(cpu, msj);
 
 
-				}//else{
-					//printf("No pudo leer\n");
-					//printf("mProc %s Fallo\n");
-					//enviarMesaje(cpu, msj);
-				//}
+				}
+
 			 if (encabezado.msgtype==3){
-				printf("mProc Finalizado\n");
+				printf("Solicitud de finalizar proceso: %d% \n", encabezado.pid);
 
-				//log_info(logger, "mProc %s Finalizado\n", nombreProc);
+						FinalizarProceso(encabezado.pid,memoria);
+						enviarMensaje(swap,encabezado);
+						recibirMensaje(swap,listaDePaginas);
 
-				//enviarMesaje(swap, "Finaliza mProc\n");
+				printf("Se elimino correctamente el proceso %d% \n",encabezado.pid);
+
 				procesoAux.aceptado=1;
 				procesoAux.pid=encabezado.pid;
-				//procesoAux->contenido=malloc(sizeof(char*));
-				//procesoAux->contenido="fallo";
 
-			 }
 
-	//free(line);
-	return procesoAux;
+
+}
+			 return procesoAux;
 }
 
  void enviarMsjCPU(int cpu, PROCESO procesoAux){

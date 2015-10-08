@@ -38,7 +38,9 @@ typedef struct{
 	t_list* asignarMarcos_MemoriaPrincipal(t_list* marcosAsignados, int* memoriaLibre, int MarcosPorProcesos);
 	int algoritmo_FirstFit_MEMORIA(int Cant_Marcos, int* memoriaLibre);
 	void inicializarProceso(int PID, int totalDePaginas, int* memoriaLibre, int marcosPorProcesos);
+	void FinalizarProceso(int pid, char** memoria);
 	int ** inicializarTablaDePaginas(int cantPagina);
+	void resetearMarco(void * numeroMarco);
 
 
 

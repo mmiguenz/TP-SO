@@ -69,13 +69,12 @@
                         	logs= log_create("log.txt", "Administrador de memoria",false, LOG_LEVEL_INFO);
                         	}
 
-
                         	int swap = conectar_cliente(puerto_escucha_swap, ip_conec_swap);
 
                         	memoriaPrincipal.Memoria=inicializarMemoriaPrincipal(Cant_Marcos,Tamanio_Marco);
                         	memoriaPrincipal.MemoriaLibre=inicializarMemoriaLibre(Cant_Marcos);
                         	tlb.CacheTLB=inicializarTLB(Entradas_TLB);
-                        	 conectar_servidor(puerto_escucha_memoria, swap, memoriaPrincipal.MemoriaLibre,Max_Marcos_Por_Proceso,Cant_Marcos);
+                        	 conectar_servidor(puerto_escucha_memoria, swap, memoriaPrincipal.MemoriaLibre,Max_Marcos_Por_Proceso,Cant_Marcos,memoriaPrincipal.Memoria);
                         	 return EXIT_SUCCESS;
  }
 
