@@ -146,22 +146,20 @@ t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas)
 	}
 
 
-t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres,t_list* list_Ocupados)
+t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP* procesoSwap,t_list* list_Libres,t_list* list_Ocupados)
 	{
-		int paginas_requeridas=procesoSwap.pagina;
-		int pid=procesoSwap.pid;
-		t_espacio_ocupado* proceso_ocuado=malloc(sizeof(t_espacio_ocupado));
-		switch ( procesoSwap.msgtype ) {
+		t_espacio_ocupado* proceso_ocupado=malloc(sizeof(t_espacio_ocupado));
+		switch ( procesoSwap->msgtype ) {
 		case 1://Iniciar
-			if(total_Libres(list_Libres)>=paginas_requeridas){
-				t_espacio_libre* espacio = encontrar_Espacio(list_Libres, paginas_requeridas);
+			if(total_Libres(list_Libres)>=procesoSwap->pagina){
+				t_espacio_libre* espacio = encontrar_Espacio(list_Libres, procesoSwap->pagina);
 				if(espacio == NULL)
 					{
 						// ver la funcionalidadde compactar y rebuscar el espacio libre
 					}
 				else
 					{
-						proceso_ocuado = asignar_espacio_actualizar(pid,paginas_requeridas,espacio,list_Libres,list_Ocupados);
+						proceso_ocupado = asignar_espacio_actualizar(procesoSwap->pid,procesoSwap->pagina,espacio,list_Libres,list_Ocupados);
 					}
 			}
 		  break;
@@ -204,7 +202,7 @@ int total_Libres(t_list* espacio_Libre)
 }
 
 
-t_espacio_ocupado* asignar_espacio_actualizar(pid_t pid, int paginas,t_espacio_libre* espacio, t_list* list_libre,t_list* list_Ocupado)
+t_espacio_ocupado* asignar_espacio_actualizar(int pid, int paginas,t_espacio_libre* espacio, t_list* list_libre,t_list* list_Ocupado)
 {
 	t_espacio_ocupado* proceso_enCurso=malloc(sizeof(t_espacio_ocupado));
 	proceso_enCurso-> pid = pid;

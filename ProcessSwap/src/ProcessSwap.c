@@ -71,8 +71,17 @@ int main(void)
 	int espacio_libre = total_Libres(listaEspaciosLibres);
 	t_list* espacio_ocupado= crear_ListaOcupados();
 
-	//Probando funcionalidad
-	//recibir_Solicitud(5,8,espacio_libre,espacio_ocupado);
+	//MOCK de prueba de funcionalidad
+
+	//creo el proceso swap que recibe desde la memoria
+	PROCESOSWAP* proceso_recibe;
+	proceso_recibe->msgtype=1;
+	proceso_recibe->pagina=1;
+	proceso_recibe->pid=1;
+	printf("Pagina wapppppppppppppppppppppppppppppppp: %s \n",proceso_recibe->msgtype);
+	// creo la estructura a devolver
+	t_espacio_ocupado* struct_paraMemoria = recibir_Solicitud(proceso_recibe,espacio_libre,espacio_ocupado);
+
 /*
  * typedef struct  {
 		int msgtype;
@@ -82,7 +91,7 @@ int main(void)
 */
 
 	//----------Soy una barra separadora ;)--------------------------------------//
-
+/*
 	fd_set master;    // master file descriptor list
     fd_set read_fds;  // temp file descriptor list for select()
     int fdmax;        // maximum file descriptor number
@@ -226,5 +235,5 @@ int main(void)
     } // END for(;;)--and you thought it would never end!
 
 
-    return 0;
+    return 0;*/
 }
