@@ -25,6 +25,7 @@ int puerto_escucha_memoria;
 char* ip_conec_memoria;
 t_log* logger;
 int retardo;
+int cant_hilitos;
 
 struct param{
 	int puerto_escucha_planificador;
@@ -43,22 +44,26 @@ int main(void) {
 	ip_conec_plani= malloc(sizeof (ip_conec_plani));
 	t_config* config;
 	ip_conec_memoria= malloc(sizeof (ip_conec_memoria));
-    config = config_create("config.cfg");
+	config = config_create("config.cfg");
+	logger = log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
 	if(config != NULL){
-		    puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
-		    ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
-		    puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
-		    ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
-		    logger = log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
-		    retardo = config_get_int_value(config, "RETARDO");
-	}
-	//printf("The ID of this thread is: %u\n", (unsigned int)pthread_self());
+		puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
+		ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
+		puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
+		ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
+		retardo = config_get_int_value(config, "RETARDO");
+		cant_hilitos=config_get_int_value(config, "CANTIDAD_HILOS");
 
-	pthread_t hilito;
-	struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo};
-	pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
-	pthread_join(hilito, NULL);
-	//config_destroy(config);
+	}
+	printf("Cantidad de hilitos es\n %d:", cant_hilitos);
+	while(cant_hilitos){
+
+		pthread_t hilito;
+		struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo};
+		pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
+		pthread_join(hilito, NULL);
+	}
+	config_destroy(config);
 	free ( ip_conec_memoria);
 	free ( ip_conec_plani);
 	return EXIT_SUCCESS;
