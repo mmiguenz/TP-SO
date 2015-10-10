@@ -118,7 +118,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					sem_wait(&sem_consumidor);
 					PcbAux=queue_pop(fifo_PCB);
 					char* mensaje;
-					mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+strlen(PcbAux->path)+strlen(PcbAux->nombreProc)+2+sizeof(t_msgHeader));
+					mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(PcbAux->path)+strlen(PcbAux->nombreProc)+2+sizeof(t_msgHeader));
 
 					printf("\n PCB a mandar \n\n");
 					printf("EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
@@ -136,6 +136,9 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					offset+=strlen(PcbAux->path)+1;
 					memcpy(mensaje +offset  , PcbAux->nombreProc, strlen(PcbAux->nombreProc)+1);
 					offset+=strlen(PcbAux->nombreProc)+1;
+					memcpy(mensaje +offset  , &(PcbAux->quantum), sizeof(int));
+					offset+=sizeof(int);
+
 					memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 					header.msgtype = 1;//MSG_PCB;
 					header.payload_size = offset;

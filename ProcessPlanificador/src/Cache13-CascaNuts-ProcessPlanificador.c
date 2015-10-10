@@ -43,7 +43,7 @@ int PID;
 int contadorProgram;
 char* path;
 int cpu_asignada;
-int quantum;
+int quantum;//Si el quantum es -1 la planificacion es fifo caso contrario round robin
 
 }PCB ;
 
@@ -241,7 +241,9 @@ void procesar_comando(char comando[], char proceso[]){
 		auxPCB=queue_pop(fifo_PCB_ready);
 		printf("El pid del proceso es: %d \n",auxPCB->PID);
 		if(auxPCB->PID==pid)
-		{printf("Encontre  al proceso!!!\n");}
+		{printf("Encontre  al proceso!!!\n");
+		auxPCB->contadorProgram=-1;}//Si el cpu encuentra -1 lo finaliza automaticamente
+
 		queue_push(fifo_PCB_ready,auxPCB);
 		tamanio--;
 		}
