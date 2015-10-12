@@ -55,7 +55,7 @@ int main(void) {
 		cant_hilitos=config_get_int_value(config, "CANTIDAD_HILOS");
 
 	}
-	printf("Cantidad de hilitos es\n %d:", cant_hilitos);
+	printf("Cantidad de hilitos es: %d\n", cant_hilitos);
 	while(cant_hilitos){
 
 		pthread_t hilito;

@@ -167,7 +167,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		instruccion = 2;
 		punta=recolectar_pagina(cadena,punta,pagina) + 1;
 		int paginas = atoi(pagina);
-		printf("Encontro leer");
+		printf("Encontro leer\n");
 		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
 		PROCESO msj = recibirMsjMemoria(memoria);
 
@@ -176,10 +176,10 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		if(msj.aceptado==1)
 		{
 			printf("Pude leer\n");
-			char* mensaje;
+			/*char* mensaje;
 			mensaje = malloc(msj.tamanioMensaje);
 			recv(memoria, mensaje, msj.tamanioMensaje, 0);
-			printf("El contenido leido es:%s\n", mensaje);
+			printf("El contenido leido es:%s\n", mensaje);*/
 
 			//log_info(logger, "Hay lugar para: %s", PcbAux->nombreProc);
 			//log_info(logger, "El pid es %s", PcbAux->PID);
@@ -256,7 +256,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 	}
 	case 4://Finalizar
 	{
-		instruccion = 4;
+		instruccion = 3;
 		printf("Encontre Finalizar\n");
 		punta+=200;
 
@@ -350,11 +350,13 @@ void* conectar(struct param *mensa){
 	int retardo = mensa->retardo;
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
-	printf("El ID de hilito es: %u\n", (unsigned int)pthread_self());
-
+	printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
+	char* mensaje;
+	mensaje=malloc(100);
+	recv(memoria, mensaje, 100, 0);
 	char* aux = recibirMensaje(planificador, logger);
 	free(aux);
-	while(1){
+	//while(1){
 
 		t_msgHeader header2;
 		memset(&header2, 0, sizeof(t_msgHeader));
@@ -415,7 +417,7 @@ void* conectar(struct param *mensa){
 		}
 
 		free(buffer);
-	}
+	//}
 	return EXIT_SUCCESS;
 }
 

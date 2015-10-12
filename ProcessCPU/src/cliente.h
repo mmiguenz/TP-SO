@@ -33,7 +33,7 @@
 typedef struct {
 int aceptado;
 int pid;
-int tamanioMensaje;
+//int tamanioMensaje;
 //char* contenido;
 }PROCESO;
 

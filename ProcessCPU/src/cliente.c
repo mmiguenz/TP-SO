@@ -76,7 +76,7 @@ PROCESO recibirMsjMemoria(int memoria){
 	PROCESO proceso;
 	proceso.aceptado=0;
 	proceso.pid=0;
-	proceso.tamanioMensaje=0;
+	//proceso.tamanioMensaje=0;
 	recv(memoria, &proceso, sizeof(proceso), 0);
 
 	return proceso;
