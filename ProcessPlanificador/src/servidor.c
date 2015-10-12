@@ -148,7 +148,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					PcbAux->cpu_asignada=socketCliente[i];
 
 					free(mensaje);
-					free(PcbAux);
+					//free(PcbAux);
 
 					break;
 					}
@@ -161,7 +161,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 						PcbRun=queue_pop(fifo_PCB);
 						sem_post(&sem_consumidor);
 						queue_push(running_PCB,PcbRun);
-
+						//free(PcbRun);
 
 						break;
 					}
