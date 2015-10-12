@@ -25,6 +25,13 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+/*-------Comandos del Shell-------*/
+#define CORRER 0
+#define FINALIZAR 1
+#define PS 2
+#define CPU 3
+#define ERROR -1
+
 //sem_t haveData;
 
 
@@ -206,7 +213,7 @@ void procesar_comando(char comando[], char proceso[]){
 
 
 	switch(identificar_comando(comando)){
-	case 0:{
+	case CORRER:{
 		recolectar_proceso(proceso);
 
 
@@ -227,7 +234,7 @@ void procesar_comando(char comando[], char proceso[]){
     sem_post(&sem_consumidor);
     break;
     }
-	case 1:
+	case FINALIZAR:
 	{
 		int pid;
 		PCB* auxPCB=malloc(sizeof(PCB));
@@ -250,7 +257,7 @@ void procesar_comando(char comando[], char proceso[]){
 
 		break;
 	}
-	case 2:
+	case PS:
 	{
 		printf("El comando que eligio fue ps \n");
 		PCB* auxPCB=malloc(sizeof(PCB));
@@ -272,12 +279,12 @@ void procesar_comando(char comando[], char proceso[]){
 
 		break;
 	}
-	case 3:
+	case CPU:
 	{
 		printf("El comando que eligio fue cpu \n");
 		break;
 	}
-	case -1:
+	case ERROR:
 	{
 		printf("No reconozco ese comando tipee de nuevo \n");
 	}
