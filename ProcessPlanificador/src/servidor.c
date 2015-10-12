@@ -1,8 +1,9 @@
 #include "servidor.h"
-
+#include <sys/types.h>
+#include <fcntl.h>
 
 #include <semaphore.h>
-sem_t sem_productor;
+sem_t *sem_productor;
 sem_t sem_consumidor;
 
 
@@ -31,7 +32,7 @@ typedef struct  {
 void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB)
 {
 
-
+	//sem_open("sem_consumidor",O_CREAT,0644,0);
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 	int numeroClientes = 0;			/* Número clientes conectados */
@@ -159,7 +160,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 						PCB* PcbRun;
 						sem_wait(&sem_consumidor);
 						PcbRun=queue_pop(fifo_PCB);
-						sem_post(&sem_consumidor);
+						//sem_post(sem_consumidor);
 						queue_push(running_PCB,PcbRun);
 						//free(PcbRun);
 

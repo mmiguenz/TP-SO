@@ -24,6 +24,7 @@
 #include <commons/collections/queue.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <fcntl.h>
 
 /*-------Comandos del Shell-------*/
 #define CORRER 0
@@ -40,7 +41,7 @@ t_queue * PCB_running;//Cola de pcb que estan ejecutando
 
 
 
-sem_t sem_productor;
+sem_t *sem_productor;
 sem_t sem_consumidor;
 
 typedef struct {
@@ -129,7 +130,7 @@ int main(void)
 void *shell(){
 	char comando[15]; //= malloc(sizeof(char*));
 	char proceso[15];
-
+	//sem_open("sem_consumidor",O_CREAT,0644,0);
 
 
 	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V2.6----------------\n");
