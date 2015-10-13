@@ -34,6 +34,13 @@ typedef struct  {
 	int payload_size;
 }t_msgHeader;
 
+typedef struct  {
+	int msgtype;
+	int contadorDeProgrma;
+	int tiempo;
+	int pid;
+}PCB_PARCIAL;
+
 typedef struct {
 char* nombreProc;
 int estado;

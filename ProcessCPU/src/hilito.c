@@ -356,7 +356,7 @@ void* conectar(struct param *mensa){
 	recv(memoria, mensaje, 100, 0);
 	char* aux = recibirMensaje(planificador, logger);
 	free(aux);
-	//while(1){
+	while(1){
 
 		t_msgHeader header2;
 		memset(&header2, 0, sizeof(t_msgHeader));
@@ -417,7 +417,7 @@ void* conectar(struct param *mensa){
 		}
 
 		free(buffer);
-	//}
+	}
 	return EXIT_SUCCESS;
 }
 

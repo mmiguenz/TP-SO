@@ -27,6 +27,7 @@ t_log* logger;
 int retardo;
 int cant_hilitos;
 
+
 struct param{
 	int puerto_escucha_planificador;
 	char* ip_conec_plani;
@@ -56,13 +57,34 @@ int main(void) {
 
 	}
 	printf("Cantidad de hilitos es: %d\n", cant_hilitos);
-	while(cant_hilitos){
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	/*while(cant_hilitos){
 
-		pthread_t hilito;
+			pthread_t hilito;
+			struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo};
+			pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
+			pthread_join(hilito, NULL);
+		}*/
+
+	pthread_t threads[2];
+	int rc;
+	long t;
+
+	for(t=0; t<2; t++){
+		printf("In main: creating thread %ld\n", t);
 		struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo};
-		pthread_create(&hilito, NULL, (void*)conectar,(void*)&param1 );
-		pthread_join(hilito, NULL);
+		rc = pthread_create(&threads[t], NULL, (void*)conectar,(void*)&param1 );
+		if (rc){
+			printf("ERROR; return code from pthread_create() is %d\n", rc);
+			exit(-1);
+		}
+
 	}
+	for(t=0; t<2; t++){
+	  pthread_join(threads[t], NULL);
+	}
+
+	pthread_exit(NULL);
 	config_destroy(config);
 	free ( ip_conec_memoria);
 	free ( ip_conec_plani);
