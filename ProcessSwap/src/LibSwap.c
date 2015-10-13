@@ -107,11 +107,12 @@ char* crearArchivoSwap(char *nombre_Swap ,int tam_Pag,int cant_Pag)
 // Devolviendo la lista de espacio libres.
 t_list* crear_ListaLibre(int cant_Paginas)
 {
-	t_espacio_libre* particion;
-	particion->comienzo = 1;
-	particion->cant_paginas = cant_Paginas;
+	t_espacio_libre particion;
+
+	particion.comienzo = 1;
+	particion.cant_paginas = cant_Paginas;
 	t_list* lista_Libre = list_create();
-	list_add(lista_Libre, particion);
+	list_add(lista_Libre, &particion);
 	return lista_Libre;
 }
 
@@ -146,20 +147,20 @@ t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas)
 	}
 
 
-t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP* procesoSwap,t_list* list_Libres,t_list* list_Ocupados)
+t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres,t_list* list_Ocupados)
 	{
-		t_espacio_ocupado* proceso_ocupado=malloc(sizeof(t_espacio_ocupado));
-		switch ( procesoSwap->msgtype ) {
+		t_espacio_ocupado proceso_ocupado;//=malloc(sizeof(t_espacio_ocupado));
+		switch ( procesoSwap.msgtype ) {
 		case 1://Iniciar
-			if(total_Libres(list_Libres)>=procesoSwap->pagina){
-				t_espacio_libre* espacio = encontrar_Espacio(list_Libres, procesoSwap->pagina);
+			if(total_Libres(list_Libres)>=procesoSwap.pagina){
+				t_espacio_libre* espacio = encontrar_Espacio(list_Libres, procesoSwap.pagina);
 				if(espacio == NULL)
 					{
 						// ver la funcionalidadde compactar y rebuscar el espacio libre
 					}
 				else
 					{
-						proceso_ocupado = asignar_espacio_actualizar(procesoSwap->pid,procesoSwap->pagina,espacio,list_Libres,list_Ocupados);
+						//proceso_ocupado = asignar_espacio_actualizar(procesoSwap.pid,procesoSwap.pagina,espacio,list_Libres,list_Ocupados);
 					}
 			}
 		  break;

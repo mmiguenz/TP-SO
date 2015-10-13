@@ -74,11 +74,11 @@ int main(void)
 	//MOCK de prueba de funcionalidad
 
 	//creo el proceso swap que recibe desde la memoria
-	PROCESOSWAP* proceso_recibe;
-	proceso_recibe->msgtype=1;
-	proceso_recibe->pagina=1;
-	proceso_recibe->pid=1;
-	printf("Pagina wapppppppppppppppppppppppppppppppp: %s \n",proceso_recibe->msgtype);
+	PROCESOSWAP proceso_recibe;
+	proceso_recibe.msgtype=1;
+	proceso_recibe.pagina=1;
+	proceso_recibe.pid=1;
+	printf("Pagina wapppppppppppppppppppppppppppppppp: %d \n",proceso_recibe.msgtype);
 	// creo la estructura a devolver
 	t_espacio_ocupado* struct_paraMemoria = recibir_Solicitud(proceso_recibe,espacio_libre,espacio_ocupado);
 
