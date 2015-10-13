@@ -150,19 +150,26 @@ t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas)
 t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres,t_list* list_Ocupados)
 	{
 		t_espacio_ocupado proceso_ocupado;//=malloc(sizeof(t_espacio_ocupado));
+		int espacio_libre=total_Libres(list_Libres);
 		switch ( procesoSwap.msgtype ) {
 		case 1://Iniciar
-			if(total_Libres(list_Libres)>=procesoSwap.pagina){
+			if(espacio_libre>=procesoSwap.pagina){
 				t_espacio_libre* espacio = encontrar_Espacio(list_Libres, procesoSwap.pagina);
 				if(espacio == NULL)
 					{
 						// ver la funcionalidadde compactar y rebuscar el espacio libre
+					printf("Va 2");
 					}
 				else
 					{
 						//proceso_ocupado = asignar_espacio_actualizar(procesoSwap.pid,procesoSwap.pagina,espacio,list_Libres,list_Ocupados);
+					printf("Va 3  \n");
 					}
+				printf("Va 1");
+			}else{
+				printf("NO hay espacio puto");
 			}
+
 		  break;
 		/*case 2://Leer
 			//return t_espacio_ocupado;
@@ -181,14 +188,15 @@ t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres
 	}
 }
 
+//funcion que devuelve la catidad de pagina de una lista libre.
+int fun_pag(t_espacio_libre* espacio)
+{
+	return espacio->cant_paginas;
+}
+
 // devuelve el total de espacio libre de la lista
 int total_Libres(t_list* espacio_Libre)
 {
-	//funcion que devuelve la catidad de pagina de una lista libre.
-	int fun_pag(t_espacio_libre* espacio)
-	{
-		return espacio->cant_paginas;
-	}
 
 	t_list* listPag= list_map(espacio_Libre, (void*) *fun_pag);
 	int count_libre=0;

@@ -80,7 +80,7 @@ int main(void)
 	proceso_recibe.pid=1;
 	printf("Pagina wapppppppppppppppppppppppppppppppp: %d \n",proceso_recibe.msgtype);
 	// creo la estructura a devolver
-	t_espacio_ocupado* struct_paraMemoria = recibir_Solicitud(proceso_recibe,espacio_libre,espacio_ocupado);
+	t_espacio_ocupado* struct_paraMemoria = recibir_Solicitud(proceso_recibe,listaEspaciosLibres,espacio_ocupado);
 
 /*
  * typedef struct  {
