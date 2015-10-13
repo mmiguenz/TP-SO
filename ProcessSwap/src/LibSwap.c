@@ -149,11 +149,15 @@ t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas)
 
 t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres,t_list* list_Ocupados)
 	{
-		t_espacio_ocupado proceso_ocupado;//=malloc(sizeof(t_espacio_ocupado));
+		t_espacio_ocupado* proceso_ocupado;//=malloc(sizeof(t_espacio_ocupado));
+		int cant_pag_requeridas=procesoSwap.pagina;
+		int pid_proceso_en_curso=procesoSwap.pid;
+		int mensaje_solicitado=procesoSwap.msgtype;
+
 		int espacio_libre=total_Libres(list_Libres);
-		switch ( procesoSwap.msgtype ) {
+		switch ( mensaje_solicitado) {
 		case 1://Iniciar
-			if(espacio_libre>=procesoSwap.pagina){
+			if(espacio_libre>=cant_pag_requeridas){
 				t_espacio_libre* espacio = encontrar_Espacio(list_Libres, procesoSwap.pagina);
 				if(espacio == NULL)
 					{
@@ -162,8 +166,8 @@ t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres
 					}
 				else
 					{
-						//proceso_ocupado = asignar_espacio_actualizar(procesoSwap.pid,procesoSwap.pagina,espacio,list_Libres,list_Ocupados);
-					printf("Va 3  \n");
+					proceso_ocupado = asignar_espacio_actualizar(pid_proceso_en_curso,cant_pag_requeridas,espacio,list_Libres,list_Ocupados);
+					printf("Va 3  \n%d",proceso_ocupado->pid);
 					}
 				printf("Va 1");
 			}else{
