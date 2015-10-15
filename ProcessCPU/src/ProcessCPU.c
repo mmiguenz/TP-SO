@@ -19,10 +19,7 @@
 #include <commons/collections/list.h>
 #include <commons/log.h>
 
-int puerto_escucha_planificador;
-char* ip_conec_plani;
-int puerto_escucha_memoria;
-char* ip_conec_memoria;
+
 t_log* logger;
 int retardo;
 int cant_hilitos;
@@ -41,7 +38,10 @@ struct param{
 
 int main(void) {
 
-
+	int puerto_escucha_planificador;
+	char* ip_conec_plani;
+	int puerto_escucha_memoria;
+	char* ip_conec_memoria;
 	ip_conec_plani= malloc(sizeof (ip_conec_plani));
 	t_config* config;
 	ip_conec_memoria= malloc(sizeof (ip_conec_memoria));
