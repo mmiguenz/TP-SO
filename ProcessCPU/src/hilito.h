@@ -35,8 +35,7 @@ typedef struct  {
 }t_msgHeader;
 
 typedef struct  {
-	int msgtype;
-	int contadorDeProgrma;
+	int contadorDePrograma;
 	int tiempo;
 	int pid;
 }PCB_PARCIAL;

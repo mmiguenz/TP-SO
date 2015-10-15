@@ -185,11 +185,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			//log_info(logger, "El pid es %s", PcbAux->PID);
 			//log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
 			//log_info(logger, "Cantidad de paginas %s", substrings[1]);
-			//t_msgHeader header;
-			//memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-			//header.msgtype = 2;
-			//header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
-			//send(planificador, &header, sizeof( t_msgHeader), 0);
+
 			PcbAux->contadorProgram++;
 			sleep(retardo);
 
@@ -223,6 +219,11 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		if(msj.aceptado==1){
 			printf("mProc %s - Pagina %d escrita: %s \n", PcbAux->nombreProc,paginas, texto);
 			PcbAux->contadorProgram++;
+			//eviar a memoria el contenido a escribir
+			/*char* mensaje;
+					mensaje = malloc(sizeof(texto));
+					send(memoria, mensaje, sizeof(texto), 0);
+					printf("El contenido leido es:%s\n", mensaje);*/
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 		}else{
 			printf("La escritura fallo");
@@ -242,14 +243,21 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		/*enviarSolicitud (PcbAux->PID, instruccion, tiempo , memoria);
 		PROCESO msj = recibirMsjMemoria(memoria);
 		printf("El mensaje de la memoria es: %d", msj.aceptado);*/
+		PcbAux->contadorProgram++;
 
 		t_msgHeader header;
 		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-		header.msgtype = 3;
-		header.payload_size = tiempo;
+		header.msgtype = 4;
+		header.payload_size = 0; //en este caso el playload lo usamos para pid
 		send(planificador, &header, sizeof( t_msgHeader), 0);
-		//Planificador que debe bloquear al proceso “mProc” en ejecución durante T segundos
-		PcbAux->contadorProgram++;
+
+		PCB_PARCIAL parcial;
+		memset(&parcial, 0, sizeof(PCB_PARCIAL)); // Ahora el struct tiene cero en todos sus miembros
+		parcial.contadorDePrograma= PcbAux->contadorProgram;
+		parcial.pid= PcbAux->PID;
+		parcial.tiempo= tiempo;
+		send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
+
 		printf("mProc %s en entrada-salida de tiempo %d\n", PcbAux->nombreProc,tiempo);
 		printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 		break;
@@ -271,12 +279,20 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			//log_info(logger, "El pid es %s", PcbAux->PID);
 			//log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
 			//log_info(logger, "Cantidad de paginas %s", substrings[1]);
+			PcbAux->contadorProgram++;
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-			header.msgtype = 4;
-			header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+			header.msgtype = 3;
+			header.payload_size = 0; //en este caso el playload lo usamos para pid
 			send(planificador, &header, sizeof( t_msgHeader), 0);
-			PcbAux->contadorProgram++;
+
+			PCB_PARCIAL parcial;
+			memset(&parcial, 0, sizeof(PCB_PARCIAL)); // Ahora el struct tiene cero en todos sus miembros
+			parcial.pid = PcbAux->PID; //en este caso el playload lo usamos para pid
+			parcial.tiempo = 0;
+			parcial.contadorDePrograma = PcbAux->contadorProgram;
+			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
+
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 			sleep(retardo);
 
@@ -298,7 +314,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 int procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 	int valor=1;
 	int punta=0;
-	int tamBuff=strlen(cadena);
+	int tamBuff=1500;
 	char comando[15];
 	char pagina[3];
 	char texto[20];
@@ -431,8 +447,8 @@ int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int p
 	char texto[20];
 	/*PROCESO msj;
 	msj.aceptado=1;*/
-
-	while(quantum)
+ int i=0;
+	while((strcmp(comando, "finalizar")) || quantum>=i )
 	{
 		int aux;
 		aux= recolectar_instruccion(cadena,comando, punta);
@@ -440,6 +456,21 @@ int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int p
 		//printf("La punta es %d, y la instruccion es: %s \n", punta,comando);
 		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto);
 		punta=aux;
+		i++;
+	}
+	if(strcmp(comando, "finalizar")){
+	t_msgHeader header;
+	memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+	header.msgtype = 5;
+	header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+	send(planificador, &header, sizeof( t_msgHeader), 0);
+
+	PCB_PARCIAL parcial;
+	memset(&parcial, 0, sizeof(PCB_PARCIAL)); // Ahora el struct tiene cero en todos sus miembros
+	parcial.pid = PcbAux->PID; //en este caso el playload lo usamos para pid
+	parcial.tiempo = 0;
+	parcial.contadorDePrograma = PcbAux->contadorProgram;
+	send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 	}
 	return valor;
 }

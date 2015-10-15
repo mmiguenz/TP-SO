@@ -47,6 +47,9 @@ int main(void) {
 	ip_conec_memoria= malloc(sizeof (ip_conec_memoria));
 	config = config_create("config.cfg");
 	logger = log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
+	if (logger == NULL) {
+
+	}
 	if(config != NULL){
 		puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
 		ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
@@ -71,7 +74,7 @@ int main(void) {
 	long t;
 
 	for(t=0; t<2; t++){
-		printf("In main: creating thread %ld\n", t);
+
 		struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo};
 		rc = pthread_create(&threads[t], NULL, (void*)conectar,(void*)&param1 );
 		if (rc){
