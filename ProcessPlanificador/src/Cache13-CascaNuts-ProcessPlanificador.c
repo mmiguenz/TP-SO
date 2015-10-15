@@ -88,7 +88,7 @@ int main(void)
 	fifo_PCB_ready=queue_create();
 	PCB_running=queue_create();
 	char* planificacion;
-	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_INFO);
+	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_TRACE);
 
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
 

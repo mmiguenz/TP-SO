@@ -17,11 +17,14 @@ int cpu_asignada;
 int quantum;
 
 }PCB ;
+
 typedef struct  {
 	int msgtype;
 	int payload_size;
 }t_msgHeader;
 
+
+PCB* search_and_destroy(int pid,t_queue * running_PCB);
 
 /*
  * Programa principal.
@@ -29,6 +32,7 @@ typedef struct  {
  * Cuando un cliente se conecta, le atiende y lo añade al select() y vuelta
  * a empezar.
  */
+
 void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB)
 {
 
@@ -102,7 +106,10 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 				 header.msgtype=0;
 				 header.payload_size=0;
 				 //memset(&header, 0, sizeof(t_msgHeader));
-
+				 PCB_PARCIAL pcb_parc;
+				 pcb_parc.contadorDePrograma=0;
+				 pcb_parc.pid=0;
+				 pcb_parc.tiempo=0;
 
 
 				if ((recv(socketCliente[i],&header,sizeof(header),0)) > 0){
@@ -113,7 +120,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					//
 
 					PCB* PcbAux;
-
+					PcbAux=malloc(sizeof(PCB*));
 
 
 					sem_wait(&sem_consumidor);
@@ -149,7 +156,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					PcbAux->cpu_asignada=socketCliente[i];
 
 					free(mensaje);
-					//free(PcbAux);
+					free(PcbAux);
 
 					break;
 					}
@@ -169,6 +176,10 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					case 3 : {
 											printf("El proceso %d finalizo correctamente \n",header.payload_size);
 											log_info(logger, "Se ha finalizado el proceso con el CPU: %d", socketCliente[i]);
+
+											recv(socketCliente[i], &pcb_parc,sizeof (PCB_PARCIAL),0);
+											//crear funcion busqueda de PCb por pid
+
 											PCB* PcbRun;
 											PcbRun=queue_pop(running_PCB);
 
@@ -179,6 +190,15 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 											break;
 										}
+
+					case 4://Entrada salida
+					{
+						recv(socketCliente[i], &pcb_parc,sizeof (PCB_PARCIAL),0);
+						//Buscar procreso pid
+						//Creo un hilo mandandole el pcb el retardo
+						//El hilo dormira ese pcB y luego lo pondra en listos
+						break;
+					}
 					}
 
 
@@ -434,3 +454,23 @@ int Abre_Socket_Inet (char* puerto_escucha_planif)
 
 
 
+PCB* search_and_destroy(int pid,t_queue * running_PCB){
+	PCB* pcbAux ;
+
+	int tamanio=queue_size(running_PCB);
+			while(tamanio!=0){
+			pcbAux=queue_pop(running_PCB);
+			//printf("El pid del proceso es: %d \n",auxPCB->PID);
+			tamanio--;
+			if(pcbAux->PID==pid)
+			{printf("Encontre  al proceso!!!\n");
+			tamanio=0;
+			}
+			else{
+			queue_push(running_PCB, pcbAux);
+			}
+			}
+
+	return pcbAux;
+
+}

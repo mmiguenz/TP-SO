@@ -24,6 +24,14 @@
 
 
 
+typedef struct  {
+
+	int contadorDePrograma;
+	int tiempo;
+	int pid;
+}PCB_PARCIAL;
+
+
 
 /**
  * Abre un socket INET para atender al servicio cuyo nombre es Servicio.
@@ -62,5 +70,7 @@ void compactaClaves (int *tabla, int *n);
 
 
 void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB);
+
+
 
 #endif /* SERVIDOR_H_ */
