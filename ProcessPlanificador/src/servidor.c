@@ -1,6 +1,7 @@
 #include "servidor.h"
 #include <sys/types.h>
 #include <fcntl.h>
+#include "semaph.h"
 
 #include <semaphore.h>
 sem_t *sem_productor;
@@ -33,7 +34,7 @@ PCB* search_and_destroy(int pid,t_queue * running_PCB);
  * a empezar.
  */
 
-void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB)
+void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex)
 {
 
 	//sem_open("sem_consumidor",O_CREAT,0644,0);
@@ -122,10 +123,11 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 					PCB* PcbAux;
 					PcbAux=malloc(sizeof(PCB*));
 
-
+					semWait(mutex);
 					sem_wait(&sem_consumidor);
 					PcbAux=queue_peek(fifo_PCB);
 					sem_post(&sem_consumidor);
+					semSignal(mutex);
 					char* mensaje;
 					mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(PcbAux->path)+strlen(PcbAux->nombreProc)+2+sizeof(t_msgHeader));
 
@@ -165,10 +167,14 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 						log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
 
 						PCB* PcbRun;
+						semWait(mutex);
 						sem_wait(&sem_consumidor);
 						PcbRun=queue_pop(fifo_PCB);
+						semSignal(mutex);
 						//sem_post(sem_consumidor);
+						semWait(mutex);
 						queue_push(running_PCB,PcbRun);
+						semSignal(mutex);
 						//free(PcbRun);
 
 						break;
@@ -181,8 +187,9 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 											//crear funcion busqueda de PCb por pid
 
 											PCB* PcbRun;
+											semWait(mutex);
 											PcbRun=queue_pop(running_PCB);
-
+											semSignal(mutex);
 											//PcbAux=queue_pop(running_PCB);
 											//free(PcbAux);
 											//queue_push(fifo_PCB_running,PcbAux);

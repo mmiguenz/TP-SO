@@ -66,20 +66,21 @@ void  recolectar_proceso(char proceso[15]);
 
 int  recolectar_pid(char proceso[]);
 
-void procesar_comando(char comando[15], char proceso[15]);
+void procesar_comando(char comando[15], char proceso[15],int mutex);
 
 PCB *pcb_create(char *name, int estado, char* ruta);
 
 int identificar_comando(char comando[]);
 
 #include "servidor.h"
+#include "semaph.h"
 
 
 
-void* shell();
+void* shell(int mutex);
 
 int quantum=0;
-
+key_t claveMutex;
 
 int main(void)
 {
@@ -106,16 +107,28 @@ int main(void)
                         	 log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
                         	}
 //------------------Soy una barra separadora ;p------------------------------------//
+//------------------Creacion de semaforos------------------------------------------//
 
-                        	//sem_init(&haveData, 0, 0);
+   int   mutex;	/* semáforo */
+
+   /* obtener una clave cualquiera para el recurso ipc */
+   if ((key_t) -1 == (claveMutex = ftok("/bin/ls", 123))) {
+	   fprintf(stderr, "main: Error al crear la clave con ftok()\n");
+       exit(1);
+       }
+    /* crear del semaforo */
+     if (-1 == (mutex = semCreate(claveMutex, 1))){
+     fprintf(stderr, "main: No pude crear el semaforo\n");
+     exit(1);
+       }
 
 
 /********************Soy una barra llena de asteriscos*********************************************/
 
 
-                        	pthread_create(&hilo_shell, NULL, shell, NULL);
+                        	pthread_create(&hilo_shell, NULL, shell, (void * )&mutex);
 
-                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger,PCB_running);
+                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger,PCB_running, mutex);
 
 
                         	pthread_join(hilo_shell, NULL);
@@ -127,7 +140,7 @@ int main(void)
 
 /*Shell funcion que se carga en el hilo y va aceptando procesos----->>*/
 
-void *shell(){
+void *shell(int mutex){
 	char comando[15]; //= malloc(sizeof(char*));
 	char proceso[15];
 	//sem_open("sem_consumidor",O_CREAT,0644,0);
@@ -137,13 +150,14 @@ void *shell(){
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
 	printf("----o bien los comandos que desea que realize el planificador------------\n");
 	printf("--------------------------------------------------------------------------\n\n\n\n");
-
+	  if (-1 == (mutex = semOpen(claveMutex)))
+		 fprintf(stderr, "No tengo el cualificador de mutex\n");
     while(1){
     printf("Por favor ingrese el comando que desea ejecutar:  \n");
 
     recolectar_comando(comando);
 
-    procesar_comando(comando, proceso);
+    procesar_comando(comando, proceso, mutex);
 
     }
 
@@ -206,7 +220,7 @@ int  recolectar_pid(char proceso[]){
  * seleccionado
  */
 
-void procesar_comando(char comando[], char proceso[]){
+void procesar_comando(char comando[], char proceso[],int mutex){
 
 	char* ruta =  string_new();
 
@@ -231,8 +245,10 @@ void procesar_comando(char comando[], char proceso[]){
 
     nuevoPCB = pcb_create(proceso,0,ruta);//Creo mi pcb
 
+    semWait(mutex);
     queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
     sem_post(&sem_consumidor);
+    semSignal(mutex);
     break;
     }
 	case FINALIZAR:
@@ -245,6 +261,7 @@ void procesar_comando(char comando[], char proceso[]){
 		printf("El Comando que eligio fue finalizar \n");
 		printf("Y el PID del proceso a finalizar es = %d  \n",pid);
 		int tamanio=queue_size(fifo_PCB_ready);
+		semWait(mutex);
 		while(tamanio!=0){
 		auxPCB=queue_pop(fifo_PCB_ready);
 		printf("El pid del proceso es: %d \n",auxPCB->PID);
@@ -255,7 +272,7 @@ void procesar_comando(char comando[], char proceso[]){
 		queue_push(fifo_PCB_ready,auxPCB);
 		tamanio--;
 		}
-
+		semSignal(mutex);
 		break;
 	}
 	case PS:
@@ -263,6 +280,7 @@ void procesar_comando(char comando[], char proceso[]){
 		printf("El comando que eligio fue ps \n");
 		PCB* auxPCB=malloc(sizeof(PCB));
 		int tamanio=queue_size(fifo_PCB_ready);
+		semWait(mutex);
 		while(tamanio!=0){
 		auxPCB=queue_pop(fifo_PCB_ready);
 		printf("mProc %d: %s -> Listo \n",auxPCB->PID,auxPCB->nombreProc);
@@ -276,7 +294,7 @@ void procesar_comando(char comando[], char proceso[]){
 		queue_push(fifo_PCB_ready,auxPCB);
 		tamanio--;
 		}
-
+		semSignal(mutex);
 
 		break;
 	}
