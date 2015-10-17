@@ -159,26 +159,27 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 					free(mensaje);
 					free(PcbAux);
+					recv(socketCliente[i],&header,sizeof(header),0);
+					printf("El proceso inicio correctamente \n");
+											log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
+
+											PCB* PcbRun;
+											semWait(mutex);
+											sem_wait(&sem_consumidor);
+											PcbRun=queue_pop(fifo_PCB);
+											semSignal(mutex);
+											//sem_post(sem_consumidor);
+											semWait(mutex);
+											queue_push(running_PCB,PcbRun);
+											semSignal(mutex);
+											//free(PcbRun);
+
+
+
 
 					break;
 					}
-					case 2 : {
-						printf("El proceso inicio correctamente \n");
-						log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente[i]);
 
-						PCB* PcbRun;
-						semWait(mutex);
-						sem_wait(&sem_consumidor);
-						PcbRun=queue_pop(fifo_PCB);
-						semSignal(mutex);
-						//sem_post(sem_consumidor);
-						semWait(mutex);
-						queue_push(running_PCB,PcbRun);
-						semSignal(mutex);
-						//free(PcbRun);
-
-						break;
-					}
 					case 3 : {
 											printf("El proceso %d finalizo correctamente \n",header.payload_size);
 											log_info(logger, "Se ha finalizado el proceso con el CPU: %d", socketCliente[i]);
