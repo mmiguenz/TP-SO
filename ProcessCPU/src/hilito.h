@@ -28,6 +28,7 @@
 #include <commons/string.h>
 #include <assert.h>
 #include <commons/log.h>
+#include <semaphore.h>
 
 typedef struct  {
 	int msgtype;

@@ -38,15 +38,9 @@
 #include <assert.h>
 #include "hilito.h"
 #include <commons/log.h>
+#include <semaphore.h>
 
-typedef struct {
-	int puerto_escucha_planificador;
-	char* ip_conec_plani;
-	int puerto_escucha_memoria;
-	char* ip_conec_memoria;
-	t_log* logger;
-	int retardo;
-}param;
+pthread_mutex_t mutex;
 
 
 
@@ -362,26 +356,42 @@ void abrir(PCB* PcbAux, char buffer[1500])
 	fclose(fp);
 }
 
+typedef struct {
+	int puerto_escucha_planificador;
+	char* ip_conec_plani;
+	int puerto_escucha_memoria;
+	char* ip_conec_memoria;
+	t_log* logger;
+	int retardo;
 
-void* conectar(param *mensa){
+}struct1;
 
-	int puertoPlanificador = mensa->puerto_escucha_planificador;
-	char* ipPlanificador = mensa ->ip_conec_plani;
-	int puertoMemoria = mensa-> puerto_escucha_memoria;
-	char* ipMemoria = mensa->ip_conec_memoria;
-	t_log* logger = mensa->logger;
-	int retardo = mensa->retardo;
+void* conectar(void* mensa){
+	 struct1 *b;
+	 b=(struct1*)mensa;
 
-	int idHilo = (unsigned int)pthread_self();
+	int puertoPlanificador = b->puerto_escucha_planificador;
+	char* ipPlanificador = b ->ip_conec_plani;
+	int puertoMemoria = b-> puerto_escucha_memoria;
+	char* ipMemoria = b->ip_conec_memoria;
+	t_log* logger = b->logger;
+	int retardo = b->retardo;
+	//pthread_mutex_t mutex = mensa->mutex;
+
+
 	printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
+	//pthread_t id = pthread_self();
 
+	//pthread_mutex_lock(&mutex);
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
+	//pthread_mutex_unlock(&mutex);
 
 	if (memoria > 0){
-	log_info(logger, "El hilo %d se conecto a memoria correctamente",idHilo);}else {
-		log_info(logger, "error al conectarse con memoria");
-	}
+		//log_info(logger, "El hilo %u se conecto a memoria correctamente",id);
+	}else {
+			log_info(logger, "error al conectarse con memoria");
+		}
 	printf("El planificador es %d\n", planificador);
 
 
@@ -477,7 +487,7 @@ int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int p
 	msj.aceptado=1;*/
 
 	//Ejecución de ráfaga concluída, indicando PID.
- int i=0;
+	int i=0;
 	while((strcmp(comando, "finalizar")) || quantum>=i )
 	{
 		int aux;
@@ -489,18 +499,18 @@ int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int p
 		i++;
 	}
 	if(strcmp(comando, "finalizar")){
-	t_msgHeader header;
-	memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-	header.msgtype = 5;
-	header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
-	send(planificador, &header, sizeof( t_msgHeader), 0);
+		t_msgHeader header;
+		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+		header.msgtype = 5;
+		header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+		send(planificador, &header, sizeof( t_msgHeader), 0);
 
-	PCB_PARCIAL parcial;
-	memset(&parcial, 0, sizeof(PCB_PARCIAL)); // Ahora el struct tiene cero en todos sus miembros
-	parcial.pid = PcbAux->PID; //en este caso el playload lo usamos para pid
-	parcial.tiempo = 0;
-	parcial.contadorDePrograma = PcbAux->contadorProgram;
-	send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
+		PCB_PARCIAL parcial;
+		memset(&parcial, 0, sizeof(PCB_PARCIAL)); // Ahora el struct tiene cero en todos sus miembros
+		parcial.pid = PcbAux->PID; //en este caso el playload lo usamos para pid
+		parcial.tiempo = 0;
+		parcial.contadorDePrograma = PcbAux->contadorProgram;
+		send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 	}
 	log_info(logger, "El pid es %d", PcbAux->PID);
 	log_info(logger, "mProc %s finalizo el quantum de %d", PcbAux->nombreProc, quantum);
