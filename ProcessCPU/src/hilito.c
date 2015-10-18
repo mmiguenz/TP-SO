@@ -365,7 +365,7 @@ typedef struct {
 	int retardo;
 
 }struct1;
-
+//pthread_t id = pthread_self();
 void* conectar(void* mensa){
 	 struct1 *b;
 	 b=(struct1*)mensa;
@@ -376,24 +376,24 @@ void* conectar(void* mensa){
 	char* ipMemoria = b->ip_conec_memoria;
 	t_log* logger = b->logger;
 	int retardo = b->retardo;
-	//pthread_mutex_t mutex = mensa->mutex;
+
 
 
 	printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
-	//pthread_t id = pthread_self();
 
-	//pthread_mutex_lock(&mutex);
+
+	pthread_mutex_lock(&mutex);
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
-	//pthread_mutex_unlock(&mutex);
+
 
 	if (memoria > 0){
-		//log_info(logger, "El hilo %u se conecto a memoria correctamente",id);
+		log_info(logger, "El hilo %u se conecto a memoria correctamente",(unsigned int)pthread_self());
 	}else {
 			log_info(logger, "error al conectarse con memoria");
 		}
 	printf("El planificador es %d\n", planificador);
-
+	pthread_mutex_unlock(&mutex);
 
 	char* mensaje;
 	mensaje=malloc(100);
@@ -441,14 +441,14 @@ void* conectar(void* mensa){
 		printf("El path es:                      %s\n", PcbAux->path);
 		printf("El quantum es:                   %d\n", PcbAux->quantum);
 
-		log_info(logger, "----------------PCB-------------------------");
+		log_info(logger, "----------------PCB-------------------------------------------------------------------------------------------------------------------------------------------------------------");
 		log_info(logger, "Este es el PID:                  %d\n", PcbAux->PID);
 		log_info(logger, "Este es el contador de programa: %d\n",PcbAux->contadorProgram);
 		log_info(logger, "La CPU asignada es:              %d\n",PcbAux->cpu_asignada);
 		log_info(logger, "El nombre  del proceso es:       %s\n", PcbAux->nombreProc);
 		log_info(logger, "El path es:                      %s\n", PcbAux->path);
 		log_info(logger, "El quantum es:                   %d\n", PcbAux->quantum);
-
+		log_info(logger, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
 
 		// si el quantum es -1 la planificacion es fifo, sino es round robin
