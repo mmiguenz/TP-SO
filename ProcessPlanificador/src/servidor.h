@@ -22,6 +22,11 @@
 #include <semaphore.h>
 #include "PCB.h"
 
+typedef struct  {
+	int msgtype;
+	int payload_size;
+}t_msgHeader;
+
 
 
 typedef struct  {
@@ -31,6 +36,8 @@ typedef struct  {
 	int pid;
 }PCB_PARCIAL;
 
+
+int procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex);
 
 
 /**
