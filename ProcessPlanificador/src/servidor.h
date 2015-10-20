@@ -37,6 +37,9 @@ typedef struct  {
 }PCB_PARCIAL;
 
 
+
+void * search_and_destroy(int pid,t_queue * running_PCB);
+
 int procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex);
 
 

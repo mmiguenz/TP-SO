@@ -4,9 +4,8 @@
 #include "semaph.h"
 
 #include <semaphore.h>
-sem_t *sem_productor;
+sem_t sem_mutex1;
 sem_t sem_consumidor;
-
 
 typedef struct {
 char* nombreProc;
@@ -20,7 +19,7 @@ int quantum;
 }PCB ;
 
 
-PCB* search_and_destroy(int pid,t_queue * running_PCB);
+
 
 /*
  * Programa principal.
@@ -361,7 +360,7 @@ int Abre_Socket_Inet (char* puerto_escucha_planif)
 
 
 
-PCB* search_and_destroy(int pid,t_queue * running_PCB){
+ void *search_and_destroy(int pid,t_queue * running_PCB){
 	PCB* pcbAux ;
 
 	int tamanio=queue_size(running_PCB);
@@ -377,8 +376,7 @@ PCB* search_and_destroy(int pid,t_queue * running_PCB){
 			queue_push(running_PCB, pcbAux);
 			}
 			}
-
-	return pcbAux;
+return 0;
 
 }
 
@@ -400,11 +398,11 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	PCB* PcbAux;
 	PcbAux=malloc(sizeof(PCB*));
 
-	semWait(mutex);
+	sem_wait(&sem_mutex1);
 	sem_wait(&sem_consumidor);
 	PcbAux=queue_peek(fifo_PCB);
 	sem_post(&sem_consumidor);
-	semSignal(mutex);
+	sem_post(&sem_mutex1);
 	char* mensaje;
 	mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(PcbAux->path)+strlen(PcbAux->nombreProc)+2+sizeof(t_msgHeader));
 
@@ -442,11 +440,13 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente);
 
 	PCB* PcbRun=malloc(sizeof(PCB*));
-	semWait(mutex);
+
+	sem_wait(&sem_mutex1);
 	sem_wait(&sem_consumidor);
 	PcbRun=queue_pop(fifo_PCB);
 	queue_push(running_PCB,PcbRun);
-	semSignal(mutex);
+	sem_post(&sem_mutex1);
+
 	//free(PcbRun);
 
 
@@ -462,6 +462,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	//crear funcion busqueda de PCb por pid
 	PCB* PcbRun =malloc(sizeof (PCB*));
 
+	search_and_destroy(pcb_parc.pid,running_PCB);
 	free(PcbRun);
 
 							break;

@@ -40,8 +40,7 @@ t_queue * fifo_PCB_ready;//Cola de pcb que estan listo para ejecutar
 t_queue * PCB_running;//Cola de pcb que estan ejecutando
 
 
-
-sem_t *sem_productor;
+sem_t sem_mutex1;
 sem_t sem_consumidor;
 
 typedef struct {
@@ -152,9 +151,12 @@ void *shell(int mutex){
 	printf("--------------------------------------------------------------------------\n\n\n\n");
 	  if (-1 == (mutex = semOpen(claveMutex)))
 		 fprintf(stderr, "No tengo el cualificador de mutex\n");
-    while(1){
-    printf("Por favor ingrese el comando que desea ejecutar:  \n");
 
+	    sem_init(&sem_mutex1, 1, 1);
+	    sem_init(&sem_consumidor,1,0);
+	while(1){
+    printf("Por favor ingrese el comando que desea ejecutar:  \n");
+    sem_init(&sem_mutex1, 1, 1);
     recolectar_comando(comando);
 
     procesar_comando(comando, proceso, mutex);
@@ -245,10 +247,10 @@ void procesar_comando(char comando[], char proceso[],int mutex){
 
     nuevoPCB = pcb_create(proceso,0,ruta);//Creo mi pcb
 
-    semWait(mutex);
+    //sem_wait(&sem_mutex1);
     queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
     sem_post(&sem_consumidor);
-    semSignal(mutex);
+    //sem_post(&sem_mutex1);
     break;
     }
 	case FINALIZAR:
@@ -291,7 +293,7 @@ void procesar_comando(char comando[], char proceso[],int mutex){
 		while(tamanio!=0){
 		auxPCB=queue_pop(PCB_running);
 		printf("mProc %d: %s -> Corriendo \n",auxPCB->PID,auxPCB->nombreProc);
-		queue_push(fifo_PCB_ready,auxPCB);
+		queue_push(PCB_running,auxPCB);
 		tamanio--;
 		}
 		semSignal(mutex);
