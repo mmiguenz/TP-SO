@@ -6,6 +6,10 @@
  */
 #include "EstructurasParaMemoria.h"
 #include <commons/collections/dictionary.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 t_dictionary* dicInfoProcesos;
 extern  char** memoria;
 

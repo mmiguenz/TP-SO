@@ -26,55 +26,72 @@
 #include "servidor.h"
 #include "Cliente.h"
 #include "EstructurasParaMemoria.h"
+#include "TADConfig.h"
 
+#define SI "SI"
 
-
-
-//Variables de Archivo de Configuracion:
-	int Retardo;
-	int Cant_Marcos;
-	int Tamanio_Marco;
-	int Max_Marcos_Por_Proceso;
-
-	char* TLB_Habilitada;
-	int Entradas_TLB;
-	char* Tipo_Asignacion;
-	char* Algoritmo_De_Memoria;
-	char* puerto_escucha_memoria;
-	int puerto_escucha_swap;
-	char* ip_conec_swap;
+void inicializacionProceso(int);
+void lecturaMemoria(int);
+void escrituraMemoria(int);
+void finalizacionProceso(int);
 
 	 t_config* config;
-	 t_log* logs;
+	 t_log* logAdmMem;
+	 t_paramConfigAdmMem* configAdmMem;
 	 MEMORIAPRINCIPAL memoriaPrincipal;
 	 TLB tlb;
 
  int main(void){
 
+	 	 	 	 /* Se levanta el archivo de configuración y se crea log del Administrador de Memoria*/
+	 	 	 	 configAdmMem = establecerConfigMemoria();
+	 	 	 	 logAdmMem = log_create("log.txt", "Administrador de memoria",false, LOG_LEVEL_INFO);
 
+	 	 	 	 /* Inicialización de espacio de memoria, array indicador de memoria libre y TLB */
 
-                        	puerto_escucha_memoria=malloc(sizeof puerto_escucha_memoria);
-                        	config = config_create("config.cfg");
-                        	if(config != NULL){
+	 	 	 	 memoriaPrincipal.Memoria=inicializarMemoriaPrincipal(configAdmMem->cantidad_marcos,configAdmMem->tamanio_marco);
+	 	 	 	 memoriaPrincipal.MemoriaLibre=inicializarMemoriaLibre(configAdmMem->cantidad_marcos);
 
-                        	puerto_escucha_memoria=config_get_string_value(config, "PORT_ESCUCHA");
-                        	puerto_escucha_swap=config_get_int_value(config, "PORT_SWAP");
-                        	ip_conec_swap=config_get_string_value(config,"IP_SWAP");
-                        	Retardo = config_get_int_value(config,"RETARDO");
-                        	Cant_Marcos =  config_get_int_value(config,"CANTIDAD_MARCOS");
-                        	Tamanio_Marco =  config_get_int_value(config,"TAMANIO_MARCO");
-                        	Max_Marcos_Por_Proceso =  config_get_int_value(config,"MAX_MARCOS_POR_PROCESO");
-                        	TLB_Habilitada = config_get_string_value(config,"TLB_HABILITADA");
-                        	Entradas_TLB = config_get_int_value(config,"ENTRADAS_TLB");
-                        	logs= log_create("log.txt", "Administrador de memoria",false, LOG_LEVEL_INFO);
-                        	}
+	 	 	 	 if (strcmp(configAdmMem->tlb_habilitada,SI)) {
+	 	 	 	 tlb.CacheTLB=inicializarTLB(configAdmMem->entradas_TLB);
+	 	 	 	 }
 
-                        	int swap = conectar_cliente(puerto_escucha_swap, ip_conec_swap);
-
-                        	memoriaPrincipal.Memoria=inicializarMemoriaPrincipal(Cant_Marcos,Tamanio_Marco);
-                        	memoriaPrincipal.MemoriaLibre=inicializarMemoriaLibre(Cant_Marcos);
-                        	tlb.CacheTLB=inicializarTLB(Entradas_TLB);
-                        	 conectar_servidor(puerto_escucha_memoria, swap, memoriaPrincipal.MemoriaLibre,Max_Marcos_Por_Proceso,Cant_Marcos,memoriaPrincipal.Memoria);
-                        	 return EXIT_SUCCESS;
+	 	 	 	 int swap = conectar_cliente(configAdmMem->puerto_swap,configAdmMem->ip_swap);
+	 	 	 	 //conectar_servidor(configAdmMem->puerto_escucha, swap, memoriaPrincipal.MemoriaLibre,Max_Marcos_Por_Proceso,Cant_Marcos,memoriaPrincipal.Memoria);
+	 	 	 	 return EXIT_SUCCESS;
  }
+ void procesarPedido(int socket, char tipoInstruccion){
+	 enum {iniciar = 1,leer,escribir,finalizar};
 
+	 switch(tipoInstruccion){
+
+	 	 case iniciar:{
+		 	 inicializacionProceso(socket);
+	 	 }
+	 	 break;
+
+	 	 case leer:{
+		 	 lecturaMemoria(socket);
+	 	 }
+	 	 break;
+
+	 	 case escribir:{
+		 	 escrituraMemoria(socket);
+	 	 }
+	 	 break;
+
+	 	 case finalizar:{
+		 	 finalizacionProceso(socket);
+	 	 }
+	 	 break;
+	 }
+}
+
+ void inicializacionProceso(int socket){
+ };
+ void lecturaMemoria(int socket){
+ };
+ void escrituraMemoria(int socket){
+ };
+ void finalizacionProceso(int socket){
+ };
