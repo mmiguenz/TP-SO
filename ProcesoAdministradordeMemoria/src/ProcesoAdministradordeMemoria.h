@@ -8,6 +8,15 @@
 #ifndef PROCESOADMINISTRADORDEMEMORIA_H_
 #define PROCESOADMINISTRADORDEMEMORIA_H_
 
-void procesarPedido(int,char);
+/*
+typedef struct{
+	int idFrame;
+	char bitPresencia;
+	char bitModificado;
+}t_regTablaPaginas;
+*/
+void procesarPedido(int,int,char);
+
+void inicializacionProceso(int,int);
 
 #endif /* PROCESOADMINISTRADORDEMEMORIA_H_ */

@@ -58,9 +58,9 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre,
 			if (FD_ISSET (socketCliente[i], &descriptoresLectura))
 			{
 				// Recibo del cliente (CPU) el tipo de pedido a procesar)
-				char* tipoInstruccion;
+				char* tipoInstruccion = malloc(sizeof(char));
 				if (recv(socketCliente[i],tipoInstruccion,sizeof(char),0) > 0)
-				procesarPedido(socketCliente[i],*tipoInstruccion);
+				procesarPedido(socketCliente[i],swap,*tipoInstruccion);
 
 			}
 
