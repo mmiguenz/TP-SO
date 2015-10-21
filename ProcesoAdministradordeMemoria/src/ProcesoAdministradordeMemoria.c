@@ -105,19 +105,17 @@ void finalizacionProceso(int);
  void inicializacionProceso(int socketCPU, int socketSwap){
 
 	 	 void* buffer = malloc(sizeof(int)*2);
-	 	 int paginas;
-	 	 int pid;
 	 	 char* confirmSwap = malloc(sizeof(char));
 	 	 char* confirmCPU = malloc(sizeof(char));
 
 
 	 	 //Recibo la estructura serializada del CPU y la cargo en estructura correspondiente
-	 	 t_protoc_inicio_lectura_Proceso* estructLect = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
-	 	 recv(socketCPU,&paginas,sizeof(int),0);
-	 	 recv(socketCPU,&pid,sizeof(int),0);
+	 	 t_protoc_inicio_lectura_Proceso* protInic = malloc(sizeof(t_protoc_inicio_lectura_Proceso));;
+	 	 recv(socketCPU,protInic->paginas,sizeof(int),0);
+	 	 recv(socketCPU,protInic->PID,sizeof(int),0);
 
-	 	 memcpy(buffer,&pid,sizeof(int));
-	 	 memcpy(buffer+sizeof(int),&paginas,sizeof(int));
+	 	 memcpy(buffer,protInic->PID,sizeof(int));
+	 	 memcpy(buffer+sizeof(int),protInic->paginas,sizeof(int));
 	 	 send(socketSwap,buffer,sizeof(int)*2,0);
 	 	 recv(socketSwap,confirmSwap,sizeof(char),0); /* Recibo del Swap la confirmación de asignación de memoria al proceso */
 	 	 confirmCPU = confirmSwap;
@@ -126,11 +124,11 @@ void finalizacionProceso(int);
 	 	 if (*confirmSwap == 1) {
 	 	 //Creación de la tabla de páginas del proceso y agregado de la misma a la Lista de Tablas de Páginas
 	 		 char* pidConv = malloc(sizeof(char*));
-	 		 pidConv = string_itoa(pid);
-	 		 crear_e_insertar_TabladePaginas(paginas, pidConv, tablasPags);
+	 		 pidConv = string_itoa(*(protInic->PID));
+	 		 crear_e_insertar_TabladePaginas(*(protInic->paginas), pidConv, tablasPags);
 	 	 }
 
-	 	 free(estructLect);
+	 	 free(protInic);
  };
  void lecturaMemoria(int socket){
  };
