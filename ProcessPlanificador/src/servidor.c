@@ -440,14 +440,17 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	send(socketCliente,mensaje,header.payload_size,0);
 
 	free(mensaje);
-	free(PcbAux);
 
 	//Controlar por mensage erroneo falta
 	recv(socketCliente,&header,sizeof(header),0);
 	printf("El proceso inicio correctamente \n");
 	log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente);
 
-	PCB* PcbRun=malloc(sizeof(PCB*));
+	PCB* PcbRun=malloc(sizeof(PCB));
+	PcbRun->path=malloc(strlen(PcbAux->path)+1);
+	PcbRun->nombreProc=malloc(strlen(PcbAux->nombreProc)+1);
+
+	free(PcbAux);
 
 	sem_wait(&sem_mutex1);
 	sem_wait(&sem_consumidor);
@@ -455,7 +458,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	queue_push(running_PCB,PcbRun);
 	sem_post(&sem_mutex1);
 
-	//free(PcbRun);
+	free(PcbRun);
 
 
 
@@ -467,11 +470,9 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	printf("El proceso %d finalizo correctamente \n",header.payload_size);
 	log_info(logger, "Se ha finalizado el proceso con el CPU: %d", socketCliente);
 	recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
-	//crear funcion busqueda de PCb por pid
-	PCB* PcbRun =malloc(sizeof (PCB*));
 
 	search_and_destroy(pcb_parc.pid,running_PCB);
-	free(PcbRun);
+
 
 							break;
 						}
@@ -510,8 +511,12 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	}
 	case 5://Termina por quantum
 	{
-		PCB* pcbAux= malloc(sizeof (PCB*));
+		PCB* pcbAux= malloc(sizeof (PCB));
+		pcbAux->path=malloc(50);
+		pcbAux->nombreProc=malloc(300);
 		recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
+		pcbAux->path=malloc(50);
+		pcbAux->nombreProc=malloc(300);
 		pcbAux=search_and_return(pcb_parc.pid,running_PCB);
 		pcbAux->contadorProgram=pcb_parc.contadorDePrograma;
 		queue_push(fifo_PCB,pcbAux);

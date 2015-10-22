@@ -281,20 +281,20 @@ void procesar_comando(char comando[], char proceso[],int mutex){
 	case PS:
 	{
 		printf("El comando que eligio fue ps \n");
-		PCB* auxPCB=malloc(sizeof(PCB));
+		PCB* auxPCBrun=malloc(sizeof(PCB));
 		int tamanio=queue_size(fifo_PCB_ready);
 		semWait(mutex);
 		while(tamanio!=0){
-		auxPCB=queue_pop(fifo_PCB_ready);
-		printf("mProc %d: %s -> Listo \n",auxPCB->PID,auxPCB->nombreProc);
-		queue_push(fifo_PCB_ready,auxPCB);
+		auxPCBrun=queue_pop(fifo_PCB_ready);
+		printf("mProc %d: %s -> Listo \n",auxPCBrun->PID,auxPCBrun->nombreProc);
+		queue_push(fifo_PCB_ready,auxPCBrun);
 		tamanio--;
 		}
 		tamanio=queue_size(PCB_running);
 		while(tamanio!=0){
-		auxPCB=queue_pop(PCB_running);
-		printf("mProc %d: %s -> Corriendo \n",auxPCB->PID,auxPCB->nombreProc);
-		queue_push(PCB_running,auxPCB);
+		auxPCBrun=queue_pop(PCB_running);
+		printf("mProc %d: %s -> Corriendo \n",auxPCBrun->PID,auxPCBrun->nombreProc);
+		queue_push(PCB_running,auxPCBrun);
 		tamanio--;
 		}
 		semSignal(mutex);
@@ -337,11 +337,11 @@ int identificar_comando(char comando[]){
 PCB *pcb_create(char *name, int estado, char* ruta){
 	PCB *new = malloc( sizeof(PCB) );
 	new->nombreProc=malloc(strlen(name)+1);
+	new->path=malloc(strlen(ruta)+1);
 	strcpy(new->nombreProc, name);
 	new->PID = generar_pid();
 	new->estado=0;
 	new->contadorProgram=0;
-	new->path=malloc(sizeof(char*));
 	new->path=ruta;
 	new->quantum=quantum;
 
