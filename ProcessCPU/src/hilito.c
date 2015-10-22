@@ -39,8 +39,9 @@
 #include "hilito.h"
 #include <commons/log.h>
 #include <semaphore.h>
+#include <time.h>
 
-pthread_mutex_t mutex;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 
@@ -111,9 +112,10 @@ int recolectar_instruccion(char* cadena,char comando[15],int punta)
 	return punta;
 }
 
-int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20])
+int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20],time_t comienzo)
 {
 	int instruccion;
+	time_t final;
 
 	switch(identificar_instruccion(comando))
 	{
@@ -281,6 +283,17 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			log_info(logger, "El pid es %d", PcbAux->PID);
 			log_info(logger, "mProc %s finalizado", PcbAux->nombreProc);
 			PcbAux->contadorProgram++;
+
+
+			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
+			sleep(retardo);
+
+			final = time( NULL );
+			printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
+			int diff =  difftime(final, comienzo);
+			int porcentaje= porcentajeDeUso(diff, PcbAux->contadorProgram);
+			printf("El porcentaje de uso es %d\n", porcentaje);
+
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 			header.msgtype = 3;
@@ -292,11 +305,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			parcial.pid = PcbAux->PID; //en este caso el playload lo usamos para pid
 			parcial.tiempo = 0;
 			parcial.contadorDePrograma = PcbAux->contadorProgram;
+			parcial.porcentaje=porcentaje;
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
-
-			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
-			sleep(retardo);
-
 		}
 
 
@@ -312,22 +322,36 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 	}
 	return punta;
 }
+int ubicarPunta(char cadena [1500], PCB* PcbAux){
+	int punta=0;
+	int i =0;
+	int tamBuff=strlen(cadena);
+	int contador = PcbAux->contadorProgram;
+	while (punta<(tamBuff-1) && contador>i){
+
+		if(cadena[punta]!=';'){
+			punta++;
+		}
+		i++;
+	}
+	return i;
+}
 int procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 	int valor=1;
-	int punta=0;
+	int punta=ubicarPunta(cadena, PcbAux);
 	int tamBuff=strlen(cadena);
 	char comando[15];
 	char pagina[3];
 	char texto[20];
-	/*PROCESO msj;
-	msj.aceptado=1;*/
+	time_t comienzo;
+	 comienzo = time( NULL );
 	while(punta<(tamBuff-1))
 	{
 		int aux;
 		aux= recolectar_instruccion(cadena,comando, punta);
 		punta=aux;
 		//printf("La punta es %d, y la instruccion es: %s \n", punta,comando);
-		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto);
+		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto, comienzo);
 		punta=aux;
 	}
 	return valor;
@@ -392,7 +416,7 @@ void* conectar(void* mensa){
 	}else {
 			log_info(logger, "error al conectarse con memoria");
 		}
-	printf("El planificador es %d\n", planificador);
+	//printf("El planificador es %d\n", planificador);
 	pthread_mutex_unlock(&mutex);
 
 	char* mensaje;
@@ -461,9 +485,11 @@ void* conectar(void* mensa){
 
 			if(PcbAux->quantum == 0){
 				//fifo
+				printf("El quantum es %d\n", PcbAux->quantum);
 				procesarCadena(archivoProc, memoria, planificador,logger, PcbAux, retardo);
 
 			}else{
+				printf("El quantum2 es %d\n", PcbAux->quantum);
 				procesarCadenaConQuantum(PcbAux->quantum, archivoProc, memoria, planificador, logger, PcbAux, retardo);
 			}
 		}else{
@@ -475,11 +501,20 @@ void* conectar(void* mensa){
 	return EXIT_SUCCESS;
 }
 
+int porcentajeDeUso(int diff, int instrucciones){
+	int porcentaje;
+	int pulsos = 60;
+	int instruccionesTotal = 60;
 
+	int cantInstOptima = (diff*instruccionesTotal)/pulsos;
+	porcentaje = (instrucciones*100)/cantInstOptima;
+
+	return porcentaje;
+}
 
 int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 	int valor=1;
-	int punta=0;
+	int punta=ubicarPunta(cadena, PcbAux);;
 	char comando[15];
 	char pagina[3];
 	char texto[20];
@@ -488,16 +523,25 @@ int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int p
 
 	//Ejecución de ráfaga concluída, indicando PID.
 	int i=0;
-	while((strcmp(comando, "finalizar")) || quantum>=i )
+	  time_t comienzo, final;
+	  comienzo = time( NULL );
+	while((strcmp(comando, "finalizar")) && quantum>i )
 	{
+
 		int aux;
 		aux= recolectar_instruccion(cadena,comando, punta);
 		punta=aux;
 		//printf("La punta es %d, y la instruccion es: %s \n", punta,comando);
-		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto);
+		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto,comienzo);
 		punta=aux;
 		i++;
 	}
+	final = time( NULL );
+	printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
+	int diff =  difftime(final, comienzo);
+	int porcentaje= porcentajeDeUso(diff, quantum);
+	printf("El porcentaje de uso es %d\n", porcentaje);
+
 	if(strcmp(comando, "finalizar")){
 		t_msgHeader header;
 		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
@@ -510,6 +554,7 @@ int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int p
 		parcial.pid = PcbAux->PID; //en este caso el playload lo usamos para pid
 		parcial.tiempo = 0;
 		parcial.contadorDePrograma = PcbAux->contadorProgram;
+		parcial.porcentaje = porcentaje;
 		send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 	}
 	log_info(logger, "El pid es %d", PcbAux->PID);

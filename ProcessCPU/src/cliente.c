@@ -39,7 +39,7 @@ char* recibirMensaje(int socket,t_log* logger) {
 	char* mensaje;
 	mensaje = malloc(100);
 	if (recv(socket, mensaje, 100, 0) > 0){
-		printf("Recibi mensaje: %s \n", mensaje);
+		//printf("Recibi mensaje: %s \n", mensaje);
 	}else 	{
 		printf("Falle");
 	}

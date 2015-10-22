@@ -24,25 +24,25 @@
 t_log* logger;
 int retardo;
 int cant_hilitos;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 //pthread_mutex_t lock;
 
 struct param{
-		int puerto_escucha_planificador;
-		char* ip_conec_plani;
-		int puerto_escucha_memoria;
-		char* ip_conec_memoria;
-		t_log* logger;
-		int retardo;
-	};
+	int puerto_escucha_planificador;
+	char* ip_conec_plani;
+	int puerto_escucha_memoria;
+	char* ip_conec_memoria;
+	t_log* logger;
+	int retardo;
+};
 typedef struct param struct1;
 
 int main(void) {
 
-		struct1 *a;
-	 a=(struct1 *)malloc(sizeof(struct1));
+	struct1 *a;
+	a=(struct1 *)malloc(sizeof(struct1));
 
-
+/*
 	int puerto_escucha_planificador;
 	int puerto_escucha_memoria;
 	char* ip_conec_plani;
@@ -50,10 +50,12 @@ int main(void) {
 
 	ip_conec_plani= malloc(sizeof (ip_conec_plani));
 	ip_conec_memoria= malloc(sizeof (ip_conec_memoria));
-
+*/
 	t_config* config;
 	config = config_create("config.cfg");
 	a->logger = log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
+	a->ip_conec_memoria=malloc(12);
+	a->ip_conec_plani=malloc(12);
 
 	if(config != NULL){
 		a->puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
@@ -78,31 +80,31 @@ int main(void) {
 
 		}*/
 
-	pthread_t threads[2];
-	int rc;
+	pthread_t threads[100];
+	int err;
 	long t;
 
-	for(t=0; t<2; t++){
+	for(t=0; t<cant_hilitos; t++){
 
 
-		struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo,};
+		//struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo,};
 
-		rc = pthread_create(&threads[t], NULL, (void*)conectar, (void*) a);
+		err = pthread_create(&threads[t], NULL, (void*)conectar, (void*) a);
 
-		if (rc){
-			printf("ERROR; return code from pthread_create() is %d\n", rc);
+		if (err){
+			printf("ERROR; return code from pthread_create() is %d\n", err);
 			exit(-1);
 		}
 
 	}
-	for(t=0; t<2; t++){
+	for(t=0; t<cant_hilitos; t++){
 		pthread_join(threads[t], NULL);
 	}
-free(a);
+	//free(a);
 	pthread_exit(NULL);
 	config_destroy(config);
 	//int  pthread_mutex_destroy(pthread_mutex_t * mutex);
-	free ( ip_conec_memoria);
-	free ( ip_conec_plani);
+	//free ( ip_conec_memoria);
+	//free ( ip_conec_plani);
 	return EXIT_SUCCESS;
 }

@@ -39,6 +39,7 @@ typedef struct  {
 	int contadorDePrograma;
 	int tiempo;
 	int pid;
+	int porcentaje;
 }PCB_PARCIAL;
 
 typedef struct {
@@ -51,11 +52,13 @@ int cpu_asignada;
 int quantum; // si el quantum es -1 la planificacion es fifi, sino es round robin
 }PCB ;
 
+int ubicarPunta(char cadena [1500], PCB* PcbAux);
+
 int procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux, int retardo);
 
 int recolectar_instruccion(char* cadena,char comando[15],int punta);
 
-int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20]);
+int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20],time_t comienzo);
 
 int recolectar_pagina(char* cadena, int punta, char pagina[3]);
 
