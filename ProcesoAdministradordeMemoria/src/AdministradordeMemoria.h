@@ -5,8 +5,8 @@
  *      Author: utnso
  */
 
-#ifndef PROCESOADMINISTRADORDEMEMORIA_H_
-#define PROCESOADMINISTRADORDEMEMORIA_H_
+#ifndef ADMINISTRADORDEMEMORIA_H_
+#define ADMINISTRADORDEMEMORIA_H_
 
 /*
 typedef struct{
@@ -19,4 +19,4 @@ void procesarPedido(int,int,char);
 
 void inicializacionProceso(int,int);
 
-#endif /* PROCESOADMINISTRADORDEMEMORIA_H_ */
+#endif /* ADMINISTRADORDEMEMORIA_H_ */

@@ -8,6 +8,8 @@
  ============================================================================
  */
 
+#include "AdministradordeMemoria.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,10 +30,10 @@
 #include <commons/string.h>
 #include "servidor.h"
 #include "Cliente.h"
-#include "EstructurasParaMemoria.h"
 #include "TADConfig.h"
 #include "ProtocsyFuncsRecvMsjs.h"
-#include "ProcesoAdministradordeMemoria.h"
+#include "Memoria.h"
+#include "Tlb.h"
 
 #define SI "SI"
 
@@ -44,7 +46,10 @@ typedef struct{
 void crear_e_insertar_TabladePaginas(int, char*, t_dictionary*);
 void lecturaMemoria(int);
 void escrituraMemoria(int);
-void finalizacionProceso(int);
+void finalizacionProceso(int socketCpu,int socketSwap);
+char notificarFinalizarSwap(int socket, t_protoc_inicio_lectura_Finaliza_Proceso pedido);
+void notificarFinalizarCpu( int socket);
+
 
 	 t_config* config;
 	 t_log* logAdmMem;
@@ -76,27 +81,27 @@ void finalizacionProceso(int);
  }
 
  void procesarPedido(int socketCPU, int socketSwap, char tipoInstruccion){
-	 enum {iniciar = 1,leer,escribir,finalizar};
+	 enum {INICIAR = 1,LEER,ESCRIBIR,FINALIZAR};
 
 	 switch(tipoInstruccion){
 
-	 	 case iniciar:{
+	 	 case INICIAR:{
 		 	 inicializacionProceso(socketCPU,socketSwap);
 	 	 }
 	 	 break;
 
-	 	 case leer:{
+	 	 case LEER:{
 		 	 lecturaMemoria(socketCPU);
 	 	 }
 	 	 break;
 
-	 	 case escribir:{
+	 	 case ESCRIBIR:{
 		 	 escrituraMemoria(socketCPU);
 	 	 }
 	 	 break;
 
-	 	 case finalizar:{
-		 	 finalizacionProceso(socketCPU);
+	 	 case FINALIZAR:{
+		 	 finalizacionProceso(socketCPU,socketSwap);
 	 	 }
 	 	 break;
 	 }
@@ -110,11 +115,11 @@ void finalizacionProceso(int);
 
 
 	 	 //Recibo la estructura serializada del CPU y la cargo en estructura correspondiente
-	 	 t_protoc_inicio_lectura_Proceso* protInic = malloc(sizeof(t_protoc_inicio_lectura_Proceso));;
+	 	 t_protoc_inicio_lectura_Finaliza_Proceso* protInic = malloc(sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));;
 	 	 recv(socketCPU,protInic->paginas,sizeof(int),0);
-	 	 recv(socketCPU,protInic->PID,sizeof(int),0);
+	 	 recv(socketCPU,protInic->pid,sizeof(int),0);
 
-	 	 memcpy(buffer,protInic->PID,sizeof(int));
+	 	 memcpy(buffer,protInic->pid,sizeof(int));
 	 	 memcpy(buffer+sizeof(int),protInic->paginas,sizeof(int));
 	 	 send(socketSwap,buffer,sizeof(int)*2,0);
 	 	 recv(socketSwap,confirmSwap,sizeof(char),0); /* Recibo del Swap la confirmación de asignación de memoria al proceso */
@@ -124,7 +129,7 @@ void finalizacionProceso(int);
 	 	 if (*confirmSwap == 1) {
 	 	 //Creación de la tabla de páginas del proceso y agregado de la misma a la Lista de Tablas de Páginas
 	 		 char* pidConv = malloc(sizeof(char*));
-	 		 pidConv = string_itoa(*(protInic->PID));
+	 		 pidConv = string_itoa(*(protInic->pid));
 	 		 crear_e_insertar_TabladePaginas(*(protInic->paginas), pidConv, tablasPags);
 	 	 }
 
@@ -134,8 +139,73 @@ void finalizacionProceso(int);
  };
  void escrituraMemoria(int socket){
  };
- void finalizacionProceso(int socket){
- };
+
+
+ void finalizacionProceso(int socketCpu,int socketSwap){
+
+	 t_protoc_inicio_lectura_Finaliza_Proceso* pedido = malloc(sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));
+
+
+	 pedido->tipoInstrucc = 4 ;
+
+	 recv(socketCpu,pedido->paginas,sizeof(int),0);
+	 recv(socketCpu,pedido->pid,sizeof(int),0);
+
+
+	 if (configAdmMem->tlb_habilitada)
+		 t_tlb_limpiar(&tlb, pedido->pid);
+
+
+	 finalizarProceso(pedido->pid,&memoriaPrincipal);
+
+
+
+
+	 char respuestaSwap = notificarFinalizarSwap(socketSwap,*pedido);
+
+	 if(respuestaSwap)
+	 {
+
+		notificarFinalizarCpu(socketCpu);
+
+	 }
+
+
+ }
+
+
+ char notificarFinalizarSwap(int socket, t_protoc_inicio_lectura_Finaliza_Proceso pedido)
+ {
+	 void*buffer = malloc(sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));
+
+
+
+	 memcpy(buffer,&pedido,sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));
+
+	 send(socket,buffer,sizeof(t_protoc_inicio_lectura_Finaliza_Proceso),0);
+
+	 void* bufferResp = malloc(sizeof(char));
+	 recv(socket,bufferResp,sizeof(char),0);
+
+	 char resp;
+
+	 memcpy(&resp,bufferResp,sizeof(char));
+	 return resp;
+ }
+
+ void notificarFinalizarCpu( int socket)
+ {
+
+	 void* buffer = malloc(sizeof(char));
+	 char respuesta = 1;
+	 memcpy(buffer,&respuesta,sizeof(char));
+	 send(socket,buffer,sizeof(char),0);
+
+
+
+ }
+
+
 
  void crear_e_insertar_TabladePaginas(int paginas, char* pid, t_dictionary* tablasPagsProcesos) {
 	 t_regTablaPaginas** tablaPaginasProceso = calloc(paginas,sizeof(t_regTablaPaginas*));

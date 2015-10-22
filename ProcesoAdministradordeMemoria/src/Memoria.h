@@ -5,8 +5,8 @@
  *      Author: utnso
  */
 
-#ifndef ESTRUCTURASPARAMEMORIA_H_
-#define ESTRUCTURASPARAMEMORIA_H_
+#ifndef MEMORIA_H_
+#define MEMORIA_H_
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
 
@@ -17,10 +17,7 @@ typedef struct{
 		int* MemoriaLibre;
 	}MEMORIAPRINCIPAL;
 
-	typedef struct{
-		int** CacheTLB;
-		t_queue* sOrdenDeIngresoTLB;
-	} TLB;
+
 
 	typedef struct{
 		int totalDePaginas;
@@ -38,10 +35,10 @@ typedef struct{
 	t_list* asignarMarcos_MemoriaPrincipal(t_list* marcosAsignados, int* memoriaLibre, int MarcosPorProcesos);
 	int algoritmo_FirstFit_MEMORIA(int Cant_Marcos, int* memoriaLibre);
 	void inicializarProceso(int PID, int totalDePaginas, int* memoriaLibre, int marcosPorProcesos);
-	void FinalizarProceso(int pid, char** memoria);
+	void finalizarProceso(int pid, MEMORIAPRINCIPAL* memoria);
 	int ** inicializarTablaDePaginas(int cantPagina);
 	void resetearMarco(void * numeroMarco);
 
 
 
-#endif /* ESTRUCTURASPARAMEMORIA_H_ */
+#endif /* MEMORIA_H_ */

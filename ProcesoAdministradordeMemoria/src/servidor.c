@@ -1,7 +1,8 @@
 #include "servidor.h"
+
+#include "AdministradordeMemoria.h"
 #include "Cliente.h"
-#include "EstructurasParaMemoria.h"
-#include "ProcesoAdministradordeMemoria.h"
+#include "Memoria.h"
 
 /*
  * Programa principal.
@@ -440,7 +441,7 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 			 if (encabezado.msgtype==4){
 				printf("Solicitud de finalizar proceso: %d% \n", encabezado.pid);
 
-						FinalizarProceso(encabezado.pid,memoria);
+						finalizarProceso(encabezado.pid,memoria);
 						enviarMensaje(swap,encabezado);
 						recibirMensaje(swap,listaDePaginas);
 
