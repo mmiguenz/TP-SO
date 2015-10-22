@@ -18,7 +18,15 @@ int quantum;
 
 }PCB ;
 
+typedef struct {
+	int tiempo_sleep;
+	int pid;
+	t_queue * running_PCB;
+	t_queue * block_PCB;
+	t_queue * fifo_PCB;
+}param_hilo1;
 
+PCB *search_and_return(int pid,t_queue * running_PCB);
 
 
 /*
@@ -28,7 +36,7 @@ int quantum;
  * a empezar.
  */
 
-void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex)
+void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB)
 {
 
 	//sem_open("sem_consumidor",O_CREAT,0644,0);
@@ -105,7 +113,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 				 if ((recv(socketCliente[i],&header,sizeof(header),0)) > 0){
 
 
-					 	procesar_mensaje(socketCliente[i],header,fifo_PCB, logger,  running_PCB, mutex);
+					 	procesar_mensaje(socketCliente[i],header,fifo_PCB, logger,  running_PCB, mutex,  block_PCB);
 
 
 
@@ -381,7 +389,7 @@ return 0;
 }
 
 
-procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex){
+procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB){
 
 	 PCB_PARCIAL pcb_parc;
 					 pcb_parc.contadorDePrograma=0;
@@ -471,12 +479,81 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	case 4://Entrada salida
 	{
 		recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
-		//Buscar procreso pid
-		//Creo un hilo mandandole el pcb el retardo
-		//El hilo dormira ese pcB y luego lo pondra en listos
+
+
+		pthread_t hilo_io; //Hilo que creo para correr la i/o  que acepta procesos y los blockea
+
+		param_hilo1 *a=(param_hilo1*)malloc(sizeof(param_hilo1));
+		a->block_PCB=block_PCB;
+		a->fifo_PCB=fifo_PCB;
+		a->pid=pcb_parc.pid;
+		a->running_PCB=running_PCB;
+		a->tiempo_sleep=pcb_parc.tiempo;
+
+		int err;
+
+		err = pthread_create(&hilo_io, NULL, (void*)dormir, (void*) a);
+
+			if (err){
+				printf("ERROR; return code from pthread_create() is %d\n", err);
+				exit(-1);
+			}
+
+
+
+			pthread_join(&hilo_io, NULL);
+
+
+
+
 		break;
 	}
 	}
 
 return 0;
+}
+
+
+PCB *search_and_return(int pid,t_queue * running_PCB){
+	PCB* pcbAux=malloc(sizeof(PCB));
+
+	int tamanio=queue_size(running_PCB);
+				while(tamanio!=0){
+				pcbAux=queue_pop(running_PCB);
+				//printf("El pid del proceso es: %d \n",auxPCB->PID);
+				tamanio--;
+				if(pcbAux->PID==pid)
+				{printf("Encontre  al proceso!!!\n");
+				tamanio=0;
+				}
+				else{
+				queue_push(running_PCB, pcbAux);
+				}
+				}
+	return pcbAux;
+
+	}
+
+/*---Funcion del hilo de la entrada salida en la cual saco de mi cola de pcb running la mando
+ *  a mi cola de pcb blockeados hago un sleep simulando mi entrada salida
+ *  y luego lamando de nuevo a mi cola de pcb listos para que vuelva a ejecutar
+ ---------------------------------------------------------------------------------
+  */
+void* dormir(void* param_hilo){
+	param_hilo1 *b;
+	PCB* pcb_block = malloc(sizeof(PCB));;
+	b=(param_hilo1*)param_hilo;
+
+	pcb_block = search_and_return(b->pid,b->running_PCB);
+
+	queue_push(b->block_PCB,pcb_block);
+
+	sleep(b->tiempo_sleep);
+
+	pcb_block = search_and_return(b->pid,b->block_PCB);
+
+	queue_push(b->fifo_PCB,pcb_block);
+
+	return  0;
+
 }

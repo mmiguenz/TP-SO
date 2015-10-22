@@ -38,7 +38,7 @@
 
 t_queue * fifo_PCB_ready;//Cola de pcb que estan listo para ejecutar
 t_queue * PCB_running;//Cola de pcb que estan ejecutando
-
+t_queue * block_PCB; //Cola de pcb que estan blockeados
 
 sem_t sem_mutex1;
 sem_t sem_consumidor;
@@ -87,6 +87,7 @@ int main(void)
 
 	fifo_PCB_ready=queue_create();
 	PCB_running=queue_create();
+	block_PCB=queue_create();
 	char* planificacion;
 	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_TRACE);
 
@@ -127,7 +128,7 @@ int main(void)
 
                         	pthread_create(&hilo_shell, NULL, shell, (void * )&mutex);
 
-                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger,PCB_running, mutex);
+                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger,PCB_running, mutex, block_PCB);
 
 
                         	pthread_join(hilo_shell, NULL);
