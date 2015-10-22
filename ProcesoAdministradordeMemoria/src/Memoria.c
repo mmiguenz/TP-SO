@@ -4,8 +4,13 @@
  *  Created on: 6/10/2015
  *      Author: utnso
  */
-#include "EstructurasParaMemoria.h"
+#include "Memoria.h"
+
 #include <commons/collections/dictionary.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 t_dictionary* dicInfoProcesos;
 extern  char** memoria;
 
@@ -35,7 +40,8 @@ int* inicializarMemoriaLibre(int cant_Marcos)
 		Array de marcos libres:
 			Posicion = 0 -> LIBRE  |  Posicion = 1 -> OCUPADA
 	*/
-	memoriaLibre = calloc(cant_Marcos, sizeof(int));
+	memoriaLibre = calloc(cant_Marcos, sizeof(char));
+
 
 	return memoriaLibre;
 }
@@ -86,8 +92,9 @@ int algoritmo_FirstFit_MEMORIA(int Cant_Marcos, int* memoriaLibre)
 	return -1;
 }
 
-void FinalizarProceso(int pid, char** memoria)
+void finalizarProceso(int pid, MEMORIAPRINCIPAL* memoriaP)
 {
+ char ** memoria = 	memoriaP->Memoria;
 
 			TABLADEPROCESOS* procesoAux = dictionary_remove(dicInfoProcesos, pid);
 			int i;
@@ -121,26 +128,6 @@ void resetearMarco(void * numeroMarco)
 	return;
 }
 
-int ** inicializarTLB(int entradas_TLB)
-{
-	int ColNumPagina = 0;
-	int i;
-	/*
-		Columnas de la tabla a definir con grupo CASCANUECES  :
-
-	*/
-				    int** TLB = malloc(entradas_TLB*sizeof(int*));
-				    for (i=0; i<entradas_TLB; ++i)
-				    {
-				    	TLB[i] = calloc(3, sizeof(int));
-				    }
-		//cargo valores por defecto -1 para saber que esta vacia:
-		for (i = 0; i < entradas_TLB; i++)
-		{
-			TLB[i][ColNumPagina] = -1;
-		}
-	return TLB;
-}
 
 
 void inicializarProceso(int PID, int totalDePaginas, int* memoriaLibre, int marcosPorProcesos)

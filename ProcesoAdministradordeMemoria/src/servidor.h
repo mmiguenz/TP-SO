@@ -23,7 +23,7 @@
 typedef struct {
 int aceptado;
 int pid;
-//char* contenido;
+char* contenido;
 }PROCESO ;
 
 typedef struct  {

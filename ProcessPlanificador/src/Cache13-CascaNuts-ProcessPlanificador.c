@@ -38,10 +38,9 @@
 
 t_queue * fifo_PCB_ready;//Cola de pcb que estan listo para ejecutar
 t_queue * PCB_running;//Cola de pcb que estan ejecutando
+t_queue * block_PCB; //Cola de pcb que estan blockeados
 
-
-
-sem_t *sem_productor;
+sem_t sem_mutex1;
 sem_t sem_consumidor;
 
 typedef struct {
@@ -88,6 +87,7 @@ int main(void)
 
 	fifo_PCB_ready=queue_create();
 	PCB_running=queue_create();
+	block_PCB=queue_create();
 	char* planificacion;
 	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_TRACE);
 
@@ -128,7 +128,7 @@ int main(void)
 
                         	pthread_create(&hilo_shell, NULL, shell, (void * )&mutex);
 
-                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger,PCB_running, mutex);
+                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger,PCB_running, mutex, block_PCB);
 
 
                         	pthread_join(hilo_shell, NULL);
@@ -152,9 +152,12 @@ void *shell(int mutex){
 	printf("--------------------------------------------------------------------------\n\n\n\n");
 	  if (-1 == (mutex = semOpen(claveMutex)))
 		 fprintf(stderr, "No tengo el cualificador de mutex\n");
-    while(1){
-    printf("Por favor ingrese el comando que desea ejecutar:  \n");
 
+	    sem_init(&sem_mutex1, 1, 1);
+	    sem_init(&sem_consumidor,1,0);
+	while(1){
+    printf("Por favor ingrese el comando que desea ejecutar:  \n");
+    sem_init(&sem_mutex1, 1, 1);
     recolectar_comando(comando);
 
     procesar_comando(comando, proceso, mutex);
@@ -245,10 +248,10 @@ void procesar_comando(char comando[], char proceso[],int mutex){
 
     nuevoPCB = pcb_create(proceso,0,ruta);//Creo mi pcb
 
-    semWait(mutex);
+    //sem_wait(&sem_mutex1);
     queue_push(fifo_PCB_ready,nuevoPCB);//Voy metiendo los pcb en la cola fifo de pcb
     sem_post(&sem_consumidor);
-    semSignal(mutex);
+    //sem_post(&sem_mutex1);
     break;
     }
 	case FINALIZAR:
@@ -278,20 +281,20 @@ void procesar_comando(char comando[], char proceso[],int mutex){
 	case PS:
 	{
 		printf("El comando que eligio fue ps \n");
-		PCB* auxPCB=malloc(sizeof(PCB));
+		PCB* auxPCBrun=malloc(sizeof(PCB));
 		int tamanio=queue_size(fifo_PCB_ready);
 		semWait(mutex);
 		while(tamanio!=0){
-		auxPCB=queue_pop(fifo_PCB_ready);
-		printf("mProc %d: %s -> Listo \n",auxPCB->PID,auxPCB->nombreProc);
-		queue_push(fifo_PCB_ready,auxPCB);
+		auxPCBrun=queue_pop(fifo_PCB_ready);
+		printf("mProc %d: %s -> Listo \n",auxPCBrun->PID,auxPCBrun->nombreProc);
+		queue_push(fifo_PCB_ready,auxPCBrun);
 		tamanio--;
 		}
 		tamanio=queue_size(PCB_running);
 		while(tamanio!=0){
-		auxPCB=queue_pop(PCB_running);
-		printf("mProc %d: %s -> Corriendo \n",auxPCB->PID,auxPCB->nombreProc);
-		queue_push(fifo_PCB_ready,auxPCB);
+		auxPCBrun=queue_pop(PCB_running);
+		printf("mProc %d: %s -> Corriendo \n",auxPCBrun->PID,auxPCBrun->nombreProc);
+		queue_push(PCB_running,auxPCBrun);
 		tamanio--;
 		}
 		semSignal(mutex);
@@ -334,11 +337,11 @@ int identificar_comando(char comando[]){
 PCB *pcb_create(char *name, int estado, char* ruta){
 	PCB *new = malloc( sizeof(PCB) );
 	new->nombreProc=malloc(strlen(name)+1);
+	new->path=malloc(strlen(ruta)+1);
 	strcpy(new->nombreProc, name);
 	new->PID = generar_pid();
 	new->estado=0;
 	new->contadorProgram=0;
-	new->path=malloc(sizeof(char*));
 	new->path=ruta;
 	new->quantum=quantum;
 

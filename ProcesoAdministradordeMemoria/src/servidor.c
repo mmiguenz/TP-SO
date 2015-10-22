@@ -1,6 +1,8 @@
 #include "servidor.h"
+
+#include "AdministradordeMemoria.h"
 #include "Cliente.h"
-#include "EstructurasParaMemoria.h"
+#include "Memoria.h"
 
 /*
  * Programa principal.
@@ -35,68 +37,41 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre,
 
 	while (1)
 	{
-		/* Cuando un cliente cierre la conexión, se pondrá un -1 en su descriptor
-		 * de socket dentro del array socketCliente. La función compactaClaves()
-		 * eliminará dichos -1 de la tabla, haciéndola más pequeña.
-		 *
-		 * Se eliminan todos los clientes que hayan cerrado la conexión */
 
 		compactaClaves (socketCliente, &numeroClientes);
 
-		/* Se inicializa descriptoresLectura */
-
 		FD_ZERO (&descriptoresLectura);
 
-		/* Se añade para select() el socket servidor */
-
 		FD_SET (socketServidor, &descriptoresLectura);
-
-		/* Se añaden para select() los sockets con los clientes ya conectados */
 
 		for (i=0; i<numeroClientes; i++)
 			FD_SET (socketCliente[i], &descriptoresLectura);
 
-		/* Se el valor del descriptor más grande. Si no hay ningún cliente,
-		 * devolverá 0 */
 		maximo = dameMaximo (socketCliente, numeroClientes);
 
 		if (maximo < socketServidor)
 			maximo = socketServidor;
 
-		/* Espera indefinida hasta que alguno de los descriptores tenga algo
-		 * que decir: un nuevo cliente o un cliente ya conectado que envía un
-		 * mensaje */
-
 		select (maximo + 1, &descriptoresLectura, NULL, NULL, NULL);
-
-		/* Se comprueba si algún cliente ya conectado ha enviado algo */
 
 		for (i=0; i<numeroClientes; i++)
 		{
 			if (FD_ISSET (socketCliente[i], &descriptoresLectura))
 			{
-				/* Se lee lo enviado por el cliente y se escribe en pantalla */
+				// Recibo del cliente (CPU) el tipo de pedido a procesar)
+				char* tipoInstruccion = malloc(sizeof(char));
+				if (recv(socketCliente[i],tipoInstruccion,sizeof(char),0) > 0)
+				procesarPedido(socketCliente[i],swap,*tipoInstruccion);
 
-				t_msgHeaderMemoria encabezado;
-				 memset(&encabezado, 0, sizeof(t_msgHeaderMemoria));
-				if ((recv(socketCliente[i],&encabezado,sizeof(t_msgHeaderMemoria),0)) > 0){
-				PROCESO procesoAux;
+			}
 
-				procesoAux=procesarCadena(socketCliente[i],swap,encabezado,memoriaLibre,marcosPorProceso,Cant_Marcos,memoria);
-
-				printf("-----------Le mando %d, %d \n\n",procesoAux.aceptado,procesoAux.pid);
-				//enviarMsjCPU(socketCliente[i],procesoAux);
-
-				}
-
-				else
-				{
+			else
+			{
 					/* Se indica que el cliente ha cerrado la conexión y se
 					 * marca con -1 el descriptor para que compactaClaves() lo
 					 * elimine */
 					printf ("Cliente %d ha cerrado la conexión \n\n", i+1);
 					socketCliente[i] = -1;
-				}
 			}
 		}
 
@@ -109,10 +84,10 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre,
 				//send(socketCliente[(numeroClientes)-1],"Te conectaste con el Administrador de memoria",strlen("Te conectaste con el Administrador de memoria"),0);
 				//free(mensaje);
 				//mensaje=malloc(sizeof(char*));
-
-	}
+		}
 	}
 }
+
 
 /*
  * Crea un nuevo socket cliente.
@@ -443,7 +418,7 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 				printf("Proceso para leer  %d----legue", procesoAux.pid);
 				procesoAux.aceptado=1;
 				procesoAux.pid=encabezado.pid;
-				procesoAux.tamanioMsj=strlen("Hola flor!");
+				procesoAux.contenido=strlen("Hola flor!");
 				enviarMensaje(swap,encabezado);
 				recibirMensaje(swap,listaDePaginas);
 				enviarMsjCPU(cpu,procesoAux);
@@ -456,7 +431,7 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 
 					procesoAux.aceptado=1;
 					procesoAux.pid=encabezado.pid;
-					procesoAux.tamanioMsj=strlen(pedido);
+					procesoAux.contenido=strlen(pedido);
 
 					enviarMsjCPU(cpu,procesoAux);
 					send(cpu,pedido,sizeof(pedido),0);
@@ -466,7 +441,7 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 			 if (encabezado.msgtype==4){
 				printf("Solicitud de finalizar proceso: %d% \n", encabezado.pid);
 
-						FinalizarProceso(encabezado.pid,memoria);
+						finalizarProceso(encabezado.pid,memoria);
 						enviarMensaje(swap,encabezado);
 						recibirMensaje(swap,listaDePaginas);
 
@@ -475,7 +450,7 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 				procesoAux.aceptado=1;
 				procesoAux.pid=encabezado.pid;
 
-}
+			 }
 			 return procesoAux;
 }
 
@@ -484,6 +459,7 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 		 printf("aceptada es %d",procesoAux.aceptado);
 		 send(cpu,&procesoAux,sizeof(procesoAux),0);
 
+}
 
- }
+
 
