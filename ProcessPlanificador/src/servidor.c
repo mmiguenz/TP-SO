@@ -508,6 +508,17 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 
 		break;
 	}
+	case 5://Termina por quantum
+	{
+		PCB* pcbAux= malloc(sizeof (PCB*));
+		recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
+		pcbAux=search_and_return(pcb_parc.pid,running_PCB);
+		pcbAux->contadorProgram=pcb_parc.contadorDePrograma;
+		queue_push(fifo_PCB,pcbAux);
+
+		break;
+
+	}
 	}
 
 return 0;
