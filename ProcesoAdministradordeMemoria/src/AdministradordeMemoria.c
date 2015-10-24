@@ -44,11 +44,11 @@ typedef struct{
 }t_regTablaPaginas; */
 
 void crear_e_insertar_TabladePaginas(int, char*, t_dictionary*);
-void* deserializarInfoCPU_Inicio_Lectura(int, t_protoc_inicio_lectura_Finaliza_Proceso*,char);
+void* deserializarInfoCPU_Inicio_Lectura(int, t_protoc_inicio_lectura_Proceso*,char);
 void lecturaMemoria(int,int,MEMORIAPRINCIPAL,TLB*,t_dictionary*);
 void escrituraMemoria(int,int);
 void finalizacionProceso(int socketCpu,int socketSwap);
-char notificarFinalizarSwap(int socket, t_protoc_inicio_lectura_Finaliza_Proceso pedido);
+char notificarFinalizarSwap(int socket, t_protoc_Finaliza pedido);
 void notificarFinalizarCpu( int socket);
 
 
@@ -127,7 +127,7 @@ void notificarFinalizarCpu( int socket);
 	 	 char instruccSentencia = 1;
 
 	 	 //Recibo la estructura serializada del CPU y la cargo en estructura correspondiente
-	 	 t_protoc_inicio_lectura_Finaliza_Proceso* protInic = malloc(sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));
+	 	 t_protoc_inicio_lectura_Proceso* protInic = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 	 	 void* buffer = deserializarInfoCPU_Inicio_Lectura(socketCPU,protInic,instruccSentencia);
 
 	 	 /* Envío al Swap la info necesaria para que asigne las paginas correspondientes al proceso iniciado */
@@ -141,15 +141,15 @@ void notificarFinalizarCpu( int socket);
 	 	 if (*confirmSwap == 1) {
 	 	 //Creación de la tabla de páginas del proceso y agregado de la misma a la Lista de Tablas de Páginas
 	 		 char* pidConv = malloc(sizeof(char*));
-	 		 pidConv = string_itoa(*(protInic->pid));
-	 		 crear_e_insertar_TabladePaginas(*(protInic->paginas), pidConv, tablasPags);
+	 		 pidConv = string_itoa(protInic->pid);
+	 		 crear_e_insertar_TabladePaginas((protInic->paginas), pidConv, tablasPags);
 	 	 }
 
 	 	 free(protInic);
  };
  void lecturaMemoria(int socketCPU, int socketSwap, MEMORIAPRINCIPAL memPrincip, TLB* tlb, t_dictionary* tablasdePagsProcesos){
 
-	 t_protoc_inicio_lectura_Finaliza_Proceso* protInic = malloc(sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));
+	 t_protoc_inicio_lectura_Proceso* protInic = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 	 char instruccSentencia = 2;
 	 void* buffer = deserializarInfoCPU_Inicio_Lectura(socketCPU,protInic,instruccSentencia);
 
@@ -157,10 +157,10 @@ void notificarFinalizarCpu( int socket);
 	 int frame;
 	 int tamanioContenido;
 	 char* contenido = malloc(configAdmMem->tamanio_marco*sizeof(char));
-	 frame = buscarPaginaTLB(tlb,*(protInic->pid),*(protInic->paginas));
+	 frame = buscarPaginaTLB(tlb,protInic->pid,protInic->paginas);
 	 if (frame == -1)/*No se encontró página en TLB*/{
 
-		 frame = buscarPaginaenMemoria(*(protInic->pid),*(protInic->paginas),tablasdePagsProcesos);
+		 frame = buscarPaginaenMemoria((protInic->pid),(protInic->paginas),tablasdePagsProcesos);
 
 		 if(frame == -1)/*No se encontró página en MP*/{
 
@@ -169,7 +169,7 @@ void notificarFinalizarCpu( int socket);
 			 recv(socketSwap,&tamanioContenido,sizeof(int),0);
 			 recv(socketSwap,contenido,tamanioContenido,0);
 
-			 t_tablaDePaginas* tablaPagsProceso = dictionary_get(tablasdePagsProcesos,string_itoa(*(protInic->pid)));
+			 t_tablaDePaginas* tablaPagsProceso = dictionary_get(tablasdePagsProcesos,string_itoa(protInic->pid));
 			 frame = insertarContenidoenMP(socketSwap,contenido,memPrincip,tablaPagsProceso);
 			 //guardarEnMemoria();//Agregar o reemplazar página.
 			 //guardarRegistroenTLB();//Reemplazar o agregar registro correspondiente en TLB.
@@ -196,17 +196,16 @@ void notificarFinalizarCpu( int socket);
 
  void finalizacionProceso(int socketCpu,int socketSwap){
 
-	 t_protoc_inicio_lectura_Finaliza_Proceso* pedido = malloc(sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));
+	 t_protoc_Finaliza* pedido = malloc(sizeof(t_protoc_Finaliza));
 
 
 	 pedido->tipoInstrucc = FINALIZAR ;
 
-	 recv(socketCpu,pedido->paginas,sizeof(int),0);
-	 recv(socketCpu,pedido->pid,sizeof(int),0);
+	 recv(socketCpu,&pedido->pid,sizeof(int),0);
 
 
 	 if (configAdmMem->tlb_habilitada)
-		 t_tlb_limpiar(&tlb, pedido->pid);
+		 t_tlb_limpiar(&tlb, &pedido->pid);
 
 
 	 finalizarProceso(pedido->pid,&memoriaPrincipal);
@@ -227,15 +226,15 @@ void notificarFinalizarCpu( int socket);
  }
 
 
- char notificarFinalizarSwap(int socket, t_protoc_inicio_lectura_Finaliza_Proceso pedido)
+ char notificarFinalizarSwap(int socket, t_protoc_Finaliza pedido)
  {
-	 void*buffer = malloc(sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));
+	 void*buffer = malloc(sizeof(t_protoc_Finaliza));
 
 
 
-	 memcpy(buffer,&pedido,sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));
+	 memcpy(buffer,&pedido,sizeof(t_protoc_Finaliza));
 
-	 send(socket,buffer,sizeof(t_protoc_inicio_lectura_Finaliza_Proceso),0);
+	 send(socket,buffer,sizeof(t_protoc_Finaliza),0);
 
 	 void* bufferResp = malloc(sizeof(char));
 	 recv(socket,bufferResp,sizeof(char),0);
@@ -279,7 +278,7 @@ void notificarFinalizarCpu( int socket);
 	 dictionary_put(tablasPagsProcesos,pid,tablaPaginasProceso);
  }
 
- void* deserializarInfoCPU_Inicio_Lectura(int socketCPU, t_protoc_inicio_lectura_Finaliza_Proceso* protInic_Lect, char InstrSent){
+ void* deserializarInfoCPU_Inicio_Lectura(int socketCPU, t_protoc_inicio_lectura_Proceso* protInic_Lect, char InstrSent){
 
 	 void* buffer = malloc(sizeof(char)+sizeof(int)*2);
 
@@ -290,9 +289,9 @@ void notificarFinalizarCpu( int socket);
 
  	 memcpy(buffer,&(protInic_Lect->tipoInstrucc),sizeof(char));
  	 int offset = sizeof(char);
- 	 memcpy(buffer+offset,protInic_Lect->pid,sizeof(int));
+ 	 memcpy(buffer+offset,&protInic_Lect->pid,sizeof(int));
  	 offset += sizeof(int);
- 	 memcpy(buffer+offset,protInic_Lect->paginas,sizeof(int));
+ 	 memcpy(buffer+offset,&protInic_Lect->paginas,sizeof(int));
 
  	 return buffer;
 

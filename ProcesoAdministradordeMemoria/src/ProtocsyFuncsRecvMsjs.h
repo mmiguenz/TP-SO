@@ -33,6 +33,13 @@ typedef struct {
 
 }__attribute__((packed))t_protoc_escrituraProceso;
 
+typedef struct {
+	int tamanio;
+	char* contenido;
+
+}__attribute__((packed))t_protoc_lectura_Swap;
+
+
 
 
 
