@@ -94,7 +94,7 @@ void notificarFinalizarCpu( int socket);
  }
 
  void procesarPedido(int socketCPU, int socketSwap, char tipoInstruccion){
-	 enum {INICIAR = 1,LEER,ESCRIBIR,FINALIZAR};
+
 
 	 switch(tipoInstruccion){
 
@@ -199,7 +199,7 @@ void notificarFinalizarCpu( int socket);
 	 t_protoc_inicio_lectura_Finaliza_Proceso* pedido = malloc(sizeof(t_protoc_inicio_lectura_Finaliza_Proceso));
 
 
-	 pedido->tipoInstrucc = 4 ;
+	 pedido->tipoInstrucc = FINALIZAR ;
 
 	 recv(socketCpu,pedido->paginas,sizeof(int),0);
 	 recv(socketCpu,pedido->pid,sizeof(int),0);
@@ -285,8 +285,8 @@ void notificarFinalizarCpu( int socket);
 
 	 protInic_Lect->tipoInstrucc = InstrSent;
 
- 	 recv(socketCPU,protInic_Lect->paginas,sizeof(int),0);
- 	 recv(socketCPU,protInic_Lect->pid,sizeof(int),0);
+ 	 recv(socketCPU,&(protInic_Lect->paginas),sizeof(int),0);
+ 	 recv(socketCPU,&(protInic_Lect->pid),sizeof(int),0);
 
  	 memcpy(buffer,&(protInic_Lect->tipoInstrucc),sizeof(char));
  	 int offset = sizeof(char);
