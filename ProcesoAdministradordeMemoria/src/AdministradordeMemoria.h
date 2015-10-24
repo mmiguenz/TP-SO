@@ -8,13 +8,7 @@
 #ifndef ADMINISTRADORDEMEMORIA_H_
 #define ADMINISTRADORDEMEMORIA_H_
 
-/*
-typedef struct{
-	int idFrame;
-	char bitPresencia;
-	char bitModificado;
-}t_regTablaPaginas;
-*/
+
 void procesarPedido(int,int,char);
 
 void inicializacionProceso(int,int);

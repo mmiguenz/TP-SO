@@ -187,13 +187,9 @@ void notificarFinalizarCpu( int socket);
 	 offset += tamanioContenido+1;
 	 send(socketCPU,bufferContAEnviar,offset,0);
 
-
-
-
-
-
-
  };
+
+
  void escrituraMemoria(int socketCPU, int socketSwap){
  };
 

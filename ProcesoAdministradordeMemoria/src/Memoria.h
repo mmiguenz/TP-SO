@@ -54,6 +54,6 @@ typedef struct{
 	int insertarContenidoenMP(int,char*,MEMORIAPRINCIPAL, t_tablaDePaginas*);
 	int reemplazarPaginaFIFO (int,char*, MEMORIAPRINCIPAL, t_tablaDePaginas*);
 	void enviarDatosPorModifASwap(int,char*,int,int);
-
+	void actualizarTablaPagsProceso(int,int,t_tablaDePaginas*);
 
 #endif /* MEMORIA_H_ */

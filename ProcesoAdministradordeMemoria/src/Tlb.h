@@ -28,6 +28,7 @@ void t_tlb_eliminar(TLB*,t_paramConfigAdmMem*);
 void t_tlb_limpiar(TLB*, int);
 //t_regTLB** inicializarTLB(int entradasTLB);
 int buscarPaginaTLB(TLB*,int, int);
+void agregarRegistroTLB(TLB*,int,int, int);
 
 #endif /* TLB_H_ */
 
