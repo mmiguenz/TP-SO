@@ -96,5 +96,7 @@ int buscarPaginaTLB(TLB* tlb,int pid, int pagina){
 }
 
 void agregarRegistroTLB(TLB* tlb,int pid, int pagina, int frame){
-
+	if (queue_size(tlb)<tlb->entradasTLB){
+		 queue_push(tlb,pid);
+		}
 }
