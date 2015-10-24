@@ -395,7 +395,7 @@ printf("El tipo de mensaje es:----- %d\n",encabezado.msgtype);
 					recibirMensaje(swap,listaDePaginas);
 					procesoAux.aceptado=1;
 					procesoAux.pid=encabezado.pid;
-					inicializarProceso(encabezado.pid, encabezado.pagina, memoriaLibre,marcosPorProceso);
+					//inicializarProceso(encabezado.pid, encabezado.pagina, memoriaLibre,marcosPorProceso);
 					printf("Se creado correctamente el proceso %i con: %i paginas\n", encabezado.pid, encabezado.pagina);
 					enviarMsjCPU(cpu,procesoAux);
 					//log_info(logger, "mProc %s Fallo\n", nombreProc);

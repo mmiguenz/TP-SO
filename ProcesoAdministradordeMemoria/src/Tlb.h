@@ -10,15 +10,26 @@
 #include "TADConfig.h"
 #include <commons/collections/queue.h>
 
-	typedef struct{
-		int** CacheTLB;
-		t_queue* sOrdenDeIngresoTLB;
-	} TLB;
 
+	typedef struct{
+		int frame;
+		int pid;
+		int pagina;
+	}t_regTLB;
+
+	typedef struct{
+			t_regTLB** CacheTLB;
+			t_queue* sOrdenDeIngresoTLB;
+			int entradasTLB;
+	}TLB;
+
+TLB* t_tlb_crear(t_paramConfigAdmMem*);
+void t_tlb_eliminar(TLB*,t_paramConfigAdmMem*);
+void t_tlb_limpiar(TLB*, int);
+//t_regTLB** inicializarTLB(int entradasTLB);
+int buscarPaginaTLB(TLB*,int, int);
 
 #endif /* TLB_H_ */
 
 
-TLB* t_tlb_crear(t_paramConfigAdmMem* );
-void t_tbl_eliminar(TLB*,t_paramConfigAdmMem*);
-void t_tlb_limpiar(TLB*, int pid );
+
