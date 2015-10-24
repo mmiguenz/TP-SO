@@ -14,7 +14,15 @@ typedef struct {
 	char tipoInstrucc;
 	int paginas;
 	int pid;
-}__attribute__((packed))t_protoc_inicio_lectura_Finaliza_Proceso;
+}__attribute__((packed))t_protoc_inicio_lectura_Proceso;
+
+
+
+typedef struct {
+	char tipoInstrucc;
+	int pid;
+}__attribute__((packed))t_protoc_Finaliza;
+
 
 typedef struct {
 	char tipoInstrucc;
