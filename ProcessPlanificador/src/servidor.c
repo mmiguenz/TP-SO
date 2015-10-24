@@ -16,7 +16,7 @@ char* path;
 int cpu_asignada;
 int quantum;
 
-}PCB ;
+} __attribute__((packed)) PCB ;
 
 typedef struct {
 	int tiempo_sleep;
@@ -413,7 +413,6 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	sem_post(&sem_mutex1);
 	char* mensaje;
 	mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(PcbAux->path)+strlen(PcbAux->nombreProc)+2+sizeof(t_msgHeader));
-
 	printf("\n PCB a mandar \n\n");
 	printf("EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
 	printf("EL Path es........: %s \n",PcbAux->path);
@@ -450,7 +449,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	PcbRun->path=malloc(strlen(PcbAux->path)+1);
 	PcbRun->nombreProc=malloc(strlen(PcbAux->nombreProc)+1);
 
-	free(PcbAux);
+	//free(PcbAux);
 
 	sem_wait(&sem_mutex1);
 	sem_wait(&sem_consumidor);
@@ -458,7 +457,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	queue_push(running_PCB,PcbRun);
 	sem_post(&sem_mutex1);
 
-	free(PcbRun);
+	//free(PcbRun);
 
 
 

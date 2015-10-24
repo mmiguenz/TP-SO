@@ -42,6 +42,7 @@ t_queue * block_PCB; //Cola de pcb que estan blockeados
 
 sem_t sem_mutex1;
 sem_t sem_consumidor;
+sem_t sem_mutex_block;
 
 typedef struct {
 char* nombreProc;
@@ -155,9 +156,13 @@ void *shell(int mutex){
 
 	    sem_init(&sem_mutex1, 1, 1);
 	    sem_init(&sem_consumidor,1,0);
+	    sem_init(&sem_mutex_block,1,0);
+
 	while(1){
     printf("Por favor ingrese el comando que desea ejecutar:  \n");
     sem_init(&sem_mutex1, 1, 1);
+    sem_init(&sem_mutex_block,1,1);
+
     recolectar_comando(comando);
 
     procesar_comando(comando, proceso, mutex);
@@ -282,6 +287,7 @@ void procesar_comando(char comando[], char proceso[],int mutex){
 	{
 		printf("El comando que eligio fue ps \n");
 		PCB* auxPCBrun=malloc(sizeof(PCB));
+		PCB* auxPCBblock=malloc(sizeof(PCB));
 		int tamanio=queue_size(fifo_PCB_ready);
 		semWait(mutex);
 		while(tamanio!=0){
@@ -295,6 +301,13 @@ void procesar_comando(char comando[], char proceso[],int mutex){
 		auxPCBrun=queue_pop(PCB_running);
 		printf("mProc %d: %s -> Corriendo \n",auxPCBrun->PID,auxPCBrun->nombreProc);
 		queue_push(PCB_running,auxPCBrun);
+		tamanio--;
+		}
+		tamanio=queue_size(block_PCB);
+		while(tamanio!=0){
+		auxPCBrun=queue_pop(block_PCB);
+		printf("mProc %d: %s -> Blockeado \n",auxPCBblock->PID,auxPCBblock->nombreProc);
+		queue_push(block_PCB,auxPCBblock);
 		tamanio--;
 		}
 		semSignal(mutex);
