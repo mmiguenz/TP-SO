@@ -18,9 +18,11 @@ typedef struct {
 
 typedef struct {
 	char tipoInstrucc;
-	int pagina;
-	char* contenido;
 	int pid;
+	int pagina;
+	int tamanio;
+	char* contenido;
+
 }__attribute__((packed))t_protoc_escrituraProceso;
 
 
