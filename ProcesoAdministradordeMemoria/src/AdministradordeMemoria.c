@@ -50,7 +50,7 @@ void escrituraMemoria(int,int);
 void finalizacionProceso(int socketCpu,int socketSwap);
 char notificarFinalizarSwap(int socket, t_protoc_Finaliza pedido);
 void notificarFinalizarCpu( int socket);
-
+void elminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 
 	 t_config* config;
 	 t_log* logAdmMem;
@@ -69,9 +69,8 @@ void notificarFinalizarCpu( int socket);
 
 	 	 	 	 /* Inicialización de espacio de memoria, array indicador de memoria libre y TLB */
 
-	 	 	 	 memoriaPrincipal.Memoria=inicializarMemoriaPrincipal(configAdmMem->cantidad_marcos,configAdmMem->tamanio_marco);
-	 	 	 	 memoriaPrincipal.MemoriaLibre=inicializarMemoriaLibre(configAdmMem->cantidad_marcos);
-	 	 	 	 memoriaPrincipal.cantMarcos = configAdmMem->cantidad_marcos;
+	 	 	 	 t_memoria_crear(&memoriaPrincipal,configAdmMem);
+
 
 	 	 	 	 char* habilitacionTLB = malloc(sizeof(char)*2);
 	 	 	 	 habilitacionTLB = configAdmMem->tlb_habilitada;
@@ -205,12 +204,11 @@ void notificarFinalizarCpu( int socket);
 
 
 	 if (configAdmMem->tlb_habilitada)
-		 t_tlb_limpiar(&tlb, &pedido->pid);
+		 t_tlb_limpiar(tlb, pedido->pid);
 
 
-	 finalizarProceso(pedido->pid,&memoriaPrincipal);
-
-
+	 finalizarProceso(&memoriaPrincipal, dictionary_get(tablasPags, string_itoa(pedido->pid)));
+	 elminarTablaDePaginasDelProceso(tablasPags,pedido->pid);
 
 
 	 char respuestaSwap = notificarFinalizarSwap(socketSwap,*pedido);
@@ -294,5 +292,24 @@ void notificarFinalizarCpu( int socket);
  	 memcpy(buffer+offset,&protInic_Lect->paginas,sizeof(int));
 
  	 return buffer;
+
+ }
+
+
+ void elminarTablaDePaginasDelProceso(t_dictionary* tablasPags,int pid)
+ {
+	 t_tablaDePaginas* tPaginas =   dictionary_get(tablasPags,string_itoa(pid));
+
+	 int i ;
+	 for(i = 0; i< tPaginas->cantTotalPaginas;i++)
+	 {
+		 free(tPaginas->Pagina[i]);
+	 }
+
+	 free(tPaginas->Pagina);
+	 free(tPaginas);
+
+
+	dictionary_remove(tablasPags,string_itoa(pid));
 
  }

@@ -73,8 +73,5 @@ void compactaClaves (int *tabla, int *n);
 
 void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre, int marcosPorProceso,int Cant_Marcos, char** memoria);
 
-PROCESO procesarCadena( int cpu, int swap, t_msgHeaderMemoria encabezado, int* memoriaLibre, int marcosPorProceso,int Cant_Marcos,char** memoria);
-
-PROCESO recibirMsjCPU(t_msgHeaderMemoria encabezado);
 
 #endif /* SERVIDOR_H_ */

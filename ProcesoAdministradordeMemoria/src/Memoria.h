@@ -10,13 +10,14 @@
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
 #include <commons/collections/dictionary.h>
-
+#include "TADConfig.h"
 
 
 typedef struct{
 		char** Memoria;
 		char** MemoriaLibre;
 		int cantMarcos;
+		int tamanioMarco;
 	}MEMORIAPRINCIPAL;
 
 	typedef struct{
@@ -42,18 +43,20 @@ typedef struct{
 		int contadorHits;
 	}TABLADEPROCESOS;
 
-	char ** inicializarMemoriaPrincipal(int Cant_Marcos, int Tamanio_Marco);
+	char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos, int Tamanio_Marco);
 	int ** inicializarTLB(int entradas_TLB);
 	char** inicializarMemoriaLibre(int cant_Marcos);
 	int Marcoslibres(int cantidadDePaginas, int Cant_Marcos, int* memoriaLibre);
 	t_list* asignarMarcos_MemoriaPrincipal(t_list* marcosAsignados, int* memoriaLibre, int MarcosPorProcesos);
 	void inicializarProceso(int PID, int totalDePaginas, int* memoriaLibre, int marcosPorProcesos);
-	void finalizarProceso(int pid, MEMORIAPRINCIPAL* memoria);
+	void finalizarProceso(MEMORIAPRINCIPAL* memoria,t_tablaDePaginas* tablaDePaginas);
 	void resetearMarco(void * numeroMarco);
 	int buscarPaginaenMemoria(int, int,t_dictionary*);
 	int insertarContenidoenMP(int,char*,MEMORIAPRINCIPAL, t_tablaDePaginas*);
 	int reemplazarPaginaFIFO (int,char*, MEMORIAPRINCIPAL, t_tablaDePaginas*);
 	void enviarDatosPorModifASwap(int,char*,int,int);
 	void actualizarTablaPagsProceso(int,int,t_tablaDePaginas*);
+	void inicializarMarco(MEMORIAPRINCIPAL*, char* marco);
+	void t_memoria_crear(MEMORIAPRINCIPAL* ,t_paramConfigAdmMem* config);
 
 #endif /* MEMORIA_H_ */

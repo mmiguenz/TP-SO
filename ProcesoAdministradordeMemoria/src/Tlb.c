@@ -76,7 +76,24 @@ t_regTLB** inicializarTLB(int entradasTLB){
 
 void t_tlb_limpiar(TLB* tlb, int pid )
 {
+	int i ;
 
+	for (i = 0; i< tlb->entradasTLB ; i++)
+	{
+		t_regTLB*  cacheTlb = tlb->CacheTLB[i];
+
+		if (cacheTlb->pid == pid)
+		{
+			cacheTlb->pid = -1;
+			cacheTlb->frame = -1;
+			cacheTlb->pagina = -1;
+
+		}
+
+
+		/* falta implemenar sacar de la cola de orden de ingreso */
+
+	}
 
 }
 
@@ -99,4 +116,14 @@ void agregarRegistroTLB(TLB* tlb,int pid, int pagina, int frame){
 	if (queue_size(tlb)<tlb->entradasTLB){
 		 queue_push(tlb,pid);
 		}
+}
+
+
+char t_tlb_estaLibre(t_regTLB* cacheTLB)
+{
+	return (cacheTLB->frame == -1
+			&& cacheTLB->pagina==-1
+			&& cacheTLB->pid == -1);
+
+
 }
