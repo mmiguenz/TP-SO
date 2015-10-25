@@ -58,5 +58,7 @@ typedef struct{
 	void actualizarTablaPagsProceso(int,int,t_tablaDePaginas*);
 	void inicializarMarco(MEMORIAPRINCIPAL*, char* marco);
 	void t_memoria_crear(MEMORIAPRINCIPAL* ,t_paramConfigAdmMem* config);
+	int t_hayFrameLibre(MEMORIAPRINCIPAL* memoria);
+	int  t_cargarContenido(MEMORIAPRINCIPAL*,char* contenido);
 
 #endif /* MEMORIA_H_ */

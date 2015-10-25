@@ -17,6 +17,8 @@
 #include "ProtocsyFuncsRecvMsjs.h"
 
 
+int buscarFrameLibre(MEMORIAPRINCIPAL* memoria);
+
 
 
 void t_memoria_crear(MEMORIAPRINCIPAL* memoriaP , t_paramConfigAdmMem* config)
@@ -137,6 +139,8 @@ int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 int insertarContenidoenMP(int socketSwap,char*contenido,MEMORIAPRINCIPAL memoria, t_tablaDePaginas* tablaPagsProceso){
 int i;
 int marco;
+
+/*reveer */
 	while (memoria.MemoriaLibre[i] == 0 && i< memoria.cantMarcos){
 		i++;
 	}
@@ -226,7 +230,45 @@ int convertirTimeStringToInt(char* time){
 
 void actualizarTablaPagsProceso(int frame,int pagina,t_tablaDePaginas* tablaPagsProceso){
 	tablaPagsProceso->Pagina[pagina]->bitPresencia = 1;
+	tablaPagsProceso->Pagina[pagina]->bitModificado=1;
 	tablaPagsProceso->Pagina[pagina]->horaIngreso = convertirTimeStringToInt(temporal_get_string_time());
 	tablaPagsProceso->Pagina[pagina]->idFrame = frame;
+}
+
+
+int t_cargarContenido(MEMORIAPRINCIPAL* memoriaP,char* contenido)
+{
+	int frame = buscarFrameLibre(memoriaP);
+
+	memoriaP->Memoria[frame]  = contenido;
+	*(memoriaP->MemoriaLibre[frame]) = 1 ;
+	return frame ;
+
+
+
+
+
+
+}
+
+int buscarFrameLibre(MEMORIAPRINCIPAL* memoria)
+{
+	int i;
+	for (i = 0; memoria->cantMarcos;i++)
+	{
+		if(memoria->MemoriaLibre[i]==0)
+			return i;
+	}
+
+	return -1;
+
+
+}
+
+
+int t_hayFrameLibre(MEMORIAPRINCIPAL* memoria)
+{
+	return buscarFrameLibre(memoria)>=0? 1 : 0;
+
 }
 

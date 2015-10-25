@@ -51,7 +51,8 @@ void finalizacionProceso(int socketCpu,int socketSwap);
 char notificarFinalizarSwap(int socket, t_protoc_Finaliza pedido);
 void notificarFinalizarCpu( int socket);
 void elminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
-
+char escribirContenido(t_protoc_escrituraProceso* pedido, int socketSwap);
+void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 t_config* config;
 	 t_log* logAdmMem;
 	 t_paramConfigAdmMem* configAdmMem;
@@ -190,7 +191,97 @@ void elminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 
 
  void escrituraMemoria(int socketCPU, int socketSwap){
- };
+
+	 t_protoc_escrituraProceso* pedido = malloc(sizeof(t_protoc_escrituraProceso));
+	 pedido->tipoInstrucc = ESCRIBIR;
+
+	 recv(socketCPU, &(pedido->pid),sizeof(int), 0);
+	 recv(socketCPU, &(pedido->pagina),sizeof(int), 0);
+	 recv(socketCPU, &(pedido->tamanio),sizeof(int), 0);
+	 pedido->contenido = malloc(pedido->tamanio);
+	 recv(socketCPU,pedido->contenido, pedido->tamanio,0);
+
+
+	 char respuesta =  escribirContenido(pedido, socketSwap);
+
+	 send(socketCPU,&respuesta,sizeof(char),0);
+
+
+
+
+ }
+
+
+ char escribirContenido(t_protoc_escrituraProceso* pedido, int socketSwap)
+ {
+
+	 int frame = buscarPaginaenMemoria(pedido->pid, pedido->pagina,tablasPags);
+
+
+	 if(frame>=0)
+	 {
+		 memoriaPrincipal.Memoria[frame] = pedido->contenido;
+		 return 1 ;
+
+	 }else
+	 {
+		 if( ! t_hayFrameLibre(&memoriaPrincipal))
+		 {
+			 return -1;
+
+		 }
+		 solicitarPagina(pedido,socketSwap);
+		 return escribirContenido( pedido, socketSwap);
+
+
+	 }
+
+
+
+
+ }
+
+
+ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap)
+ {
+	 t_protoc_inicio_lectura_Proceso* pedidoLectura = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
+	 pedidoLectura->pid  = pedido->pid;
+	 pedidoLectura->paginas = pedido->pagina;
+	 pedidoLectura->tipoInstrucc = LEER;
+
+	 void* buffer = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
+	 int offset = 0 ;
+
+	 memcpy(buffer,&(pedidoLectura->tipoInstrucc),sizeof(char));
+	 offset+=sizeof(int);
+	 memcpy(buffer+offset,&(pedidoLectura->paginas),sizeof(int));
+	 offset+=sizeof(int);
+	 memcpy(buffer+offset,&(pedidoLectura->pid),sizeof(int));
+
+
+	 send(socketSwap,buffer,sizeof(t_protoc_inicio_lectura_Proceso),0);
+	 free(buffer);
+
+	 int tamanioContenido= 0 ;
+	 recv(socketSwap,&tamanioContenido,sizeof(int),0);
+
+	 char* contenido = malloc(tamanioContenido);
+	 recv(socketSwap,contenido,tamanioContenido,0);
+
+
+
+	int frame = t_cargarContenido(&memoriaPrincipal,contenido);
+
+	/*actualizar tabla de paginas paginas */
+	t_tablaDePaginas* tabla =  dictionary_get(tablasPags,string_itoa(pedido->pid));
+
+	tabla->Pagina[pedido->pagina]->bitPresencia=1;
+	tabla->Pagina[pedido->pagina]->idFrame=frame;
+	tabla->Pagina[pedido->pagina]->horaIngreso=90000;
+
+
+ }
+
 
 
  void finalizacionProceso(int socketCpu,int socketSwap){
