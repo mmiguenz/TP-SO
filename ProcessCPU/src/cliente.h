@@ -32,10 +32,8 @@
 
 typedef struct {
 int aceptado;
-int pid;
-//int tamanioMensaje;
-//char* contenido;
 }PROCESO;
+
 
 int conectar_cliente(int puerto,char* ip);
 
@@ -45,5 +43,8 @@ void enviarMesaje(int socket,char* mesaje,t_log* logger);
 
 void enviarSolicitud (int pid,int instruccion, int nroPag,int socket);
 
-PROCESO recibirMsjMemoria(int memoria);
+int recibirMsjMemoria(int memoria);
+
+void mandarMsjEscribir(int memoria, char texto[20],int pid, int instruccion, int nroPag);
+
 #endif /* CLIENTE_H_ */

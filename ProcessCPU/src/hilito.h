@@ -52,6 +52,8 @@ int cpu_asignada;
 int quantum; // si el quantum es -1 la planificacion es fifi, sino es round robin
 }PCB ;
 
+int porcentajeDeUso(int diff, int instrucciones, int retardo);
+
 int ubicarPunta(char cadena [1500], PCB* PcbAux);
 
 int procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux, int retardo);

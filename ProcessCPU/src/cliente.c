@@ -18,6 +18,13 @@ typedef struct  {
 	int pid;
 }t_msgHeaderMemoria;
 
+typedef struct  {
+	int instruccion;
+	int pagina;
+	int pid;
+	char texto[20];
+
+}estructuraEscribir;
 
 int conectar_cliente(int puerto,char* ip){
 	struct sockaddr_in dire_serv;
@@ -71,16 +78,48 @@ void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
 	send(socket,&header,sizeof(t_msgHeaderMemoria),0);
 	return;
 }
-PROCESO recibirMsjMemoria(int memoria){
+int recibirMsjMemoria(int memoria){
 
-	PROCESO proceso;
-	proceso.aceptado=0;
-	proceso.pid=0;
-	//proceso.tamanioMensaje=0;
-	recv(memoria, &proceso, sizeof(proceso), 0);
+	PROCESO mensaje;
 
-	return proceso;
+	memset(&mensaje, 0, sizeof(PROCESO));
+
+
+	recv(memoria, &mensaje, sizeof(PROCESO), 0);
+
+
+	//recv(memoria, &proceso, sizeof(proceso), 0);
+
+	return mensaje.aceptado;
 }
 
+void mandarMsjEscribir(int memoria, char texto[20],int pid, int instruccion, int nroPag){
+
+		char* mensaje;
+		mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(texto)+1);
+
+		int offset=0;
+		memcpy(mensaje +offset  , &instruccion, sizeof(int));
+		offset+=sizeof(int);
+		memcpy(mensaje +offset  , &pid, sizeof(int));
+		offset+=sizeof(int);
+		memcpy(mensaje +offset  , &nroPag, sizeof(int));
+		offset+=sizeof(int);
+		memcpy(mensaje +offset  , texto, strlen(texto)+1);
+		offset+=strlen(texto)+1;
+
+		/*memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+		header.msgtype = 1;//MSG_PCB;
+		header.payload_size = offset;
+		send(socketCliente,&header,sizeof(header),0);
+		send(socketCliente,mensaje,header.payload_size,0);*/
+
+		send(memoria,mensaje,offset,0);
+
+
+		free(mensaje);
+		return;
+
+}
 
 #endif /* CLIENTE_C_ */

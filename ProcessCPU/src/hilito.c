@@ -45,7 +45,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 
-int recolectar_Texto(char cadena[1500], int punta, char texto[15])
+int recolectar_Texto(char cadena[1500], int punta, char texto[20])
 {
 	int i =0;
 
@@ -129,10 +129,10 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		printf("El comando es Iniciar y la cantidad de paginas es %d \n", paginas);
 
 		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
-		PROCESO msj = recibirMsjMemoria(memoria);
-		printf("mensaje de la memoria %d \n",msj.aceptado);
+		int msj = recibirMsjMemoria(memoria);
+		printf("mensaje de la memoria %d \n",msj);
 
-		if(msj.aceptado==1)
+		if(msj==1)
 		{
 			printf("Hay lugar\n");
 
@@ -166,20 +166,20 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		int paginas = atoi(pagina);
 		printf("Encontro leer\n");
 		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
-		PROCESO msj = recibirMsjMemoria(memoria);
+		int msj = recibirMsjMemoria(memoria);
 
-		printf("mensaje de la memoria %d \n",msj.aceptado);
+		printf("mensaje de la memoria %d \n",msj);
 
-		if(msj.aceptado==1)
+		if(msj>0)
 		{
 			printf("Pude leer\n");
-			/*char* mensaje;
-			mensaje = malloc(msj.tamanioMensaje);
-			recv(memoria, mensaje, msj.tamanioMensaje, 0);
-			printf("El contenido leido es:%s\n", mensaje);*/
+			char* mensaje;
+			mensaje = malloc(msj);
+			recv(memoria, mensaje, msj, 0);
+			printf("El contenido leido es:%s\n", mensaje);
 
 			log_info(logger, "El pid es %d", PcbAux->PID);
-			log_info(logger, "mProc %s - Pagina %d leida: contenido", PcbAux->nombreProc, paginas);
+			log_info(logger, "mProc %s - Pagina %d leida: %s", PcbAux->nombreProc, paginas, mensaje);
 
 
 			PcbAux->contadorProgram++;
@@ -207,20 +207,16 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 		printf("El comando es Escribir en la pagina: %d \n", paginas);
 
-		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);//MANDAR TEXTO
-		PROCESO msj = recibirMsjMemoria(memoria);
+		//mandar instruccion pid pagina  tamaniomsj texto
+		mandarMsjEscribir(memoria, texto, PcbAux->PID, instruccion, paginas);
+		int msj = recibirMsjMemoria(memoria);
 
 		printf("El texto a escribir es: %s \n",texto);
-		printf("mensaje de la memoria %d \n",msj.aceptado);
+		printf("mensaje de la memoria %d \n",msj);
 
-		if(msj.aceptado==1){
+		if(msj==1){
 			printf("mProc %s - Pagina %d escrita: %s \n", PcbAux->nombreProc,paginas, texto);
 			PcbAux->contadorProgram++;
-			//eviar a memoria el contenido a escribir
-			/*char* mensaje;
-					mensaje = malloc(sizeof(texto));
-					send(memoria, mensaje, sizeof(texto), 0);
-					printf("El contenido leido es:%s\n", mensaje);*/
 			log_info(logger, "El pid es %d", PcbAux->PID);
 			log_info(logger, "mProc %s - Pagina %d escrita:%s",PcbAux->nombreProc, paginas, texto);
 
@@ -242,9 +238,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		int tiempo = atoi(pagina);
 		printf("El comando es Entrada-Salida y la cantidad de tiempo es %d \n", tiempo);
 
-		/*enviarSolicitud (PcbAux->PID, instruccion, tiempo , memoria);
-		PROCESO msj = recibirMsjMemoria(memoria);
-		printf("El mensaje de la memoria es: %d", msj.aceptado);*/
+
 		PcbAux->contadorProgram++;
 
 		t_msgHeader header;
@@ -269,15 +263,15 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 	}
 	case 4://Finalizar
 	{
-		instruccion = 3;
+		instruccion =4 ;
 		printf("Encontre Finalizar\n");
 		punta+=200;
+		int paginas=0;
+		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
+		int msj = recibirMsjMemoria(memoria);
+		printf("mensaje de la memoria %d \n",msj);
 
-		enviarSolicitud (PcbAux->PID, instruccion, 0 , memoria);
-		PROCESO msj = recibirMsjMemoria(memoria);
-		printf("mensaje de la memoria %d \n",msj.aceptado);
-
-		if(msj.aceptado==1)
+		if(msj==1)
 		{
 			printf("El proceso Pudo finalizar\n");
 			log_info(logger, "El pid es %d", PcbAux->PID);
@@ -291,7 +285,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			final = time( NULL );
 			printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 			int diff =  difftime(final, comienzo);
-			int porcentaje= porcentajeDeUso(diff, PcbAux->contadorProgram);
+			int porcentaje= porcentajeDeUso(diff, PcbAux->contadorProgram, retardo);
 			printf("El porcentaje de uso es %d\n", porcentaje);
 
 			t_msgHeader header;
@@ -501,10 +495,10 @@ void* conectar(void* mensa){
 	return EXIT_SUCCESS;
 }
 
-int porcentajeDeUso(int diff, int instrucciones){
+int porcentajeDeUso(int diff, int instrucciones, int retardo){
 	int porcentaje;
 	int pulsos = 60;
-	int instruccionesTotal = 60;
+	int instruccionesTotal = 60/retardo;
 
 	int cantInstOptima = (diff*instruccionesTotal)/pulsos;
 	porcentaje = (instrucciones*100)/cantInstOptima;
@@ -539,7 +533,7 @@ int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int p
 	final = time( NULL );
 	printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 	int diff =  difftime(final, comienzo);
-	int porcentaje= porcentajeDeUso(diff, quantum);
+	int porcentaje= porcentajeDeUso(diff, quantum, retardo);
 	printf("El porcentaje de uso es %d\n", porcentaje);
 
 	if(strcmp(comando, "finalizar")){
@@ -567,10 +561,10 @@ void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux
 	//int punta=200;
 	//Ejecución de ráfaga concluída, indicando PID.
 	enviarSolicitud (PcbAux->PID, instruccion, 0 , memoria);
-	PROCESO msj = recibirMsjMemoria(memoria);
-	printf("mensaje de la memoria %d \n",msj.aceptado);
+	int msj = recibirMsjMemoria(memoria);
+	printf("mensaje de la memoria %d \n",msj);
 
-	if(msj.aceptado==1)
+	if(msj==1)
 	{
 		printf("El proceso Pudo finalizar\n");
 		log_info(logger, "El pid es %d", PcbAux->PID);
