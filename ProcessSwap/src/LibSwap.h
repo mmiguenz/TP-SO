@@ -50,7 +50,7 @@ t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas);
 t_espacio_ocupado* recibir_Solicitud(PROCESOSWAP procesoSwap,t_list* list_Libres,t_list* list_Ocupados);
 t_espacio_ocupado* asignar_espacio_actualizar(int pid, int paginas,t_espacio_libre* espacio, t_list* list_libre,t_list* list_Ocupado);
 t_prot_cpu_mem* desSerializar(void* buffer, size_t packageSize);
-void responderPedido(int memSocket, t_prot_cpu_mem* pedido);
+void responderPedido(int memSocket, t_prot_cpu_mem* pedido,t_list* list_Libres,t_list* list_Ocupados);
 
 
 #endif /* LIBSWAP_H_ */

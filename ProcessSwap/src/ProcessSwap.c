@@ -28,6 +28,7 @@
 #include "servidor_swat.h"
 #include "protocolo_swat.h"
 #include <commons/log.h>
+#include <commons/collections/list.h>
 
 #define BACKLOG 5
 
