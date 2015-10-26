@@ -16,27 +16,57 @@
 #include "AdministradordeMemoria.h"
 #include "ProtocsyFuncsRecvMsjs.h"
 
-t_dictionary* dicInfoProcesos;
+
+int buscarFrameLibre(MEMORIAPRINCIPAL* memoria);
 
 
-char ** inicializarMemoriaPrincipal(int Cant_Marcos,int Tamanio_Marco)
+
+void t_memoria_crear(MEMORIAPRINCIPAL* memoriaP , t_paramConfigAdmMem* config)
+{
+
+
+	memoriaP->Memoria=inicializarMemoriaPrincipal(memoriaP,config->cantidad_marcos,config->tamanio_marco);
+	memoriaP->MemoriaLibre=inicializarMemoriaLibre(config->cantidad_marcos);
+	memoriaP->cantMarcos = config->cantidad_marcos;
+	memoriaP->tamanioMarco = config->tamanio_marco;
+
+
+
+
+}
+
+
+char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,int Tamanio_Marco)
 {
 	int i;
 	char** memoriaPrincipal;
+
 	memoriaPrincipal = malloc(sizeof(char*) * Cant_Marcos);
+
 
 		//Creo los MARCOS
 		for (i = 0; i < Cant_Marcos; i++)
 		{
-					char* tmp = malloc(sizeof(char) * Tamanio_Marco);
-					int tamanioDeTextoParaIniciar = strlen("Valor por defecto :D");
-					memcpy(tmp, "Valor por defecto :D", tamanioDeTextoParaIniciar);
-					tmp[tamanioDeTextoParaIniciar] = '\0';
-					memoriaPrincipal[i] = tmp;
+
+				inicializarMarco(memoriaP,memoriaPrincipal[i]);
 		}
 
 	return memoriaPrincipal;
 }
+
+
+void inicializarMarco(MEMORIAPRINCIPAL* memoriaP, char* marco)
+{
+	char* tmp = malloc(sizeof(char) * memoriaP->tamanioMarco);
+						int tamanioDeTextoParaIniciar = strlen("Valor por defecto :D");
+						memcpy(tmp, "Valor por defecto :D", tamanioDeTextoParaIniciar);
+						tmp[tamanioDeTextoParaIniciar] = '\0';
+						marco= tmp;
+
+
+
+}
+
 char** inicializarMemoriaLibre(int cant_Marcos)
 {
 	char** memoriaLibre;
@@ -73,39 +103,21 @@ int Marcoslibres(int cantidadDePaginas, int Cant_Marcos, int* memoriaLibre)
 }
 
 
-void finalizarProceso(int pid, MEMORIAPRINCIPAL* memoriaP)
+void finalizarProceso(MEMORIAPRINCIPAL* memoriaP ,t_tablaDePaginas* tablaDePaginas)
 {
- char ** memoria = 	memoriaP->Memoria;
+	int i ;
 
-			TABLADEPROCESOS* procesoAux = dictionary_remove(dicInfoProcesos, pid);
-			int i;
-			int totalDePaginas = (*procesoAux).totalDePaginas;
-			int** tablaDePaginas = (*procesoAux).tablaDePaginas;
-			t_list* marcosAsignados = (*procesoAux).marcosAsignados;
-			t_queue * contenidoDeMarcos = (*procesoAux).contenidoDeMarcos;
+	for (i = 0 ; i < tablaDePaginas->cantTotalPaginas; i++)
+	{
+		t_regPagina* pagina = tablaDePaginas->Pagina[i];
 
-			//elimina tabla de paginas del proceso
-				for(i=0; i<totalDePaginas; i++)
-				free(tablaDePaginas[i]);
-				free(tablaDePaginas);
-
-			//libero marcos de memoria Principal
-			list_iterate(marcosAsignados, resetearMarco);//ver parametros
-			list_clean(marcosAsignados);
-			list_destroy(marcosAsignados);
-			queue_clean(contenidoDeMarcos);
-			queue_destroy(contenidoDeMarcos);
-			free(procesoAux);
-
-	return;
-}
+		 inicializarMarco(memoriaP, memoriaP->Memoria[pagina->idFrame]);
+		 *(memoriaP->MemoriaLibre[pagina->idFrame]) = 0;
 
 
-void resetearMarco(void * numeroMarco)
-{
-	int * numMarco = (int*)numeroMarco;
-	//memcpy(memoria[numeroMarco],"Marco Libre" , strlen("Marco Libre"));
-	//memoria[numeroMarco][strlen("Marco Libre")] = '\0';
+	}
+
+
 	return;
 }
 
@@ -127,6 +139,8 @@ int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 int insertarContenidoenMP(int socketSwap,char*contenido,MEMORIAPRINCIPAL memoria, t_tablaDePaginas* tablaPagsProceso){
 int i;
 int marco;
+
+/*reveer */
 	while (memoria.MemoriaLibre[i] == 0 && i< memoria.cantMarcos){
 		i++;
 	}
@@ -216,7 +230,45 @@ int convertirTimeStringToInt(char* time){
 
 void actualizarTablaPagsProceso(int frame,int pagina,t_tablaDePaginas* tablaPagsProceso){
 	tablaPagsProceso->Pagina[pagina]->bitPresencia = 1;
+	tablaPagsProceso->Pagina[pagina]->bitModificado=1;
 	tablaPagsProceso->Pagina[pagina]->horaIngreso = convertirTimeStringToInt(temporal_get_string_time());
 	tablaPagsProceso->Pagina[pagina]->idFrame = frame;
+}
+
+
+int t_cargarContenido(MEMORIAPRINCIPAL* memoriaP,char* contenido)
+{
+	int frame = buscarFrameLibre(memoriaP);
+
+	memoriaP->Memoria[frame]  = contenido;
+	*(memoriaP->MemoriaLibre[frame]) = 1 ;
+	return frame ;
+
+
+
+
+
+
+}
+
+int buscarFrameLibre(MEMORIAPRINCIPAL* memoria)
+{
+	int i;
+	for (i = 0; memoria->cantMarcos;i++)
+	{
+		if(memoria->MemoriaLibre[i]==0)
+			return i;
+	}
+
+	return -1;
+
+
+}
+
+
+int t_hayFrameLibre(MEMORIAPRINCIPAL* memoria)
+{
+	return buscarFrameLibre(memoria)>=0? 1 : 0;
+
 }
 
