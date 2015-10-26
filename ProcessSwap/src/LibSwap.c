@@ -150,15 +150,15 @@ t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas)
 t_espacio_ocupado* iniciarProceso(int memSocket,t_prot_cpu_mem* pedido,t_list* list_Libres,t_list* list_Ocupados)
 	{
 		t_espacio_ocupado* proceso_ocupado;//=malloc(sizeof(t_espacio_ocupado));
-		int cant_pag_requeridas=procesoSwap.pagina;
-		int pid_proceso_en_curso=procesoSwap.pid;
-		int mensaje_solicitado=procesoSwap.msgtype;
+		int cant_pag_requeridas=pedido->paginas;
+		int pid_proceso_en_curso=pedido->pid;
+		int mensaje_solicitado=pedido->tipo_Instruccion;
 
 		int espacio_libre=total_Libres(list_Libres);
 		switch ( mensaje_solicitado) {
 		case 1://Iniciar
 			if(espacio_libre>=cant_pag_requeridas){
-				t_espacio_libre* espacio = encontrar_Espacio(list_Libres, procesoSwap.pagina);
+				t_espacio_libre* espacio = encontrar_Espacio(list_Libres, pedido->paginas);
 				if(espacio == NULL)
 					{
 						// ver la funcionalidadde compactar y rebuscar el espacio libre

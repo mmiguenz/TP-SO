@@ -76,7 +76,7 @@ int main(void)
 		if (status != 0){
 			printf("Se recibio el paquete desde el administrador de memoria");
 			t_prot_cpu_mem* pedido = desSerializar(buffer,packageSize);
-			responderPedido(memSocket,pedido);
+			responderPedido(memSocket,pedido,listaEspaciosLibres,espacio_ocupado);
 
 		}
 	}
