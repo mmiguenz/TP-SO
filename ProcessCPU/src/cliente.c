@@ -96,8 +96,8 @@ int recibirMsjMemoria(int memoria){
 void mandarMsjEscribir(int memoria, char texto[20],int pid, int instruccion, int nroPag){
 
 		char* mensaje;
-		mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(texto)+1);
-
+		mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(texto)+1);
+		int tamanio= strlen(texto);
 		int offset=0;
 		memcpy(mensaje +offset  , &instruccion, sizeof(int));
 		offset+=sizeof(int);
@@ -105,14 +105,10 @@ void mandarMsjEscribir(int memoria, char texto[20],int pid, int instruccion, int
 		offset+=sizeof(int);
 		memcpy(mensaje +offset  , &nroPag, sizeof(int));
 		offset+=sizeof(int);
+		memcpy(mensaje +offset  , &tamanio, sizeof(int));
+		offset+=sizeof(int);
 		memcpy(mensaje +offset  , texto, strlen(texto)+1);
 		offset+=strlen(texto)+1;
-
-		/*memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-		header.msgtype = 1;//MSG_PCB;
-		header.payload_size = offset;
-		send(socketCliente,&header,sizeof(header),0);
-		send(socketCliente,mensaje,header.payload_size,0);*/
 
 		send(memoria,mensaje,offset,0);
 

@@ -560,30 +560,25 @@ void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux
 	printf("Encontre Finalizar\n");
 	//int punta=200;
 	//Ejecución de ráfaga concluída, indicando PID.
-	enviarSolicitud (PcbAux->PID, instruccion, 0 , memoria);
-	int msj = recibirMsjMemoria(memoria);
-	printf("mensaje de la memoria %d \n",msj);
 
-	if(msj==1)
-	{
-		printf("El proceso Pudo finalizar\n");
-		log_info(logger, "El pid es %d", PcbAux->PID);
-		log_info(logger, "mProc %s solo ejecuta sentencia finalizado", PcbAux->nombreProc);
+	printf("El proceso Pudo finalizar\n");
+	log_info(logger, "El pid es %d", PcbAux->PID);
+	log_info(logger, "mProc %s solo ejecuta sentencia finalizado", PcbAux->nombreProc);
 
-		t_msgHeader header;
-		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-		header.msgtype = 3;
-		header.payload_size = 0; //en este caso el playload lo usamos para pid
-		send(planificador, &header, sizeof( t_msgHeader), 0);
+	t_msgHeader header;
+	memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+	header.msgtype = 3;
+	header.payload_size = 0; //en este caso el playload lo usamos para pid
+	send(planificador, &header, sizeof( t_msgHeader), 0);
 
-		PCB_PARCIAL parcial;
-		memset(&parcial, 0, sizeof(PCB_PARCIAL)); // Ahora el struct tiene cero en todos sus miembros
-		parcial.pid = PcbAux->PID; //en este caso el playload lo usamos para pid
-		parcial.tiempo = 0;
-		parcial.contadorDePrograma = PcbAux->contadorProgram;
-		send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
-		sleep(retardo);
+	PCB_PARCIAL parcial;
+	memset(&parcial, 0, sizeof(PCB_PARCIAL)); // Ahora el struct tiene cero en todos sus miembros
+	parcial.pid = PcbAux->PID; //en este caso el playload lo usamos para pid
+	parcial.tiempo = 0;
+	parcial.contadorDePrograma = PcbAux->contadorProgram;
+	send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
+	sleep(retardo);
 
-	}
+
 
 }
