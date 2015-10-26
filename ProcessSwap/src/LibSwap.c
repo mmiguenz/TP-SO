@@ -30,7 +30,7 @@
 
 int tam_Pagina , cant_Pagina, tamanio_Total;
 char* ruta_Swap;
-
+typedef enum tipopedidosCpu {INICIAR=1,LEER,FINALIZAR} t_tipoPedidos;
 
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
 
@@ -325,7 +325,37 @@ void finalizar_Proceso (t_list* espacio_Libre, t_list* espacio_Ocupado, pid_t pi
 	list_remove_by_condition(espacio_Ocupado,  (void*) validar_proceso);
 }
 
+t_prot_cpu_mem* desSerializar(void* buffer, size_t packageSize)
+{
+	t_prot_cpu_mem*  pedido = malloc(sizeof(t_prot_cpu_mem));
 
+	memcpy(&pedido->tipo_Instruccion,buffer,sizeof(char));
+	memcpy(&pedido->pid,buffer + sizeof(char) , sizeof(int));
+	memcpy(&pedido->paginas, buffer + sizeof(char) + sizeof(int), sizeof(int));
+
+
+	return pedido;
+
+}
+
+void responderPedido(int memSocket, t_prot_cpu_mem* pedido)
+{
+
+	t_tipoPedidos tipoPedido  = pedido->tipo_Instruccion;
+
+	switch (tipoPedido)
+	{
+	/*
+	case    INICIAR: iniciarProceso(memSocket, pedido); break;
+	case   	 LEER: realizarLectura(memSocket,pedido); break ;
+	case  	 FINALIZAR: finalizarProceso(memSocket,pedido); break;
+
+	default: tipoDePedidoIncorrecto(memSocket); break;
+
+	*/
+
+	}
+}
 
 
 

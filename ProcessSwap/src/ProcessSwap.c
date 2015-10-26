@@ -23,54 +23,75 @@
 #include <net/if.h>
 #include <commons/config.h>
 #include "LibSwap.h"
+#include "config_swat.h"
+#include "particion_swat.h"
+#include "servidor_swat.h"
+#include "protocolo_swat.h"
+#include <commons/log.h>
 
+#define BACKLOG 5
 
+t_particion* particion;
+t_swapConfig* config;
 
 
 int main(void)
 {
-	//Espacio para la configuracion del entorno---------------------------<<
+	//Logueo
+	t_log* log_Swap = log_create("Log_Swap.txt","AdministradorSwap",false,LOG_LEVEL_TRACE);
+	log_trace(log_Swap, "Inicia Logeo Swap.");
 
-	//variables de configuracion.
-	char* puerto_escucha_swap;
-	char* nombre_swap;
-	int cant_pag;
-	int tam_pag;
-	int retardo_swat;
-	int retardo_compactacion;
-	t_config* config;
+	//estructuras de conexion
+	struct addrinfo* swapInfo;
+	struct addrinfo hints;
+
+	//configuraciones
+	config = swapConfig_Create();
+	swapConfig_GetConfig(config);
+	particion = t_particion_crear(config);
+
+	//manejo de listas Administradoras.
+	t_list* listaEspaciosLibres = crear_ListaLibre(config->cantidad_Paginas);
+	t_list* espacio_ocupado= crear_ListaOcupados();
+	int espacio_libre = total_Libres(listaEspaciosLibres);
+
+	//conexiones
+	hints = configAddrSvr();
+	getaddrinfo(NULL,config->puerto_Escucha,&hints,&swapInfo);
+	int listenningSocket =getListeningSocket(swapInfo);
+
+	listen(listenningSocket,BACKLOG);		// IMPORTANTE: listen() es una syscall BLOQUEANTE.
 
 
-	puerto_escucha_swap=malloc(sizeof puerto_escucha_swap);
+	int memSocket = connectToClient(listenningSocket);
 
-	config = config_create("config.cfg");
-	if(config != NULL){
-		//setea las variables de configuracion.
-		puerto_escucha_swap=config_get_string_value(config, "PORT_SWAP");
-		printf("PuertoSwap %s: \n",puerto_escucha_swap);
-		nombre_swap=config_get_string_value(config, "NOMBRE_SWAT");
-		printf("Nombre de ArchivoSwap: %s \n",nombre_swap);
-		cant_pag=config_get_int_value(config, "CANTIDAD_PAGINAS");
-		printf("Cantidad de paginas del archivo : %d \n",cant_pag);
-		tam_pag=config_get_int_value(config, "TAMANIO_PAGINA");
-		printf("tamaño de las paginas :%d \n",tam_pag);
-		retardo_swat=config_get_int_value(config, "RETARDO_SWAT");
-		printf("Restardo de Swap: %d \n" ,retardo_swat);
-		retardo_compactacion=config_get_int_value(config, "RETARDO_COMPACTACION");
-		printf("Retardo de compactacion: %d \n",retardo_compactacion);
-	}else{
-		perror("Error al crear Archivo de configuracion");
-		return EXIT_FAILURE;
+	int status = 1;
+	size_t packageSize = sizeof(t_prot_cpu_mem);
+	void* buffer = malloc(packageSize);
+
+	while (status != 0) {
+
+		status = recv(memSocket,buffer,packageSize,0);
+		if (status != 0){
+			printf("Se recibio el paquete desde el administrador de memoria");
+			t_prot_cpu_mem* pedido = desSerializar(buffer,packageSize);
+			responderPedido(memSocket,pedido);
+
+		}
 	}
 
-	//Obtiene el path del archivo creado.
-	char* pathArchivoSwap=crearArchivoSwap(nombre_swap,tam_pag,cant_pag);
+	if (status == -1) {
+		printf("Se ha cerrado el SWAP porque la Memoria ha finalizado");
+	}
 
-	printf("Path de Archivo creado: %s \n",pathArchivoSwap);
-	t_list* listaEspaciosLibres = crear_ListaLibre(cant_pag);
-	int espacio_libre = total_Libres(listaEspaciosLibres);
-	t_list* espacio_ocupado= crear_ListaOcupados();
+	close(memSocket);
+	close(listenningSocket);
+	swapConfig_Free(config);
 
+	return 0;
+
+
+/*
 	//MOCK de prueba de funcionalidad
 
 	//creo el proceso swap que recibe desde la memoria
@@ -82,158 +103,5 @@ int main(void)
 	// creo la estructura a devolver
 	t_espacio_ocupado* struct_paraMemoria = recibir_Solicitud(proceso_recibe,listaEspaciosLibres,espacio_ocupado);
 
-/*
- * typedef struct  {
-		int msgtype;
-		int pagina;
-		int pid;
-	}t_msgHeaderSwap
-*/
-
-	//----------Soy una barra separadora ;)--------------------------------------//
-/*
-	fd_set master;    // master file descriptor list
-    fd_set read_fds;  // temp file descriptor list for select()
-    int fdmax;        // maximum file descriptor number
-
-    int listener;     // listening socket descriptor
-    int newfd;        // newly accept()ed socket descriptor
-    struct sockaddr_storage remoteaddr; // client address
-    socklen_t addrlen;
-
-    char buf[256]="";    // buffer for client data
-
-    int nbytes;
-
-    char remoteIP[INET6_ADDRSTRLEN];
-
-    int yes=1;        // for setsockopt() SO_REUSEADDR, below
-    int i, j, rv;
-
-    struct addrinfo hints, *ai, *p;
-
-    FD_ZERO(&master);    // clear the master and temp sets
-    FD_ZERO(&read_fds);
-
-    // get us a socket and bind it
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, puerto_escucha_swap, &hints, &ai)) != 0) {
-        fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
-        exit(1);
-    }
-
-    for(p = ai; p != NULL; p = p->ai_next) {
-        listener = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (listener < 0) {
-            continue;
-        }
-
-        //  "address already in use" error message
-        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-
-        if (bind(listener, p->ai_addr, p->ai_addrlen) < 0) {
-            close(listener);
-            continue;
-        }
-
-        break;
-    }
-
-    // if we got here, it means we didn't get bound
-    if (p == NULL) {
-        fprintf(stderr, "selectserver: failed to bind\n");
-        exit(2);
-    }
-
-    freeaddrinfo(ai); // all done with this
-
-    // listen
-    if (listen(listener, 10) == -1) {
-        perror("listen");
-        exit(3);
-    }
-
-    // add the listener to the master set
-    FD_SET(listener, &master);
-
-    // keep track of the biggest file descriptor
-    fdmax = listener; // so far, it's this one
-
-    // main loop
-    for(;;) {
-        read_fds = master; // copy it
-        if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
-            perror("select");
-            exit(4);
-        }
-
-        // run through the existing connections looking for data to read
-        for(i = 0; i <= fdmax; i++) {
-            if (FD_ISSET(i, &read_fds)) { // we got one!!
-                if (i == listener) {
-                    // handle new connections
-                    addrlen = sizeof remoteaddr;
-                    newfd = accept(listener,
-                        (struct sockaddr *)&remoteaddr,
-                        &addrlen);
-
-                    if (newfd == -1) {
-                        perror("accept");
-                    } else {
-                        FD_SET(newfd, &master); // add to master set
-                        if (newfd > fdmax) {    // keep track of the max
-                            fdmax = newfd;
-                        }
-                        printf("selectserver: new connection from %s on "
-                            "Cpu %d\n",//Uso el identificador del soket como nombre del soket
-                            inet_ntop(remoteaddr.ss_family,
-                                get_in_addr((struct sockaddr*)&remoteaddr),
-                                remoteIP, INET6_ADDRSTRLEN),
-                            newfd);
-
-                        //----------------------------------------------------------------------------------------------------------------------------------------------------------//
-                        //------------------------------------------------------------------------------------------------------------/////
-
-
-                        PROCESOSWAP procesoAux;
-
-                        recv(newfd, &procesoAux,sizeof(PROCESOSWAP),0);
-                        printf("Recibi msj de memoria PID : %d \n",procesoAux.pid);
-                        //send (newfd,recibir_Solicitud(procesoAux,espacio_libre,espacio_ocupado),sizeof(t_espacio_ocupado),0);
-                        printf("Recibi mensaje: %d  del administrador de memoria.\n",procesoAux.msgtype);
-
-                    }
-                } else {
-                    // handle data from a client
-                    if ((nbytes = recv(i, buf, sizeof buf, 0)) <= 0) {
-                        // got error or connection closed by client
-                        if (nbytes == 0) {
-                            // connection closed
-                            printf("selectserver: socket %d hung up\n", i);
-
-                        } else {
-                            perror("recv");
-                        }
-                        close(i); // bye!
-                        FD_CLR(i, &master); // remove from master set
-                    } else {
-                       // we got some data from a client
-                       for(j = 0; j <= fdmax; j++) {
-                            // send to everyone!
-                            if (FD_ISSET(j, &master)&& i!=j) {
-                                // except the listener and ourselves
-                                shell (listener, i, j , buf, nbytes);
-                           }
-                        }
-                    }
-                } // END handle data from client
-            } // END got new incoming connection
-        } // END looping through file descriptors
-    } // END for(;;)--and you thought it would never end!
-
-
-    return 0;*/
+	*/
 }
