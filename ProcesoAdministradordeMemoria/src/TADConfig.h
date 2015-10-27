@@ -9,7 +9,7 @@
 #define TADCONFIG_H_
 
 typedef struct {
-	int puerto_escucha;
+	char* puerto_escucha;
 	char* ip_swap;
 	int puerto_swap;
 	int max_marcos_proceso;

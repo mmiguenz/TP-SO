@@ -11,7 +11,7 @@
  * a empezar.
  */
 
-void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre, int marcosPorProceso,int Cant_Marcos, char** memoria)
+void conectar_servidor(char* puerto_escucha_memoria, int swap)
 {
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */

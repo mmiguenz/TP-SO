@@ -14,7 +14,7 @@ t_paramConfigAdmMem* establecerConfigMemoria(){
 	t_config* archConfiguracion = config_create("../config.cfg");
 
 	t_paramConfigAdmMem* config = malloc(sizeof(t_paramConfigAdmMem));
-	config->puerto_escucha = config_get_int_value(archConfiguracion,"PUERTO_ESCUCHA");
+	config->puerto_escucha = config_get_string_value(archConfiguracion,"PUERTO_ESCUCHA");
 	config->puerto_swap = config_get_int_value(archConfiguracion,"PUERTO_SWAP");
 	config->ip_swap = config_get_string_value(archConfiguracion,"IP_SWAP");
 	config->max_marcos_proceso = config_get_int_value(archConfiguracion,"MAXIMO_MARCOS_POR_PROCESO");

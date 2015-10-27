@@ -61,6 +61,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 t_dictionary* tablasPags;
 	 TLB* tlb;
 	 t_queue* tlb2;
+	 int socketSwap;
 
  int main(void){
 
@@ -89,8 +90,8 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 	 	 	 /*Conexión del administrador de memoria como cliente al Swap y como Servidor con CPU*/
 
-	 	 	 	 int swap = conectar_cliente(configAdmMem->puerto_swap,configAdmMem->ip_swap);
-	 	 	 	 //conectar_servidor(configAdmMem->puerto_escucha, swap, memoriaPrincipal.MemoriaLibre,Max_Marcos_Por_Proceso,Cant_Marcos,memoriaPrincipal.Memoria);
+	 	 	 	 socketSwap = conectar_cliente(configAdmMem->puerto_swap,configAdmMem->ip_swap);
+	 	 	 	 conectar_servidor(configAdmMem->puerto_escucha, socketSwap);
 	 	 	 	 return EXIT_SUCCESS;
  }
 

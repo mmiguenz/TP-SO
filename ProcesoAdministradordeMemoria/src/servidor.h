@@ -71,7 +71,7 @@ void nuevoCliente (int servidor, int *clientes, int *nClientes);
 int dameMaximo (int *tabla, int n);
 void compactaClaves (int *tabla, int *n);
 
-void conectar_servidor(char* puerto_escucha_memoria, int swap,int* memoriaLibre, int marcosPorProceso,int Cant_Marcos, char** memoria);
+void conectar_servidor(char* puerto_escucha_memoria, int swap);
 
 
 #endif /* SERVIDOR_H_ */
