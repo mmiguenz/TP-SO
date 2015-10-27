@@ -6,10 +6,17 @@
  */
 
 
-typedef struct protocolo_cpu_memoria
-{
-	char tipo_Instruccion;
-	int pid;
-	int paginas;
 
-}__attribute__((packed)) t_prot_cpu_mem ;
+/*
+int responder_instruccion_iniciar(t_prot_cpu_mem* pedido){
+
+	void* buffer = malloc(sizeof(t_proceso));
+
+	memcpy(buffer,&proceso->pid,sizeof(int));
+	memcpy(buffer + sizeof(int),&proceso->paginaInicio,sizeof(int));
+	memcpy(buffer + (sizeof(int)*2),&proceso->cantidadDePaginas,sizeof(int));
+	send(memSocket,buffer,sizeof(t_proceso),0);
+}
+*/
+
+

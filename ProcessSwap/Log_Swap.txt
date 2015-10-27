@@ -1,0 +1,5 @@
+[TRACE] 22:34:12:771 AdministradorSwap/(5162:5162): Inicia Logeo Swap.
+[TRACE] 22:34:16:997 AdministradorSwap/(5173:5173): Inicia Logeo Swap.
+[TRACE] 22:34:22:512 AdministradorSwap/(5184:5184): Inicia Logeo Swap.
+[TRACE] 22:34:23:957 AdministradorSwap/(5195:5195): Inicia Logeo Swap.
+[TRACE] 22:34:27:208 AdministradorSwap/(5206:5206): Inicia Logeo Swap.

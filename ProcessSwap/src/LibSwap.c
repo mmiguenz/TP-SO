@@ -25,12 +25,14 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <commons/log.h>
 
 
 
 int tam_Pagina , cant_Pagina, tamanio_Total;
 char* ruta_Swap;
 typedef enum tipopedidosCpu {INICIAR=1,LEER,FINALIZAR,ESCRIBIR} t_tipoPedidos;
+typedef enum tipoRespuesta {TRUE=1,FALSE=0} t_tipoRespuesta;
 
 void shell(int listener, int skEmisor, int skReceptor, char * buf, int nbytes){
 
@@ -147,27 +149,26 @@ t_espacio_libre*  encontrar_Espacio(t_list* list_Libre, int paginas)
 	}
 
 
-t_espacio_ocupado* iniciarProceso(int memSocket,t_prot_cpu_mem* pedido,t_list* list_Libres,t_list* list_Ocupados)
+t_espacio_ocupado* iniciarProceso(int memSocket,t_prot_cpu_mem* pedido,t_list* list_Libres,t_list* list_Ocupados,t_log* log_Swap)
 {
-		t_espacio_ocupado* proceso_ocupado;//=malloc(sizeof(t_espacio_ocupado));
+		t_espacio_ocupado* proceso_ocupado;
 		int cant_pag_requeridas=pedido->paginas;
 		int pid_proceso_en_curso=pedido->pid;
 		int espacio_libre=total_Libres(list_Libres);
 			if(espacio_libre>=cant_pag_requeridas){
 				t_espacio_libre* espacio = encontrar_Espacio(list_Libres, pedido->paginas);
-				if(espacio == NULL)
-					{
+				if(espacio == NULL){
 						// ver la funcionalidadde compactar y rebuscar el espacio libre
-					printf("Va 2");
-					}
-				else
-					{
-					proceso_ocupado = asignar_espacio_actualizar(pid_proceso_en_curso,cant_pag_requeridas,espacio,list_Libres,list_Ocupados);
-					printf("Va 3  \n%d",proceso_ocupado->pid);
-					}
-				printf("Va 1");
+						printf( "En proceso compactacion del proceso %d.",pedido->pid);
+				}
+				else{
+						printf( "En proceso de asignacion a particion del proceso %d.",pedido->pid);
+						proceso_ocupado = asignar_espacio_actualizar(pid_proceso_en_curso,cant_pag_requeridas,espacio,list_Libres,list_Ocupados);
+						send(memSocket,TRUE,sizeof(int),0);
+				}
 			}else{
-				printf("NO hay espacio puto");
+				printf( "No hay  espacio suficiente libre para el proceso %d.",pedido->pid);
+				log_error(log_Swap, "No hay  espacio suficiente libre para el proceso %d.",pedido->pid);
 			}
 			return proceso_ocupado;
 }
@@ -318,7 +319,7 @@ t_prot_cpu_mem* desSerializar(void* buffer, size_t packageSize)
 
 }
 
-void responderPedido(int memSocket, t_prot_cpu_mem* pedido,t_list* list_Libres,t_list* list_Ocupados)
+void responderPedido(int memSocket, t_prot_cpu_mem* pedido,t_list* list_Libres,t_list* list_Ocupados,t_log* log_Swap)
 {
 
 	t_tipoPedidos tipoPedido  = pedido->tipo_Instruccion;
@@ -326,7 +327,7 @@ void responderPedido(int memSocket, t_prot_cpu_mem* pedido,t_list* list_Libres,t
 	switch (tipoPedido)
 	{
 
-		case    INICIAR: iniciarProceso(memSocket, pedido,list_Libres,list_Ocupados); break;
+		case    INICIAR: iniciarProceso(memSocket, pedido,list_Libres,list_Ocupados,log_Swap); break;
 		/*case   	 LEER: realizarLectura(memSocket,pedido); break ;
 		case  	 FINALIZAR: finalizarProceso(memSocket,pedido); break;
 		case  	 ESCRIBIR: finalizarProceso(memSocket,pedido); break;
