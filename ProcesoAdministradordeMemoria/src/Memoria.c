@@ -136,26 +136,22 @@ int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 	return frame;
 }
 
-int insertarContenidoenMP(int socketSwap,char*contenido,MEMORIAPRINCIPAL memoria, t_tablaDePaginas* tablaPagsProceso){
-int i;
-int marco;
+int insertarContenidoenMP(int socketSwap,char*contenido,MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso){
 
-/*reveer */
-	while (memoria.MemoriaLibre[i] == 0 && i< memoria.cantMarcos){
-		i++;
+int marco = buscarFrameLibre(memoria);
+
+	if (marco != -1){
+		memoria->Memoria[marco] = contenido;
 	}
-	if (memoria.MemoriaLibre[i] != 0){
-		memoria.Memoria[i] = contenido;
-		marco = i;
-	}
+
 	else {//posible switch a implementar con el algoritmo de reemplazo indicado por arch de config.
 	marco = reemplazarPaginaFIFO(socketSwap,contenido,memoria,tablaPagsProceso);
-	memoria.Memoria[marco] = contenido;
+	memoria->Memoria[marco] = contenido;
 	}
 	return marco;
 }
 
-int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL memoria, t_tablaDePaginas* tablaPagsProceso){
+int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso){
 	int i;
 	int pagAModif = 0;
 	int frame;
@@ -171,9 +167,9 @@ int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL memor
 	PaginaFirstIn->bitPresencia = 0;
 	int tamanioContenido;
 	if(PaginaFirstIn->bitModificado){
-		tamanioContenido = strlen(memoria.Memoria[PaginaFirstIn->idFrame]);
+		tamanioContenido = strlen(memoria->Memoria[PaginaFirstIn->idFrame]);
 		char* contenidoReemp = malloc((sizeof(char)*(tamanioContenido+1)));
-		contenidoReemp = memoria.Memoria[PaginaFirstIn->idFrame];
+		contenidoReemp = memoria->Memoria[PaginaFirstIn->idFrame];
 		enviarDatosPorModifASwap(socketSwap,contenidoReemp,pagAModif,tablaPagsProceso->pid);
 		frame = PaginaFirstIn->idFrame;
 	}
@@ -228,9 +224,8 @@ int convertirTimeStringToInt(char* time){
 	return timeConverted;
 }
 
-void actualizarTablaPagsProceso(int frame,int pagina,t_tablaDePaginas* tablaPagsProceso){
+void actualizarTablaPagina_porReemp(int frame,int pagina,t_tablaDePaginas* tablaPagsProceso){
 	tablaPagsProceso->Pagina[pagina]->bitPresencia = 1;
-	tablaPagsProceso->Pagina[pagina]->bitModificado=1;
 	tablaPagsProceso->Pagina[pagina]->horaIngreso = convertirTimeStringToInt(temporal_get_string_time());
 	tablaPagsProceso->Pagina[pagina]->idFrame = frame;
 }

@@ -52,10 +52,10 @@ typedef struct{
 	void finalizarProceso(MEMORIAPRINCIPAL* memoria,t_tablaDePaginas* tablaDePaginas);
 	void resetearMarco(void * numeroMarco);
 	int buscarPaginaenMemoria(int, int,t_dictionary*);
-	int insertarContenidoenMP(int,char*,MEMORIAPRINCIPAL, t_tablaDePaginas*);
-	int reemplazarPaginaFIFO (int,char*, MEMORIAPRINCIPAL, t_tablaDePaginas*);
+	int insertarContenidoenMP(int,char*,MEMORIAPRINCIPAL*, t_tablaDePaginas*);
+	int reemplazarPaginaFIFO (int,char*, MEMORIAPRINCIPAL*, t_tablaDePaginas*);
 	void enviarDatosPorModifASwap(int,char*,int,int);
-	void actualizarTablaPagsProceso(int,int,t_tablaDePaginas*);
+	void actualizarTablaPagina_porReemp(int,int,t_tablaDePaginas*);
 	void inicializarMarco(MEMORIAPRINCIPAL*, char* marco);
 	void t_memoria_crear(MEMORIAPRINCIPAL* ,t_paramConfigAdmMem* config);
 	int t_hayFrameLibre(MEMORIAPRINCIPAL* memoria);

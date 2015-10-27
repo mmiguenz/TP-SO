@@ -45,7 +45,7 @@ typedef struct{
 
 void crear_e_insertar_TabladePaginas(int, char*, t_dictionary*);
 void* deserializarInfoCPU_Inicio_Lectura(int, t_protoc_inicio_lectura_Proceso*,char);
-void lecturaMemoria(int,int,MEMORIAPRINCIPAL,TLB*,t_dictionary*);
+void lecturaMemoria(int,int,MEMORIAPRINCIPAL*,TLB*,t_dictionary*);
 void escrituraMemoria(int,int);
 void finalizacionProceso(int socketCpu,int socketSwap);
 char notificarFinalizarSwap(int socket, t_protoc_Finaliza pedido);
@@ -53,6 +53,7 @@ void notificarFinalizarCpu( int socket);
 void elminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 char escribirContenido(t_protoc_escrituraProceso* pedido, int socketSwap);
 void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
+
 	 t_config* config;
 	 t_log* logAdmMem;
 	 t_paramConfigAdmMem* configAdmMem;
@@ -104,7 +105,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 	 break;
 
 	 	 case LEER:{
-		 	 lecturaMemoria(socketCPU,socketSwap,memoriaPrincipal,tlb,tablasPags);
+		 	 lecturaMemoria(socketCPU,socketSwap,&memoriaPrincipal,tlb,tablasPags);
 	 	 }
 	 	 break;
 
@@ -147,11 +148,10 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 	 free(protInic);
  };
- void lecturaMemoria(int socketCPU, int socketSwap, MEMORIAPRINCIPAL memPrincip, TLB* tlb, t_dictionary* tablasdePagsProcesos){
+ void lecturaMemoria(int socketCPU, int socketSwap, MEMORIAPRINCIPAL* memPrincip, TLB* tlb, t_dictionary* tablasdePagsProcesos){
 
 	 t_protoc_inicio_lectura_Proceso* protInic = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
-	 char instruccSentencia = 2;
-	 void* buffer = deserializarInfoCPU_Inicio_Lectura(socketCPU,protInic,instruccSentencia);
+	 void* buffer = deserializarInfoCPU_Inicio_Lectura(socketCPU,protInic,LEER);
 
 	 // Búsqueda del frame asociado a la página del proceso en TLB
 	 int frame;
@@ -171,10 +171,11 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 			 t_tablaDePaginas* tablaPagsProceso = dictionary_get(tablasdePagsProcesos,string_itoa(protInic->pid));
 			 frame = insertarContenidoenMP(socketSwap,contenido,memPrincip,tablaPagsProceso);
-			 //guardarEnMemoria();//Agregar o reemplazar página.
-			 //guardarRegistroenTLB();//Reemplazar o agregar registro correspondiente en TLB.
+			 actualizarTablaPagina_porReemp(frame,protInic->paginas,tablaPagsProceso);
 
 		 }
+
+		 agregar_reemplazarRegistroTLB(tlb,protInic->pid,protInic->paginas,frame);
 	 }
 	 contenido = memoriaPrincipal.Memoria[frame];
 

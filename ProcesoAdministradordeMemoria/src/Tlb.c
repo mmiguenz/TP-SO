@@ -112,10 +112,28 @@ int buscarPaginaTLB(TLB* tlb,int pid, int pagina){
 	return frame;
 }
 
-void agregarRegistroTLB(TLB* tlb,int pid, int pagina, int frame){
-	if (queue_size(tlb)<tlb->entradasTLB){
-		 queue_push(tlb,pid);
+void agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int frame){
+	int i;
+	int* posCacheTLB = malloc(sizeof(int));
+
+	if (queue_size(tlb->sOrdenDeIngresoTLB)< tlb->entradasTLB){
+		 while (tlb->CacheTLB[i]->pid == -1){
+			 i++;
+		 }
+		 tlb->CacheTLB[i]->pid = pid;
+		 tlb->CacheTLB[i]->pagina = pagina;
+		 tlb->CacheTLB[i]->frame = frame;
+		 *(posCacheTLB) = i;
+		 queue_push(tlb->sOrdenDeIngresoTLB,posCacheTLB);
 		}
+	else{
+		 posCacheTLB = queue_peek(tlb->sOrdenDeIngresoTLB);
+		 tlb->CacheTLB[*posCacheTLB]->pid = pid;
+		 tlb->CacheTLB[*posCacheTLB]->pagina = pagina;
+		 tlb->CacheTLB[*posCacheTLB]->frame = frame;
+		 queue_pop(tlb->sOrdenDeIngresoTLB);
+		 queue_push(tlb->sOrdenDeIngresoTLB,posCacheTLB);
+	}
 }
 
 
