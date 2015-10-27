@@ -144,9 +144,13 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 		 char* pidConv = malloc(sizeof(char*));
 	 		 pidConv = string_itoa(protInic->pid);
 	 		 crear_e_insertar_TabladePaginas((protInic->paginas), pidConv, tablasPags);
+	 		 free(pidConv);
 	 	 }
 
+	 	 free(confirmSwap);
+	 	 free(confirmCPU);
 	 	 free(protInic);
+	 	 free(buffer);
  };
  void lecturaMemoria(int socketCPU, int socketSwap, MEMORIAPRINCIPAL* memPrincip, TLB* tlb, t_dictionary* tablasdePagsProcesos){
 
@@ -187,6 +191,10 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 memcpy(bufferContAEnviar+offset,contenido,tamanioContenido+1);
 	 offset += tamanioContenido+1;
 	 send(socketCPU,bufferContAEnviar,offset,0);
+
+	 free(protInic);
+	 free(contenido);
+	 free(bufferContAEnviar);
 
  };
 
@@ -366,6 +374,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 };
 
 	 dictionary_put(tablasPagsProcesos,pid,tablaPaginasProceso);
+	 free(tablaPaginasProceso);
  }
 
  void* deserializarInfoCPU_Inicio_Lectura(int socketCPU, t_protoc_inicio_lectura_Proceso* protInic_Lect, char InstrSent){

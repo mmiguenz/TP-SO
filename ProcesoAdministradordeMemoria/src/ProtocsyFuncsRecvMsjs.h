@@ -8,7 +8,7 @@
 #ifndef PROTOCSYFUNCSRECVMSJS_H_
 #define PROTOCSYFUNCSRECVMSJS_H_
 
-typedef enum {INICIAR=1, LEER , ESCRIBIR , FINALIZAR};
+enum {INICIAR=1, LEER , ESCRIBIR , FINALIZAR};
 
 typedef struct {
 	char tipoInstrucc;

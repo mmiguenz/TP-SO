@@ -16,6 +16,8 @@
 #include "AdministradordeMemoria.h"
 #include "ProtocsyFuncsRecvMsjs.h"
 
+#define MAXTIME 90000000;
+
 
 int buscarFrameLibre(MEMORIAPRINCIPAL* memoria);
 
@@ -125,7 +127,7 @@ void finalizarProceso(MEMORIAPRINCIPAL* memoriaP ,t_tablaDePaginas* tablaDePagin
 int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 	char* pidBuscado = string_itoa(pid);
 	int frame = -1;
-	t_tablaDePaginas* tablaPaginasProceso = malloc(sizeof(t_regPagina**)+sizeof(int));
+	t_tablaDePaginas* tablaPaginasProceso = malloc(sizeof(t_tablaDePaginas));
 
 	if (!(dictionary_is_empty(tablasPagsProcesos) && dictionary_has_key(tablasPagsProcesos,pidBuscado))){
 		tablaPaginasProceso = dictionary_get(tablasPagsProcesos,pidBuscado);
@@ -133,6 +135,7 @@ int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 			frame = tablaPaginasProceso->Pagina[pagina]->idFrame;
 		}
 	}
+	free(tablaPaginasProceso);
 	return frame;
 }
 
@@ -172,11 +175,13 @@ int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memo
 		contenidoReemp = memoria->Memoria[PaginaFirstIn->idFrame];
 		enviarDatosPorModifASwap(socketSwap,contenidoReemp,pagAModif,tablaPagsProceso->pid);
 		frame = PaginaFirstIn->idFrame;
+		free(contenidoReemp);
 	}
 	PaginaFirstIn->bitPresencia = 0;
 	PaginaFirstIn->bitModificado = 0;
-	PaginaFirstIn->horaIngreso = 90000000;
+	PaginaFirstIn->horaIngreso = MAXTIME;
 	PaginaFirstIn->idFrame = -1;
+
 	return frame;
 
 }
@@ -204,6 +209,9 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp,int pagAModif,
 	memcpy(buffer+offset,protocEscrSwap->contenido,(sizeof(char)*tamanioContenido));
 
 	send(swapSocket,buffer,tamanioBuffer,0);
+
+	free(protocEscrSwap);
+	free(buffer);
 
 }
 

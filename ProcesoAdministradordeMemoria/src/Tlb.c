@@ -101,7 +101,7 @@ int buscarPaginaTLB(TLB* tlb,int pid, int pagina){
 	int i;
 	int frame;
 	frame = -1;
-	t_regTLB** regTLBtemp = malloc(tlb->entradasTLB*sizeof(t_regTLB));
+	t_regTLB** regTLBtemp = calloc(tlb->entradasTLB,sizeof(t_regTLB));
 	regTLBtemp = tlb->CacheTLB;
 	for (i=0; i < tlb->entradasTLB;i++){
 		if (regTLBtemp[i]->pid == pid && regTLBtemp[i]->pagina == pagina){
@@ -109,6 +109,7 @@ int buscarPaginaTLB(TLB* tlb,int pid, int pagina){
 			i = tlb->entradasTLB;
 		}
 	}
+	free(regTLBtemp);
 	return frame;
 }
 
@@ -134,6 +135,7 @@ void agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int frame){
 		 queue_pop(tlb->sOrdenDeIngresoTLB);
 		 queue_push(tlb->sOrdenDeIngresoTLB,posCacheTLB);
 	}
+	free(posCacheTLB);
 }
 
 
