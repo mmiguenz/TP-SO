@@ -6,6 +6,8 @@
 #include <semaphore.h>
 sem_t sem_mutex1;
 sem_t sem_consumidor;
+sem_t sem_consumidor_block;
+
 
 typedef struct {
 char* nombreProc;
@@ -15,16 +17,21 @@ int contadorProgram;
 char* path;
 int cpu_asignada;
 int quantum;
+int retardo_io;
 
 } __attribute__((packed)) PCB ;
 
+
+
+
 typedef struct {
-	int tiempo_sleep;
-	int pid;
-	t_queue * running_PCB;
-	t_queue * block_PCB;
-	t_queue * fifo_PCB;
-}param_hilo1;
+		int cpu;
+		int porcentaje;
+		time_t tiempo;
+}__attribute__((packed)) METRICAS;
+
+
+
 
 PCB *search_and_return(int pid,t_queue * running_PCB);
 
@@ -38,13 +45,11 @@ PCB *search_and_return(int pid,t_queue * running_PCB);
 
 void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB)
 {
-
-	//sem_open("sem_consumidor",O_CREAT,0644,0);
+	sem_init(&sem_consumidor_block,1,0);
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 	int numeroClientes = 0;			/* Número clientes conectados */
 	fd_set descriptoresLectura;	/* Descriptores de interes para select() */
-	//char* buffer;							/* Buffer para leer de los socket */
 	int maximo;							/* Número de descriptor más grande */
 	int i;								/* Para bubles */
 
@@ -429,6 +434,8 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	offset+=strlen(PcbAux->path)+1;
 	memcpy(mensaje +offset  , PcbAux->nombreProc, strlen(PcbAux->nombreProc)+1);
 	offset+=strlen(PcbAux->nombreProc)+1;
+
+
 	memcpy(mensaje +offset  , &(PcbAux->quantum), sizeof(int));
 	offset+=sizeof(int);
 
@@ -479,29 +486,12 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	case 4://Entrada salida
 	{
 		recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
+		PCB* Pcb_IO=malloc(sizeof(PCB*));
+		Pcb_IO=search_and_return(pcb_parc.pid,fifo_PCB);
+		Pcb_IO->retardo_io=pcb_parc.tiempo;
 
-
-		pthread_t hilo_io; //Hilo que creo para correr la i/o  que acepta procesos y los blockea
-
-		param_hilo1 *a=(param_hilo1*)malloc(sizeof(param_hilo1));
-		a->block_PCB=block_PCB;
-		a->fifo_PCB=fifo_PCB;
-		a->pid=pcb_parc.pid;
-		a->running_PCB=running_PCB;
-		a->tiempo_sleep=pcb_parc.tiempo;
-
-		int err;
-
-		err = pthread_create(&hilo_io, NULL, (void*)dormir, (void*) a);
-
-			if (err){
-				printf("ERROR; return code from pthread_create() is %d\n", err);
-				exit(-1);
-			}
-
-
-
-			pthread_join(&hilo_io, NULL);
+		queue_push(block_PCB,Pcb_IO);
+		sem_post(&sem_consumidor_block);
 
 
 
@@ -531,6 +521,8 @@ return 0;
 
 PCB *search_and_return(int pid,t_queue * running_PCB){
 	PCB* pcbAux=malloc(sizeof(PCB));
+	pcbAux->nombreProc=malloc(50);
+	pcbAux->path=malloc(200);
 
 	int tamanio=queue_size(running_PCB);
 				while(tamanio!=0){
@@ -549,26 +541,3 @@ PCB *search_and_return(int pid,t_queue * running_PCB){
 
 	}
 
-/*---Funcion del hilo de la entrada salida en la cual saco de mi cola de pcb running la mando
- *  a mi cola de pcb blockeados hago un sleep simulando mi entrada salida
- *  y luego lamando de nuevo a mi cola de pcb listos para que vuelva a ejecutar
- ---------------------------------------------------------------------------------
-  */
-void* dormir(void* param_hilo){
-	param_hilo1 *b;
-	PCB* pcb_block = malloc(sizeof(PCB));;
-	b=(param_hilo1*)param_hilo;
-
-	pcb_block = search_and_return(b->pid,b->running_PCB);
-
-	queue_push(b->block_PCB,pcb_block);
-
-	sleep(b->tiempo_sleep);
-
-	pcb_block = search_and_return(b->pid,b->block_PCB);
-
-	queue_push(b->fifo_PCB,pcb_block);
-
-	return  0;
-
-}

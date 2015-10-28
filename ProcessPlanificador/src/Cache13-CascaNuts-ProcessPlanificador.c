@@ -43,6 +43,9 @@ t_queue * block_PCB; //Cola de pcb que estan blockeados
 sem_t sem_mutex1;
 sem_t sem_consumidor;
 sem_t sem_mutex_block;
+sem_t sem_consumidor_block;
+
+
 
 typedef struct {
 char* nombreProc;
@@ -52,6 +55,7 @@ int contadorProgram;
 char* path;
 int cpu_asignada;
 int quantum;//Si el quantum es -1 la planificacion es fifo caso contrario round robin
+int retardo_io;
 
 }PCB ;
 
@@ -79,6 +83,7 @@ int identificar_comando(char comando[]);
 
 void* shell(int mutex);
 
+void * manejo_IO();
 int quantum=0;
 key_t claveMutex;
 
@@ -93,6 +98,8 @@ int main(void)
 	t_log* logger= log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_TRACE);
 
 	pthread_t hilo_shell; //Hilo que creo para correr el shell que acepta procesos por terminal
+	pthread_t hilo_io; //Hilo que creo para correr la i/o  que acepta procesos y los blockea
+
 
 	char* puerto_escucha_planif;
 
@@ -126,14 +133,17 @@ int main(void)
 
 /********************Soy una barra llena de asteriscos*********************************************/
 
+				pthread_create(&hilo_shell, NULL, shell, (void *) &mutex);
 
-                        	pthread_create(&hilo_shell, NULL, shell, (void * )&mutex);
-
-                        	conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger,PCB_running, mutex, block_PCB);
+				pthread_create(&hilo_io, NULL, manejo_IO, NULL);
 
 
-                        	pthread_join(hilo_shell, NULL);
 
+				conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger, PCB_running,
+						mutex, block_PCB);
+
+				pthread_join(hilo_shell, NULL);
+				pthread_join(&hilo_io, NULL);
     return 0;
 }
 
@@ -171,6 +181,26 @@ void *shell(int mutex){
 
 
 }
+
+ void * manejo_IO()
+ {PCB* pcb_block;
+
+
+	 while(1){
+		pcb_block = malloc(sizeof(PCB*));
+		pcb_block->nombreProc = malloc(50);
+		pcb_block->path = malloc(200);
+		sem_wait(&sem_consumidor_block);
+		pcb_block = queue_pop(block_PCB);
+
+		sleep(pcb_block->retardo_io);
+
+		queue_push(fifo_PCB_ready,pcb_block);
+
+	 }
+ }
+
+
 
 /*
  * Funcion que  toma por pantalla el comando caracter por caracter
