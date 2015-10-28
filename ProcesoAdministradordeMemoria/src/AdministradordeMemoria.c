@@ -223,21 +223,38 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 
  char escribirContenido(t_protoc_escrituraProceso* pedido, int socketSwap)
- {
+ {	int frame =-1;
 
-	 int frame = buscarPaginaenMemoria(pedido->pid, pedido->pagina,tablasPags);
+ t_tablaDePaginas* tablaDePaginas =   dictionary_get(tablasPags,string_itoa(pedido->pid));
+
+ 	 if(configAdmMem->tlb_habilitada)
+ 		 frame = buscarPaginaTLB(tlb,pedido->pid,pedido->pagina);
+
+
+
+	  frame = (frame <0)?buscarPaginaenMemoria(pedido->pid, pedido->pagina,tablasPags):frame;
 
 
 	 if(frame>=0)
 	 {
 		 memoriaPrincipal.Memoria[frame] = pedido->contenido;
+		 memoriaPrincipal.MemoriaLibre[frame]= 1;
+		 tablaDePaginas->Pagina[pedido->pagina]->bitPresencia=1;
+		 tablaDePaginas->Pagina[pedido->pagina]->bitModificado=1;
+
+
 		 return 1 ;
 
 	 }else
 	 {
-		 if( ! t_hayFrameLibre(&memoriaPrincipal))
+		 if(t_hayFrameLibre(&memoriaPrincipal, tablaDePaginas,configAdmMem->max_marcos_proceso)<=0)
 		 {
-			 return -1;
+			/*
+			 * en este punto, quizas tendria sentido que el cpu sepa el motivo de porque se rechazo la lectura.
+			 * Sea por la necesidad de reemplazar.
+			 * O porque la memoria esta llena.
+			 */
+			 return 0;
 
 		 }
 		 solicitarPagina(pedido,socketSwap);
@@ -288,6 +305,8 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	tabla->Pagina[pedido->pagina]->bitPresencia=1;
 	tabla->Pagina[pedido->pagina]->idFrame=frame;
 	tabla->Pagina[pedido->pagina]->horaIngreso=90000;
+
+	agregar_reemplazarRegistroTLB(tlb,pedido->pid,pedido->pagina,frame);
 
 
  }

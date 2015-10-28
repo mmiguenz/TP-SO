@@ -259,7 +259,7 @@ int buscarFrameLibre(MEMORIAPRINCIPAL* memoria)
 	int i;
 	for (i = 0; memoria->cantMarcos;i++)
 	{
-		if(memoria->MemoriaLibre[i]==0)
+		if(*(memoria->MemoriaLibre[i])==0)
 			return i;
 	}
 
@@ -269,9 +269,26 @@ int buscarFrameLibre(MEMORIAPRINCIPAL* memoria)
 }
 
 
-int t_hayFrameLibre(MEMORIAPRINCIPAL* memoria)
+int t_hayFrameLibre(MEMORIAPRINCIPAL* memoriaPrincipal , t_tablaDePaginas* tablaDePaginasDelProceso,int maximoDeMarcos)
 {
-	return buscarFrameLibre(memoria)>=0? 1 : 0;
+	int i,ocupados=0 ;
+	for (i = 0 ; i<memoriaPrincipal->cantMarcos;i++)
+		ocupados+=*(memoriaPrincipal->MemoriaLibre[i]);
+
+	if(ocupados==memoriaPrincipal->cantMarcos)
+		return -1;
+
+
+	 int paginasOcupadas=0;
+	for (  i = 0 ; i <tablaDePaginasDelProceso->cantTotalPaginas; i++)
+	{
+		if ( ! tablaDePaginasDelProceso->Pagina[i]->bitPresencia )
+			paginasOcupadas++;
+
+
+	}
+
+	return (paginasOcupadas>=maximoDeMarcos)?0:1;
 
 }
 

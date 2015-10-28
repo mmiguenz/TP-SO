@@ -58,7 +58,18 @@ typedef struct{
 	void actualizarTablaPagina_porReemp(int,int,t_tablaDePaginas*);
 	void inicializarMarco(MEMORIAPRINCIPAL*, char* marco);
 	void t_memoria_crear(MEMORIAPRINCIPAL* ,t_paramConfigAdmMem* config);
-	int t_hayFrameLibre(MEMORIAPRINCIPAL* memoria);
+
+
+
+	/*Recorro el vector de paginas. Contando cuales tienen el bit de presencia en 1 .
+	 * Si la cantidad es mayor o igual a maximo de marcos por proceso, significa que no hay frame libre: retorno 0.
+	 * Caso Contrario, retorno 1.
+	 * Podria darse un caso particular, y es que en mi tabla de paginas, mi proceso no tenga ocupados su maximo de
+	 *  frames, pero de todas formas, la memoria podria estar totalmente usada. Es decir no tendria frame para asignar.
+	 * Como los reemplazos son locales, no puedo desalojar un frame de otro proceso. Para esta situacion retorno -1,
+	 * ya que es un error. Memoria llena.
+	 * . */
+	int t_hayFrameLibre(MEMORIAPRINCIPAL* memoriaP,t_tablaDePaginas* tablaDePaginasDelProceso,int maximoDeMarcos);
 	int  t_cargarContenido(MEMORIAPRINCIPAL*,char* contenido);
 
 #endif /* MEMORIA_H_ */

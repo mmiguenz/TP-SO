@@ -28,9 +28,9 @@ void t_tlb_eliminar(TLB*,t_paramConfigAdmMem*);
 void t_tlb_limpiar(TLB*, int pid); // recibe un pid e itera todos los registros liberando los que contangan el pid recibido
 char t_tlb_estaLibre(t_regTLB* cacheTLB); // recibe un registro tlb e indica si esta libre
 //t_regTLB** inicializarTLB(int entradasTLB);
-int buscarPaginaTLB(TLB*,int, int);
+int buscarPaginaTLB(TLB* tlb,int pid, int pagina);
 
-void agregar_reemplazarRegistroTLB(TLB*,int,int,int);
+void agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int frame);
 
 #endif /* TLB_H_ */
 
