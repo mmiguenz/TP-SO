@@ -70,7 +70,7 @@ void  recolectar_proceso(char proceso[15]);
 
 int  recolectar_pid(char proceso[]);
 
-void procesar_comando(char comando[15], char proceso[15],int mutex);
+void procesar_comando(char comando[15], char proceso[15],int mutex, int fd2);
 
 PCB *pcb_create(char *name, int estado, char* ruta);
 
@@ -168,14 +168,58 @@ void *shell(int mutex){
 	    sem_init(&sem_consumidor,1,0);
 	    sem_init(&sem_mutex_block,1,0);
 
-	while(1){
+	/************Barra separadora que crea una conexion con hilo porcentaje CPU******///////
+	    int fd, fd2; /* los ficheros descriptores */
+
+	       struct sockaddr_in server;
+	       /* para la información de la dirección del servidor */
+
+	       struct sockaddr_in client;
+	       /* para la información de la dirección del cliente */
+
+	       int sin_size;
+
+	       /* A continuación la llamada a socket() */
+	       if ((fd=socket(AF_INET, SOCK_STREAM, 0)) == -1 ) {
+	          printf("error en socket()\n");
+	          exit(-1);
+	       }
+
+	       server.sin_family = AF_INET;
+
+	       server.sin_port = htons(8082);
+
+	       server.sin_addr.s_addr = INADDR_ANY;
+
+	       bzero(&(server.sin_zero),8);
+
+	        if(bind(fd,(struct sockaddr*)&server,
+	                sizeof(struct sockaddr))==-1) {
+	           printf("error en bind() \n");
+	           exit(-1);
+	        }
+
+	        if(listen(fd,1) == -1) {  /* llamada a listen() */
+	           printf("error en listen()\n");
+	           exit(-1);
+	        }
+
+	        sin_size=sizeof(struct sockaddr_in);
+	            /* A continuación la llamada a accept() */
+	            if ((fd2 = accept(fd,(struct sockaddr *)&client,
+	                              &sin_size))==-1) {
+	               printf("error en accept()\n");
+	               exit(-1);
+	            }
+
+	       while(1){
     printf("Por favor ingrese el comando que desea ejecutar:  \n");
     sem_init(&sem_mutex1, 1, 1);
     sem_init(&sem_mutex_block,1,1);
 
     recolectar_comando(comando);
 
-    procesar_comando(comando, proceso, mutex);
+    procesar_comando(comando, proceso, mutex,fd2);
 
     }
 
@@ -258,7 +302,7 @@ int  recolectar_pid(char proceso[]){
  * seleccionado
  */
 
-void procesar_comando(char comando[], char proceso[],int mutex){
+void procesar_comando(char comando[], char proceso[],int mutex, int fd2){
 
 	char* ruta =  string_new();
 
@@ -347,6 +391,7 @@ void procesar_comando(char comando[], char proceso[],int mutex){
 	case CPU:
 	{
 		printf("El comando que eligio fue cpu \n");
+		send(fd2,"Dame %", 8, 0);
 		break;
 	}
 	case ERROR:
