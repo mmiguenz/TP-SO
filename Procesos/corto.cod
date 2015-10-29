@@ -1,4 +1,5 @@
-iniciar 2;
-leer 0;
+iniciar 10;
+escribir 1 "Hola";
 leer 1;
+entrada-salida 5;
 finalizar;

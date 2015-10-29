@@ -19,29 +19,30 @@
 #include <commons/collections/list.h>
 #include <commons/log.h>
 #include <semaphore.h>
-
+#include <commons/collections/queue.h>
 
 t_log* logger;
 int retardo;
 int cant_hilitos;
 
-//pthread_mutex_t lock;
+t_queue * porcentajes_CPU;
 
-struct param{
+typedef struct{
 	int puerto_escucha_planificador;
 	char* ip_conec_plani;
 	int puerto_escucha_memoria;
 	char* ip_conec_memoria;
 	t_log* logger;
 	int retardo;
-};
-typedef struct param struct1;
+	t_queue * porcentajes_CPU;
+}struct1;
+
 
 int main(void) {
 
-	struct1 *a;
-	a=(struct1 *)malloc(sizeof(struct1));
-
+	struct1 *paramHilo;
+	paramHilo=(struct1 *)malloc(sizeof(struct1));
+	porcentajes_CPU=queue_create();
 /*
 	int puerto_escucha_planificador;
 	int puerto_escucha_memoria;
@@ -53,16 +54,17 @@ int main(void) {
 */
 	t_config* config;
 	config = config_create("config.cfg");
-	a->logger = log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
-	a->ip_conec_memoria=malloc(12);
-	a->ip_conec_plani=malloc(12);
+	paramHilo->logger = log_create("log.txt", "CPU",false, LOG_LEVEL_INFO);
+	paramHilo->ip_conec_memoria=malloc(12);
+	paramHilo->ip_conec_plani=malloc(12);
+	paramHilo->porcentajes_CPU= porcentajes_CPU;
 
 	if(config != NULL){
-		a->puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
-		a->ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
-		a->puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
-		a->ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
-		a->retardo = config_get_int_value(config, "RETARDO");
+		paramHilo->puerto_escucha_planificador=config_get_int_value(config, "PORT_PLANIFICADOR");
+		paramHilo->ip_conec_plani=config_get_string_value(config,"IP_PLANIFICADOR");
+		paramHilo->puerto_escucha_memoria=config_get_int_value(config, "PORT_MEMORIA");
+		paramHilo->ip_conec_memoria=config_get_string_value(config,"IP_MEMORIA");
+		paramHilo->retardo = config_get_int_value(config, "RETARDO");
 		cant_hilitos=config_get_int_value(config, "CANTIDAD_HILOS");
 
 	}
@@ -83,13 +85,17 @@ int main(void) {
 	pthread_t threads[100];
 	int err;
 	long t;
+	pthread_t threadPorcentajes;
+
+	pthread_create(&threadPorcentajes, NULL,(void*)porcentajesCPU,&porcentajes_CPU);
+
 
 	for(t=0; t<cant_hilitos; t++){
 
 
 		//struct param param1 = { puerto_escucha_planificador,ip_conec_plani, puerto_escucha_memoria, ip_conec_memoria, logger,retardo,};
 
-		err = pthread_create(&threads[t], NULL, (void*)conectar, (void*) a);
+		err = pthread_create(&threads[t], NULL, (void*)conectar, (void*) paramHilo);
 
 		if (err){
 			printf("ERROR; return code from pthread_create() is %d\n", err);
@@ -97,9 +103,12 @@ int main(void) {
 		}
 
 	}
+	pthread_join(threadPorcentajes, NULL);
+
 	for(t=0; t<cant_hilitos; t++){
 		pthread_join(threads[t], NULL);
 	}
+
 	//free(a);
 	pthread_exit(NULL);
 	config_destroy(config);

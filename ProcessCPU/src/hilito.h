@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <commons/log.h>
 #include <semaphore.h>
-
+#include <commons/collections/queue.h>
 typedef struct  {
 	int msgtype;
 	int payload_size;
@@ -51,6 +51,7 @@ char* path;
 int cpu_asignada;
 int quantum; // si el quantum es -1 la planificacion es fifi, sino es round robin
 }PCB ;
+
 
 int porcentajeDeUso(int diff, int instrucciones, int retardo);
 
@@ -77,6 +78,10 @@ void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux
 void abrir(PCB* PcbAux, char buffer[1500]);
 
 void* conectar();
+
+void porcentajesCPU(t_queue * porcentajes_CPU);
+
+
 
 
 #endif /* HILITO_H_ */

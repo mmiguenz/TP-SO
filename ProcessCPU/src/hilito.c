@@ -40,10 +40,72 @@
 #include <commons/log.h>
 #include <semaphore.h>
 #include <time.h>
+#include <commons/collections/queue.h>
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+t_queue * porcentajes_CPU;
+
+typedef struct {
+	int puerto_escucha_planificador;
+	char* ip_conec_plani;
+	int puerto_escucha_memoria;
+	char* ip_conec_memoria;
+	t_log* logger;
+	int retardo;
+
+}struct1;
 
 
+typedef struct{
+	int cpu;
+	int porcentaje;
+}usoCPU;
+
+
+usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU);
+
+usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU){
+
+	usoCPU* aux=malloc(sizeof(usoCPU));
+
+	int tamanio=queue_size(porcentajes_CPU);
+	while(tamanio!=0){
+		aux=queue_pop(porcentajes_CPU);
+		tamanio--;
+		if(aux->cpu==cpu)
+		{printf("Encontre  al cpu!!!\n");
+		tamanio=0;
+		}
+		else{
+			queue_push(porcentajes_CPU,aux);
+		}
+	}
+	return aux;
+}
+
+void porcentajesCPU(t_queue * porcentajes_CPU){
+	typedef struct{
+		int cpu;
+		int porcentaje;
+	}usoCPU;
+	int planificador = conectar_cliente(8082, "127.0.0.1");
+	while(1){
+		char* mensaje;
+		mensaje = malloc(100);
+		recv(planificador, mensaje, 100, 0);
+		free(mensaje);
+
+		usoCPU *auxusoCPU=malloc(sizeof(usoCPU));
+		int tamanio=queue_size(porcentajes_CPU);
+		//semWait(mutex);
+		while(tamanio!=0){
+			auxusoCPU=queue_pop(porcentajes_CPU);
+			printf("La cpu %d tiene un porcentaje de:%d\n",  auxusoCPU->cpu, auxusoCPU->porcentaje);
+			queue_push(porcentajes_CPU,auxusoCPU);
+			tamanio--;
+		}
+
+	}
+}
 
 int recolectar_Texto(char cadena[1500], int punta, char texto[20])
 {
@@ -62,7 +124,7 @@ int recolectar_Texto(char cadena[1500], int punta, char texto[20])
 int recolectar_paginaEscribir(char cadena[1500], int punta, char pagina[3])
 {
 	int i =0;
-
+	punta++;
 	while (cadena[punta]!=' '){
 		pagina[i]=cadena[punta];
 		punta++; i++;
@@ -199,7 +261,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 	{
 		printf("Encontro Escribir\n");
 		instruccion = 3;
-		int aux=recolectar_paginaEscribir(cadena,punta,pagina);
+		int aux=recolectar_paginaEscribir(cadena,punta,pagina)+1;
 		punta=aux;
 		int paginas = atoi(pagina);
 		aux= recolectar_Texto(cadena, punta, texto);
@@ -231,13 +293,18 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 	case 3://Entrada-salida
 	{
 		printf("Encontro entrada-salida\n");
-		instruccion = 5;
+
 
 		int aux=recolectar_pagina(cadena,punta,pagina);
 		punta=aux+1;
 		int tiempo = atoi(pagina);
 		printf("El comando es Entrada-Salida y la cantidad de tiempo es %d \n", tiempo);
 
+		final = time( NULL );
+		printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
+		int diff =  difftime(final, comienzo);
+		int porcentaje= porcentajeDeUso(diff, PcbAux->contadorProgram, retardo);
+		printf("El porcentaje de uso es %d\n", porcentaje);
 
 		PcbAux->contadorProgram++;
 
@@ -252,12 +319,22 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		parcial.contadorDePrograma= PcbAux->contadorProgram;
 		parcial.pid= PcbAux->PID;
 		parcial.tiempo= tiempo;
+		parcial.porcentaje= porcentaje;
 		send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 		//DEJAR DE LLERRRR !!!!!!!!!!!!!!!!!!!!!!!!
 		printf("mProc %s en entrada-salida de tiempo %d\n", PcbAux->nombreProc,tiempo);
 		printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 		log_info(logger, "El pid es %d", PcbAux->PID);
 		log_info(logger, "mProc %s en entrada-salida de tiempo %d",PcbAux->nombreProc, tiempo);
+
+		//actualizamos el porcentaje de cpu en la cola
+		usoCPU* nodo =malloc(sizeof(usoCPU*));
+		nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
+		nodo->porcentaje=porcentaje;
+		queue_push(porcentajes_CPU, nodo);
+		free(nodo);
+		//-------
+
 		punta=1501;
 		break;
 	}
@@ -301,6 +378,14 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			parcial.contadorDePrograma = PcbAux->contadorProgram;
 			parcial.porcentaje=porcentaje;
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
+
+			//actualizamos el porcentaje de cpu en la cola
+			usoCPU* nodo =malloc(sizeof(usoCPU*));
+			nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
+			nodo->porcentaje=porcentaje;
+			queue_push(porcentajes_CPU, nodo);
+			free(nodo);
+			//-------
 		}
 
 
@@ -338,7 +423,7 @@ int procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logge
 	char pagina[3];
 	char texto[20];
 	time_t comienzo;
-	 comienzo = time( NULL );
+	comienzo = time( NULL );
 	while(punta<(tamBuff-1))
 	{
 		int aux;
@@ -364,7 +449,7 @@ void abrir(PCB* PcbAux, char buffer[1500])
 	len = ftell(fp);
 	//printf("El tamaño del mCod es:%d \n", len);
 	//char* buffer = malloc(len+10);
-	fseek(fp, 0, SEEK_SET);
+	fseek(fp, 0, SEEK_SET);usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU);
 	if (len != fread(buffer, sizeof(char), len+10, fp))
 	{
 		free(buffer);
@@ -374,16 +459,8 @@ void abrir(PCB* PcbAux, char buffer[1500])
 	fclose(fp);
 }
 
-typedef struct {
-	int puerto_escucha_planificador;
-	char* ip_conec_plani;
-	int puerto_escucha_memoria;
-	char* ip_conec_memoria;
-	t_log* logger;
-	int retardo;
 
-}struct1;
-//pthread_t id = pthread_self();
+
 void* conectar(void* mensa){
 	 struct1 *b;
 	 b=(struct1*)mensa;
@@ -395,29 +472,27 @@ void* conectar(void* mensa){
 	t_log* logger = b->logger;
 	int retardo = b->retardo;
 
-
-
 	printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
 
 
-	pthread_mutex_lock(&mutex);
+
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
+	usoCPU *new = malloc( sizeof(usoCPU) );
+	new->cpu=planificador;
+	new->porcentaje=0;
+	queue_push(porcentajes_CPU,new);//Voy metiendo los porcentajes en la cola
 
-
-	if (memoria > 0){
-		log_info(logger, "El hilo %u se conecto a memoria correctamente",(unsigned int)pthread_self());
-	}else {
-			log_info(logger, "error al conectarse con memoria");
-		}
+	if (memoria > 0) {
+		log_info(logger, "El hilo %u se conecto a memoria correctamente", (unsigned int) pthread_self());
+	} else {
+		log_info(logger, "error al conectarse con memoria");
+	}
 	//printf("El planificador es %d\n", planificador);
-	pthread_mutex_unlock(&mutex);
 
-	char* mensaje;
-	mensaje=malloc(100);
-	recv(memoria, mensaje, 100, 0);
 	char* aux = recibirMensaje(planificador, logger);
 	free(aux);
+
 	while(1){
 
 		t_msgHeader header2;
@@ -426,6 +501,8 @@ void* conectar(void* mensa){
 		header2.payload_size = planificador;
 
 		send(planificador, &header2, sizeof( t_msgHeader), 0);
+		time_t comienzo, final;
+		comienzo = time( NULL );
 
 
 		char* buffer;
@@ -435,6 +512,8 @@ void* conectar(void* mensa){
 		printf("El planificador es %d\n", planificador);
 		recv(planificador, &header, sizeof( t_msgHeader), 0);
 		//printf("El tamaño delmensaje  es: %d\n\n",header.payload_size);
+
+
 
 		buffer=malloc(header.payload_size+5);
 		recv(planificador, buffer, header.payload_size, 0);
@@ -450,6 +529,20 @@ void* conectar(void* mensa){
 		PcbAux->nombreProc=strdup(buffer +offset);
 		offset+=strlen(PcbAux->nombreProc)+1;
 		memcpy(&PcbAux->quantum,buffer +offset  ,  sizeof(int));
+
+
+		final = time( NULL );
+		int diff =  difftime(final, comienzo);
+		if(diff >= 60){
+			//actualizamos el porcentaje de cpu en la cola
+			usoCPU* nodo =malloc(sizeof(usoCPU*));
+			nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
+			nodo->porcentaje=0;
+			queue_push(porcentajes_CPU, nodo);
+			free(nodo);
+			//-------
+		}
+
 
 		printf("El mensaje del planificador PCB es:\n");
 		printf("Este es el PID:                  %d\n", PcbAux->PID);
@@ -536,6 +629,14 @@ int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int p
 	int porcentaje= porcentajeDeUso(diff, quantum, retardo);
 	printf("El porcentaje de uso es %d\n", porcentaje);
 
+	//actualizamos el porcentaje de cpu en la cola
+	usoCPU* nodo =malloc(sizeof(usoCPU*));
+	nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
+	nodo->porcentaje=porcentaje;
+	queue_push(porcentajes_CPU, nodo);
+	free(nodo);
+	//-------
+
 	if(strcmp(comando, "finalizar")){
 		t_msgHeader header;
 		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
@@ -557,6 +658,10 @@ int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int p
 }
 void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 	int instruccion = 4;
+	printf("Encontre Finalizar\n");
+
+	int paginas=0;
+	enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
 	printf("Encontre Finalizar\n");
 	//int punta=200;
 	//Ejecución de ráfaga concluída, indicando PID.
