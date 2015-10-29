@@ -372,6 +372,7 @@ int Abre_Socket_Inet (char* puerto_escucha_planif)
 }
 
 
+/****Funcion que recibe un pid de una cola de PCb lo busca y lo destruye****/
 
  void *search_and_destroy(int pid,t_queue * running_PCB){
 	PCB* pcbAux ;
@@ -414,6 +415,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	sem_wait(&sem_mutex1);
 	sem_wait(&sem_consumidor);
 	PcbAux=queue_peek(fifo_PCB);
+	PcbAux->cpu_asignada=socketCliente;
 	sem_post(&sem_consumidor);
 	sem_post(&sem_mutex1);
 	char* mensaje;
@@ -461,6 +463,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	sem_wait(&sem_mutex1);
 	sem_wait(&sem_consumidor);
 	PcbRun=queue_pop(fifo_PCB);
+	PcbRun->cpu_asignada=socketCliente;
 	queue_push(running_PCB,PcbRun);
 	sem_post(&sem_mutex1);
 

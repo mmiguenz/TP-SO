@@ -70,7 +70,7 @@ void  recolectar_proceso(char proceso[15]);
 
 int  recolectar_pid(char proceso[]);
 
-void procesar_comando(char comando[15], char proceso[15],int mutex, int fd2);
+void procesar_comando(char comando[15], char proceso[15],int mutex, int cpu_conectada);
 
 PCB *pcb_create(char *name, int estado, char* ruta);
 
@@ -157,7 +157,7 @@ void *shell(int mutex){
 	//sem_open("sem_consumidor",O_CREAT,0644,0);
 
 
-	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V2.6----------------\n");
+	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V3.5----------------\n");
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
 	printf("----o bien los comandos que desea que realize el planificador------------\n");
 	printf("--------------------------------------------------------------------------\n\n\n\n");
@@ -169,7 +169,7 @@ void *shell(int mutex){
 	    sem_init(&sem_mutex_block,1,0);
 
 	/************Barra separadora que crea una conexion con hilo porcentaje CPU******///////
-	    int fd, fd2; /* los ficheros descriptores */
+	    int fd, Cpu_conectada; /* los ficheros descriptores */
 
 	       struct sockaddr_in server;
 	       /* para la información de la dirección del servidor */
@@ -206,7 +206,7 @@ void *shell(int mutex){
 
 	        sin_size=sizeof(struct sockaddr_in);
 	            /* A continuación la llamada a accept() */
-	            if ((fd2 = accept(fd,(struct sockaddr *)&client,
+	            if ((Cpu_conectada = accept(fd,(struct sockaddr *)&client,
 	                              &sin_size))==-1) {
 	               printf("error en accept()\n");
 	               exit(-1);
@@ -219,7 +219,7 @@ void *shell(int mutex){
 
     recolectar_comando(comando);
 
-    procesar_comando(comando, proceso, mutex,fd2);
+    procesar_comando(comando, proceso, mutex,Cpu_conectada);
 
     }
 
@@ -302,7 +302,7 @@ int  recolectar_pid(char proceso[]){
  * seleccionado
  */
 
-void procesar_comando(char comando[], char proceso[],int mutex, int fd2){
+void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectada){
 
 	char* ruta =  string_new();
 
@@ -391,7 +391,7 @@ void procesar_comando(char comando[], char proceso[],int mutex, int fd2){
 	case CPU:
 	{
 		printf("El comando que eligio fue cpu \n");
-		send(fd2,"Dame %", 8, 0);
+		send(cpu_conectada,"Dame %", 8, 0);
 		break;
 	}
 	case ERROR:
