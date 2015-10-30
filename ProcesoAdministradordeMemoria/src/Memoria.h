@@ -45,7 +45,7 @@ typedef struct{
 
 	char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos, int Tamanio_Marco);
 	int ** inicializarTLB(int entradas_TLB);
-	char** inicializarMemoriaLibre(int cant_Marcos);
+	char* inicializarMemoriaLibre(int cant_Marcos);
 	int Marcoslibres(int cantidadDePaginas, int Cant_Marcos, int* memoriaLibre);
 	t_list* asignarMarcos_MemoriaPrincipal(t_list* marcosAsignados, int* memoriaLibre, int MarcosPorProcesos);
 	void inicializarProceso(int PID, int totalDePaginas, int* memoriaLibre, int marcosPorProcesos);

@@ -26,11 +26,11 @@ int buscarFrameLibre(MEMORIAPRINCIPAL* memoria);
 void t_memoria_crear(MEMORIAPRINCIPAL* memoriaP , t_paramConfigAdmMem* config)
 {
 
-
-	memoriaP->Memoria=inicializarMemoriaPrincipal(memoriaP,config->cantidad_marcos,config->tamanio_marco);
-	memoriaP->MemoriaLibre=inicializarMemoriaLibre(config->cantidad_marcos);
 	memoriaP->cantMarcos = config->cantidad_marcos;
 	memoriaP->tamanioMarco = config->tamanio_marco;
+	memoriaP->Memoria=inicializarMemoriaPrincipal(memoriaP,config->cantidad_marcos,config->tamanio_marco);
+	memoriaP->MemoriaLibre=inicializarMemoriaLibre(config->cantidad_marcos);
+
 
 
 
@@ -69,15 +69,15 @@ void inicializarMarco(MEMORIAPRINCIPAL* memoriaP, char* marco)
 
 }
 
-char** inicializarMemoriaLibre(int cant_Marcos)
+char* inicializarMemoriaLibre(int cant_Marcos)
 {
-	char** memoriaLibre;
+	char* memoriaLibre;
 	int i;
 	/*
 		Array de marcos libres:
 			Posicion = 0 -> LIBRE  |  Posicion = 1 -> OCUPADA
 	*/
-	memoriaLibre = calloc(cant_Marcos, sizeof(char));
+	memoriaLibre = malloc((cant_Marcos* sizeof(char)));
 	for (i=0;i<cant_Marcos;i++){
 		memoriaLibre[i] = 0;
 	}

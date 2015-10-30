@@ -8,10 +8,13 @@
 #ifndef TADCONFIG_H_
 #define TADCONFIG_H_
 
+#include <commons/config.h>
+
+
 typedef struct {
 	char* puerto_escucha;
 	char* ip_swap;
-	int puerto_swap;
+	char* puerto_swap;
 	int max_marcos_proceso;
 	int cantidad_marcos;
 	int tamanio_marco;
@@ -22,6 +25,6 @@ typedef struct {
 }t_paramConfigAdmMem;
 
 
-t_paramConfigAdmMem* establecerConfigMemoria();
+t_paramConfigAdmMem* establecerConfigMemoria(t_config*);
 
 #endif /* TADCONFIG_H_ */

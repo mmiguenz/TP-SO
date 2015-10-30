@@ -1,0 +1,2 @@
+[TRACE] 14:51:35:937 AdministradorSwap/(13605:13605): Inicia Logeo Swap.
+[TRACE] 15:01:00:252 AdministradorSwap/(14040:14040): Inicia Logeo Swap.

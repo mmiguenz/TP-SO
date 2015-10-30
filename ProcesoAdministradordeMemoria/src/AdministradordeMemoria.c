@@ -66,8 +66,8 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
  int main(void){
 
 	 	 	 	 /* Se levanta el archivo de configuración y se crea log del Administrador de Memoria*/
-
-	 	 	 	 configAdmMem = establecerConfigMemoria();
+	 	 	 	 config = config_create("configAdmMem.cfg");
+	 	 	 	 configAdmMem = establecerConfigMemoria(config);
 	 	 	 	 logAdmMem = log_create("log.txt", "Administrador de memoria",false, LOG_LEVEL_INFO);
 
 	 	 	 	 /* Inicialización de espacio de memoria, array indicador de memoria libre y TLB */
@@ -78,7 +78,8 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 	 	 	 char* habilitacionTLB = malloc(sizeof(char)*2);
 	 	 	 	 habilitacionTLB = configAdmMem->tlb_habilitada;
 
-	 	 	 	 if (strcmp(habilitacionTLB,SI)) {
+	 	 	 	 if (!strcmp(habilitacionTLB,SI)) {
+	 	 	 	 tlb = malloc(sizeof(TLB));
 	 	 	 	 tlb = t_tlb_crear(configAdmMem);
 	 	 	 	 //tlb.CacheTLB=inicializarTLB(configAdmMem->entradas_TLB);
 	 	 	 	 }
@@ -90,8 +91,8 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 	 	 	 /*Conexión del administrador de memoria como cliente al Swap y como Servidor con CPU*/
 
-	 	 	 	 socketSwap = conectar_cliente(configAdmMem->puerto_swap,configAdmMem->ip_swap);
 	 	 	 	 conectar_servidor(configAdmMem->puerto_escucha, socketSwap);
+	 	 	 	 socketSwap = conectar_cliente(configAdmMem->puerto_swap,configAdmMem->ip_swap);
 	 	 	 	 return EXIT_SUCCESS;
  }
 
@@ -238,7 +239,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 if(frame>=0)
 	 {
 		 memoriaPrincipal.Memoria[frame] = pedido->contenido;
-		 memoriaPrincipal.MemoriaLibre[frame]= 1;
+		 memoriaPrincipal.MemoriaLibre[frame]= "1";
 		 tablaDePaginas->Pagina[pedido->pagina]->bitPresencia=1;
 		 tablaDePaginas->Pagina[pedido->pagina]->bitModificado=1;
 

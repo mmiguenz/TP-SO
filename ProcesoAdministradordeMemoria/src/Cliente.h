@@ -40,7 +40,7 @@ PROCESOSWAP;
 
 
 
-int conectar_cliente(int puerto,char* ip);
+int conectar_cliente(char* puerto,char* ip);
 void recibirMensaje(int socket, t_espacio_ocupado* listaDePaginas);
 void enviarMensaje(int socket,t_msgHeaderMemoria encabezado);
 

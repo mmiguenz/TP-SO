@@ -375,7 +375,6 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
     // listen
     if (listen(listener, 10) == -1) {
         perror("listen");
-
     }
 
 	return listener;
