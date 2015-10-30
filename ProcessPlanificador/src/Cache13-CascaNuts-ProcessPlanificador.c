@@ -135,12 +135,13 @@ int main(void)
 
 				pthread_create(&hilo_shell, NULL, shell, (void *) &mutex);
 
-				pthread_create(&hilo_io, NULL, manejo_IO, NULL);
-
+				pthread_create(&hilo_io, NULL, manejo_IO, (void *) NULL);
 
 
 				conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger, PCB_running,
 						mutex, block_PCB);
+
+
 
 				pthread_join(hilo_shell, NULL);
 				pthread_join(&hilo_io, NULL);
@@ -169,48 +170,15 @@ void *shell(int mutex){
 	    sem_init(&sem_mutex_block,1,0);
 
 	/************Barra separadora que crea una conexion con hilo porcentaje CPU******///////
-	    int fd, Cpu_conectada; /* los ficheros descriptores */
+	    int Cpu_conectada= 1;//  Abre_Socket_Inet ("8082");
 
-	       struct sockaddr_in server;
-	       /* para la información de la dirección del servidor */
+	  	//   if (Cpu_conectada == -1)
+	  	  // 	{
+	  	  // 		perror ("Error al abrir servidor");
 
-	       struct sockaddr_in client;
-	       /* para la información de la dirección del cliente */
+	  	   	//}
 
-	       int sin_size;
-
-	       /* A continuación la llamada a socket() */
-	       if ((fd=socket(AF_INET, SOCK_STREAM, 0)) == -1 ) {
-	          printf("error en socket()\n");
-	          exit(-1);
-	       }
-
-	       server.sin_family = AF_INET;
-
-	       server.sin_port = htons(8082);
-
-	       server.sin_addr.s_addr = INADDR_ANY;
-
-	       bzero(&(server.sin_zero),8);
-
-	        if(bind(fd,(struct sockaddr*)&server,
-	                sizeof(struct sockaddr))==-1) {
-	           printf("error en bind() \n");
-	           exit(-1);
-	        }
-
-	        if(listen(fd,1) == -1) {  /* llamada a listen() */
-	           printf("error en listen()\n");
-	           exit(-1);
-	        }
-
-	        sin_size=sizeof(struct sockaddr_in);
-	            /* A continuación la llamada a accept() */
-	            if ((Cpu_conectada = accept(fd,(struct sockaddr *)&client,
-	                              &sin_size))==-1) {
-	               printf("error en accept()\n");
-	               exit(-1);
-	            }
+//	  	 Cpu_conectada=Acepta_Conexion_Cliente (Cpu_conectada);
 
 	       while(1){
     printf("Por favor ingrese el comando que desea ejecutar:  \n");
