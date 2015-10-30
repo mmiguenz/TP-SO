@@ -37,9 +37,9 @@ int aceptado;
 
 int conectar_cliente(int puerto,char* ip);
 
-char* recibirMensaje(int socket,t_log* logger);
+char* recibirMensaje(int socket);
 
-void enviarMesaje(int socket,char* mesaje,t_log* logger);
+void enviarMesaje(int socket,char* mesaje);
 
 void enviarSolicitud (int pid,int instruccion, int nroPag,int socket);
 

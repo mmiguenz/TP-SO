@@ -30,18 +30,28 @@
 #include <commons/log.h>
 #include <semaphore.h>
 #include <commons/collections/queue.h>
+
+
+pthread_mutex_t mutex;
+t_queue * porcentajes_CPU;
+
+
+//estructura para la comunicacion con planificador
 typedef struct  {
 	int msgtype;
 	int payload_size;
 }t_msgHeader;
 
+
+//estructura para la comunicacion con planificador dsp de mandar el t_msgHeader
 typedef struct  {
 	int contadorDePrograma;
 	int tiempo;
 	int pid;
-	int porcentaje;
 }PCB_PARCIAL;
 
+
+//estructura que recibimos de planificador
 typedef struct {
 char* nombreProc;
 int estado;
@@ -49,15 +59,19 @@ int PID;
 int contadorProgram; //si es -1 no abrimos, ejecutamos solo finalizar
 char* path;
 int cpu_asignada;
-int quantum; // si el quantum es -1 la planificacion es fifi, sino es round robin
+int quantum; // si el quantum es -1 la planificacion es fifo, sino es round robin
 }PCB ;
 
+typedef struct{
+	int cpu;
+	int porcentaje;
+}usoCPU;
 
 int porcentajeDeUso(int diff, int instrucciones, int retardo);
 
 int ubicarPunta(char cadena [1500], PCB* PcbAux);
 
-int procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux, int retardo);
+void procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux, int retardo);
 
 int recolectar_instruccion(char* cadena,char comando[15],int punta);
 
@@ -71,7 +85,7 @@ int recolectar_paginaEscribir(char cadena[1500], int punta, char pagina[3]);
 
 int recolectar_Texto(char cadena[1500], int punta, char texto[15]);
 
-int procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo);
+void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo);
 
 void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo);
 
@@ -81,8 +95,7 @@ void* conectar();
 
 void porcentajesCPU(t_queue * porcentajes_CPU);
 
-
-
+usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU);
 
 #endif /* HILITO_H_ */
 

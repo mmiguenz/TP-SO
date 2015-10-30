@@ -12,19 +12,24 @@
 #include <commons/config.h>
 #include <commons/log.h>
 
+
+//--estructura para inviar msj a memoria
 typedef struct  {
 	int msgtype;
 	int pagina;
 	int pid;
 }t_msgHeaderMemoria;
 
+
+//--estructura para enviar solicitud de escribir a memoria
 typedef struct  {
 	int instruccion;
 	int pagina;
 	int pid;
 	char texto[20];
-
 }estructuraEscribir;
+
+
 
 int conectar_cliente(int puerto,char* ip){
 	struct sockaddr_in dire_serv;
@@ -33,31 +38,29 @@ int conectar_cliente(int puerto,char* ip){
 	dire_serv.sin_port = htons(puerto);
 	int planificador = socket(AF_INET, SOCK_STREAM, 0);
 	if (connect(planificador, (void*) &dire_serv, sizeof(dire_serv)) > 0) {
-		//log_info(logger, "No se pudo conectar");
 		perror("No se pudo conectar %s");
-
-		//}else{
-		//		log_info(logger, "Se conecto a %s");
 	}
 	return planificador	;
 }
 
-char* recibirMensaje(int socket,t_log* logger) {
+char* recibirMensaje(int socket) {
 	char* mensaje;
 	mensaje = malloc(100);
 	if (recv(socket, mensaje, 100, 0) > 0){
-		//printf("Recibi mensaje: %s \n", mensaje);
 	}else 	{
 		printf("Falle");
 	}
 	return mensaje;
 }
-void enviarMesaje(int socket,char* mensaje,t_log* logger) {
+
+
+void enviarMesaje(int socket,char* mensaje) {
 	send(socket, mensaje,strlen (mensaje)+1,0);
 	printf("Envie mensaje: %s \n", mensaje);
 	return;
 }
 
+//Para la memoria
 void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
 	t_msgHeaderMemoria header;
 	memset(&header, 0, sizeof(t_msgHeaderMemoria));
@@ -70,52 +73,43 @@ void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
 	 * */
 	header.pagina = nroPag;
 	header.pid = pid;
-	printf("Los mensajes enviados a memoria son: \n");
+	/*printf("Los mensajes enviados a memoria son: \n");
 	printf("Pagina %d\n",header.pagina);
 	printf("Tipo de instruccion  %d \n",header.msgtype);
-	printf("PID de proc %d \n ",header.pid);
+	printf("PID de proc %d \n ",header.pid);*/
 
 	send(socket,&header,sizeof(t_msgHeaderMemoria),0);
 	return;
 }
+
+//la memoria nos avisa si realizo la operacion con exito
 int recibirMsjMemoria(int memoria){
-
 	PROCESO mensaje;
-
 	memset(&mensaje, 0, sizeof(PROCESO));
-
-
 	recv(memoria, &mensaje, sizeof(PROCESO), 0);
-
-
-	//recv(memoria, &proceso, sizeof(proceso), 0);
-
 	return mensaje.aceptado;
 }
 
 void mandarMsjEscribir(int memoria, char texto[20],int pid, int instruccion, int nroPag){
+	char* mensaje;
+	mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(texto)+1);
+	int tamanio= strlen(texto);
+	int offset=0;
 
-		char* mensaje;
-		mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(texto)+1);
-		int tamanio= strlen(texto);
-		int offset=0;
-		memcpy(mensaje +offset  , &instruccion, sizeof(int));
-		offset+=sizeof(int);
-		memcpy(mensaje +offset  , &pid, sizeof(int));
-		offset+=sizeof(int);
-		memcpy(mensaje +offset  , &nroPag, sizeof(int));
-		offset+=sizeof(int);
-		memcpy(mensaje +offset  , &tamanio, sizeof(int));
-		offset+=sizeof(int);
-		memcpy(mensaje +offset  , texto, strlen(texto)+1);
-		offset+=strlen(texto)+1;
+	memcpy(mensaje +offset  , &instruccion, sizeof(int));
+	offset+=sizeof(int);
+	memcpy(mensaje +offset  , &pid, sizeof(int));
+	offset+=sizeof(int);
+	memcpy(mensaje +offset  , &nroPag, sizeof(int));
+	offset+=sizeof(int);
+	memcpy(mensaje +offset  , &tamanio, sizeof(int));
+	offset+=sizeof(int);
+	memcpy(mensaje +offset  , texto, strlen(texto)+1);
+	offset+=strlen(texto)+1;
 
-		send(memoria,mensaje,offset,0);
-
-
-		free(mensaje);
-		return;
-
+	send(memoria,mensaje,offset,0);
+	free(mensaje);
+	return;
 }
 
 #endif /* CLIENTE_C_ */
