@@ -1,12 +1,12 @@
 /*
- * config_swat.h
+ * swapConfig.h
  *
- *  Created on: 25/10/2015
+ *  Created on: 6/10/2015
  *      Author: utnso
  */
 
-#ifndef CONFIG_SWAT_H_
-#define CONFIG_SWAT_H_
+#ifndef SWAPCONFIG_H_
+#define SWAPCONFIG_H_
 
 typedef struct swapConfig {
 	char* puerto_Escucha;
@@ -24,4 +24,4 @@ void swapConfig_GetConfig();
 void swapConfig_Free();
 
 
-#endif /* CONFIG_SWAT_H_ */
+#endif /* SWAPCONFIG_H_ */

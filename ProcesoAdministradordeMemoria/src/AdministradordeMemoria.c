@@ -91,8 +91,20 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 	 	 	 /*Conexión del administrador de memoria como cliente al Swap y como Servidor con CPU*/
 
-	 	 	 	 conectar_servidor(configAdmMem->puerto_escucha, socketSwap);
+
 	 	 	 	 socketSwap = conectar_cliente(configAdmMem->puerto_swap,configAdmMem->ip_swap);
+	 	 	 	if(socketSwap>=0)
+	 	 	 		 	 	 	{
+
+	 	 	 		 	 	 		printf("Se conecto Al SWAP\n");
+
+	 	 	 		 	 	 	}
+
+	 	 		conectar_servidor(configAdmMem->puerto_escucha, socketSwap);
+
+
+
+
 	 	 	 	 return EXIT_SUCCESS;
  }
 

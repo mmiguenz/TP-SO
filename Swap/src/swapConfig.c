@@ -1,15 +1,15 @@
 /*
- * config_swat.c
+ * swapConfig.c
  *
- *  Created on: 25/10/2015
+ *  Created on: 6/10/2015
  *      Author: utnso
  */
-#include "config_swat.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <commons/config.h>
 #include <stdlib.h>
-
+#include "swapConfig.h"
 
 t_swapConfig* swapConfig_Create(){
 	t_swapConfig* swapConfig = malloc(100);
@@ -22,6 +22,12 @@ t_swapConfig* swapConfig_Create(){
 void swapConfig_GetConfig(t_swapConfig* swapConfig){
 
 	t_config* fileCfg = config_create("configSWAP");
+
+	if(!fileCfg)
+	{
+		perror("Error al leer archivo de configuracion SWAP");
+
+	}
 
 	strcpy(swapConfig->puerto_Escucha,config_get_string_value(fileCfg,"PUERTO_ESCUCHA"));
 	strcpy(swapConfig->nombre_Swap,config_get_string_value(fileCfg,"NOMBRE_SWAP"));
