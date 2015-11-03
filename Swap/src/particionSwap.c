@@ -31,15 +31,17 @@ t_particion* t_particion_crear(t_swapConfig* config)
 
 
 	strcpy(script,"dd if=/dev/zero of=");
-	strcpy(script,config->nombre_Swap);
+	strcat(script,config->nombre_Swap);
 	strcat(script," bs=");
 	strcat(script,tamanio_pagina);
 	strcat(script," count=");
 	strcat(script,cantidad_Paginas);
 
+
+
 	system(script);
 
-	particion->archivoParticion = fopen("particion","r+");
+	particion->archivoParticion = fopen(config->nombre_Swap,"r+");
 	particion->archivo_tamanio = config->cantidad_Paginas * config->tamanio_Pagina ;
 	particion->pagina_tamanio= config->tamanio_Pagina ;
 	particion->paginas_cantidad= config ->cantidad_Paginas;
@@ -168,7 +170,6 @@ void compactar(t_particion* particion)
 
 
 }
-
 
 
 t_hueco* t_hueco_crear(int inicio, int cantidad)
