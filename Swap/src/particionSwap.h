@@ -8,7 +8,7 @@
 #include "swapConfig.h"
 #include <string.h>
 #include <stdlib.h>
-#include <commons/collections/dictionary.h>
+#include <commons/collections/list.h>
 #ifndef PARTICIONSWAP_H_
 #define PARTICIONSWAP_H_
 
@@ -19,11 +19,20 @@ typedef struct particion {
 	int archivo_tamanio;
 	int pagina_tamanio;
 	int paginas_cantidad;
-	char** bitMapPaginasOcupadas;
-
+	t_list* espacioLibre;
 
 
 } t_particion;
+
+typedef struct hueco
+{
+	int paginaInicio;
+	int cantidadPaginas;
+
+} t_hueco ;
+
+
+
 
 
 t_particion* t_particion_crear(t_swapConfig*);
@@ -31,5 +40,12 @@ void* t_particion_leerPagina(t_particion*,int numeroDePagina);
 
 //Retorna el nroDePAginaDondeComienzaElBloqueReservado
 int t_particion_reservarPaginas(t_particion*, int cantidadDePaginas);
+
+
+t_hueco* t_hueco_crear(int paginaInicio, int cantidadDePaginas);
+void t_hueco_eliminar(t_hueco*);
+
+
+
 
 #endif /* PARTICIONSWAP_H_ */

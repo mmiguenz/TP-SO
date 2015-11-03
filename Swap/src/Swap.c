@@ -16,14 +16,19 @@
 #include <commons/temporal.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include <commons/collections/list.h>
 #include "servidor.h"
 #include "protocolos.h"
 #include "swapConfig.h"
 #include "particionSwap.h"
+#include "Swap.h"
 
 
 
 #define BACKLOG 5
+
+
+
 
 void atenderPedido(int memSocket, void* buffer );
 void iniciarProceso(int memSocket);
@@ -31,10 +36,11 @@ void realizarLectura(int memSocket);
 void realizarEscritura(int memSocket);
 void finalizarProceso(int memSocket);
 void tipoDePedidoIncorrecto(int memSocket);
+int hayEspacio(int cantidadNuevoProceso);
 
-t_dictionary* tablaPidsEnSwap;
 t_particion* particion;
 t_swapConfig* config;
+t_list* espacioUtilizado_lista;
 
 int main (){
 
@@ -44,7 +50,7 @@ int main (){
 	swapConfig_GetConfig(config);
 
 	particion = t_particion_crear(config);
-	tablaPidsEnSwap = dictionary_create();
+	espacioUtilizado_lista = list_create();
 
 	hints = configAddrSvr();
 
@@ -130,17 +136,17 @@ void iniciarProceso(int memSocket)
 
 	recv(memSocket,&pedido->paginas,sizeof(int),0);
 	recv(memSocket,&pedido->pid,sizeof(int),0);
-
-	int paginaComienzo =  t_particion_reservarPaginas(particion,pedido->paginas);
-
 	char respuestaMemoria;
 
-
-
-	if(paginaComienzo>=0)
+	if(hayEspacio(pedido->paginas))
 	{
-		dictionary_put(tablaPidsEnSwap,string_itoa(pedido->pid),&paginaComienzo);
+
+
+	    int paginaComienzo =  t_particion_reservarPaginas(particion,pedido->paginas);
+
 		respuestaMemoria = 1 ;
+		t_proceso* unProceso = t_proceso_crear(pedido->pid,paginaComienzo,pedido->paginas);
+		list_add(espacioUtilizado_lista,(void*)unProceso);
 
 
 	}else
@@ -148,10 +154,6 @@ void iniciarProceso(int memSocket)
 		respuestaMemoria = 0;
 
 	}
-
-
-
-
 	int error  =  send(memSocket,&respuestaMemoria,sizeof(char),0);
 
 	if (error>=0)
@@ -195,6 +197,23 @@ void tipoDePedidoIncorrecto(int memSocket)
 
 }
 
+
+int hayEspacio(int cantidadNuevoProceso)
+{
+	int obtenerPaginasOcupadas(t_proceso* unProceso)
+	{
+		return unProceso->cantidad;
+
+	}
+
+
+
+	int espacioUtilizado = list_map(espacioUtilizado_lista,(void*)obtenerPaginasOcupadas);
+
+	return (espacioUtilizado + cantidadNuevoProceso) <= particion->archivo_tamanio;
+
+
+}
 
 
 

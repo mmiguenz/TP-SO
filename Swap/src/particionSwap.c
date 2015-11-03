@@ -16,6 +16,7 @@ void posicionarPagina(t_particion*, int );
 int hayEspacio(t_particion* particion, int espacio);
 int hayEspacioContiguo(t_particion* particion,int espacioRequerido);
 void compactar(t_particion* particion);
+void reAsignarHuecos( t_particion* particion, int paginaComienzo, int cantidadPaginas);
 
 t_particion* t_particion_crear(t_swapConfig* config)
 {
@@ -29,7 +30,8 @@ t_particion* t_particion_crear(t_swapConfig* config)
 	tamanio_pagina = string_itoa(config->tamanio_Pagina);
 
 
-	strcpy(script,"dd if=/dev/zero of=particion");
+	strcpy(script,"dd if=/dev/zero of=");
+	strcpy(script,config->nombre_Swap);
 	strcat(script," bs=");
 	strcat(script,tamanio_pagina);
 	strcat(script," count=");
@@ -43,10 +45,11 @@ t_particion* t_particion_crear(t_swapConfig* config)
 	particion->paginas_cantidad= config ->cantidad_Paginas;
 
 
-	particion->bitMapPaginasOcupadas = calloc(particion->paginas_cantidad,sizeof(char));
-	int i ;
-	for(i=0; i<particion->paginas_cantidad; i++)
-		particion->bitMapPaginasOcupadas[i]= 0;
+	particion->espacioLibre = list_create();
+
+
+	t_hueco* unHueco = t_hueco_crear(0,config->cantidad_Paginas);
+	list_add(particion->espacioLibre,(void*)unHueco);
 
 
      return particion;
@@ -120,8 +123,6 @@ void posicionarPagina(t_particion* particion, int numeroDePagina)
 
 int t_particion_reservarPaginas(t_particion* particion, int cantidadDePaginas)
 {
-	if(!hayEspacio(particion,cantidadDePaginas))
-		return -1;
 
 	int paginaComienzo  =hayEspacioContiguo(particion,cantidadDePaginas);
 
@@ -132,10 +133,7 @@ int t_particion_reservarPaginas(t_particion* particion, int cantidadDePaginas)
 
 	}else
 	{
-		int i ;
-		for(i=paginaComienzo; i<cantidadDePaginas;i++)
-			(*particion->bitMapPaginasOcupadas[i]) = 1;
-
+		reAsignarHuecos(particion,paginaComienzo,cantidadDePaginas);
 		return paginaComienzo;
 
 	}
@@ -144,22 +142,6 @@ int t_particion_reservarPaginas(t_particion* particion, int cantidadDePaginas)
 
 }
 
-int hayEspacio(t_particion* particion,int espacioRequerido)
-{
-	int espacioVacioEncontrado=0;
-
-	int i ;
-	for(i=0; i< particion->paginas_cantidad;i++)
-	{
-		if(*(particion->bitMapPaginasOcupadas[i])== 0 )
-			espacioVacioEncontrado++;
-
-	}
-
-	return espacioVacioEncontrado>=espacioRequerido ;
-
-
-}
 
 
 
@@ -167,31 +149,16 @@ int hayEspacio(t_particion* particion,int espacioRequerido)
 //caso contrario, -1 .
 int hayEspacioContiguo(t_particion* particion,int espacioRequerido)
 {
-	int espacioVacioEncontrado=0;
-
-	int i ;
-	for(i=0; i< particion->paginas_cantidad;i++)
+	bool criterioBusHueco(t_hueco* hueco)
 	{
-		if(*(particion->bitMapPaginasOcupadas[i])== 0 )
-		{
-
-			if(++espacioVacioEncontrado== espacioRequerido)
-				return  (i - espacioRequerido);
-
-
-		}else
-		{
-
-			espacioVacioEncontrado= 0;
-
-		}
-
-
+		return hueco->cantidadPaginas>=espacioRequerido;
 
 	}
 
-	return -1 ;
 
+	t_hueco* huecoEncontrado=   list_find(particion->espacioLibre,(void*)criterioBusHueco);
+
+	return (huecoEncontrado!=NULL)?huecoEncontrado->paginaInicio:-1;
 
 }
 
@@ -201,3 +168,32 @@ void compactar(t_particion* particion)
 
 
 }
+
+
+
+t_hueco* t_hueco_crear(int inicio, int cantidad)
+{
+	t_hueco* unHueco = malloc(sizeof(t_hueco));
+	unHueco->cantidadPaginas = cantidad;
+	unHueco->paginaInicio = inicio;
+
+
+	return unHueco;
+
+
+}
+void t_hueco_eliminar(t_hueco* unHueco)
+{
+	free(unHueco);
+
+
+}
+
+
+void reAsignarHuecos( t_particion* particion, int paginaComienzo, int cantidadPaginas)
+{
+
+
+
+}
+
