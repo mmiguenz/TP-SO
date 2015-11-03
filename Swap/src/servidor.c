@@ -1,9 +1,11 @@
 /*
- * servidor_swat.c
+ * servidor.c
  *
- *  Created on: 25/10/2015
+ *  Created on: 2/11/2015
  *      Author: utnso
  */
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -11,6 +13,7 @@
 #include <sys/socketvar.h>
 #include <netdb.h>
 #include <unistd.h>
+#include "servidor.h"
 
 struct addrinfo configAddrSvr(){
 
@@ -25,7 +28,6 @@ struct addrinfo configAddrSvr(){
 
 }
 
-
 int getListeningSocket(struct addrinfo* listSockInfo){
 
 	int lSocket = socket(listSockInfo->ai_family, listSockInfo->ai_socktype, listSockInfo->ai_protocol);
@@ -35,7 +37,7 @@ int getListeningSocket(struct addrinfo* listSockInfo){
 		setsockopt(lSocket,SOL_SOCKET,SO_REUSEADDR,&activated,sizeof(activated));
 
 		if(bind(lSocket,listSockInfo->ai_addr, listSockInfo->ai_addrlen) != 0){
-			perror("FallÃ³ el bind");
+			perror("Falló el bind");
 			exit(EXIT_FAILURE);
 
 		}
@@ -58,5 +60,4 @@ int connectToClient(int listenningSocket){
 		return cSocket;
 
 }
-
 

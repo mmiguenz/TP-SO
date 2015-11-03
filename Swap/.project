@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>ProcessSwap</name>
+	<name>Swap</name>
 	<comment></comment>
 	<projects>
+		<project>commons</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
