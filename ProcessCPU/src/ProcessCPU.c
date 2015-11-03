@@ -92,11 +92,11 @@ int main(void) {
 	}
 
 
-	//pthread_join(threadPorcentajes, NULL);
+
 	for(t=0; t<cant_hilitos; t++){
 		pthread_join(threads[t], NULL);
 	}
-
+	//pthread_join(threadPorcentajes, NULL);
 	//--liberamos memoria
 	queue_destroy(porcentajes_CPU);
 	pthread_mutex_destroy(&mutex);
