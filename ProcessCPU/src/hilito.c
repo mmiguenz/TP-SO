@@ -65,7 +65,7 @@ void porcentajesCPU(t_queue * porcentajes_CPU){
 	while(1){
 		char* mensaje;
 		mensaje = malloc(100);
-		recv(planificador, mensaje, 100, 0);
+		recv(planificador, mensaje, 100, MSG_WAITALL);
 
 		printf("el msj es %s\n",mensaje);
 		free(mensaje);
@@ -73,6 +73,7 @@ void porcentajesCPU(t_queue * porcentajes_CPU){
 		usoCPU *auxusoCPU=malloc(sizeof(usoCPU));
 		int tamanio=queue_size(porcentajes_CPU);
 		printf("el tamanio de la cola es %d\n",tamanio);
+
 		while(tamanio!=0){
 			auxusoCPU=queue_pop(porcentajes_CPU);
 			printf("La cpu %d tiene un porcentaje de:%d\n",  auxusoCPU->cpu, auxusoCPU->porcentaje);
