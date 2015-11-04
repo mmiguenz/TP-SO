@@ -3,7 +3,6 @@
 	<name>Swap</name>
 	<comment></comment>
 	<projects>
-		<project>commons</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -11,6 +11,8 @@
 #include <commons/string.h>
 #include "Swap.h"
 
+#define finString '/0'
+
 int paginaActual(t_particion* particion);
 void posicionarProximaPagina(t_particion*);
 void posicionarPagina(t_particion*, int );
@@ -70,12 +72,21 @@ void t_particion_elminar(t_particion* particion)
 void* t_particion_leerPagina(t_particion* particion ,int numeroDePagina)
 {
 	posicionarPagina(particion,numeroDePagina);
-	void* pagina = malloc(particion->pagina_tamanio);
+	char** contenidoPagina = calloc(particion->pagina_tamanio,sizeof(char));
+	int i = 0;
+	fread(contenidoPagina[i],sizeof(char),1,particion->archivoParticion);
+	while ((*contenidoPagina[i] != '/0') && i < particion->pagina_tamanio){
+	i++;
+	fread(contenidoPagina+i,sizeof(char),1,particion->archivoParticion);
+	}
+	return contenidoPagina;
+}
 
-	fread(pagina,particion->pagina_tamanio,1,particion->archivoParticion);
-
-	return pagina;
-
+void t_particion_escribirPagina(t_particion* particion ,int numeroDePagina, char* contenido)
+{
+	posicionarPagina(particion,numeroDePagina);
+	fwrite(contenido,sizeof(char),strlen(contenido)+1,particion->archivoParticion);
+	return;
 }
 
 int paginaActual(t_particion* particion)

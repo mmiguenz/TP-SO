@@ -317,7 +317,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	tabla->Pagina[pedido->pagina]->bitPresencia=1;
 	tabla->Pagina[pedido->pagina]->idFrame=frame;
-	tabla->Pagina[pedido->pagina]->horaIngreso=90000;
+	tabla->Pagina[pedido->pagina]->horaIngreso=90000000;
 
 	agregar_reemplazarRegistroTLB(tlb,pedido->pid,pedido->pagina,frame);
 

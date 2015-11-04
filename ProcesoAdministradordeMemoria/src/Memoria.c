@@ -190,12 +190,13 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp,int pagAModif,
 	t_protoc_escrituraProceso* protocEscrSwap = malloc(sizeof(t_protoc_escrituraProceso));
 	int tamanioContenido = strlen(contenidoReemp)+1;
 	int offset;
-	int tamanioBuffer = (sizeof(int)*3)+(sizeof(char)*tamanioContenido)+1;
+	int tamanioBuffer = (sizeof(int)*3)+(sizeof(char)*(tamanioContenido))+1;
 	void* buffer = malloc(tamanioBuffer);
 
 	protocEscrSwap->tipoInstrucc = 2;
 	protocEscrSwap->pid = pid;
 	protocEscrSwap->pagina = pagAModif;
+	protocEscrSwap->tamanio = tamanioContenido;
 	protocEscrSwap->contenido = contenidoReemp;
 
 	offset = sizeof(char);
@@ -204,9 +205,9 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp,int pagAModif,
 	offset += sizeof(int);
 	memcpy(buffer+offset,&(protocEscrSwap->pagina),sizeof(int));
 	offset += sizeof(int);
-	memcpy(buffer+offset,&tamanioContenido,sizeof(int));
+	memcpy(buffer+offset,&(protocEscrSwap->tamanio),sizeof(int));
 	offset += sizeof(int);
-	memcpy(buffer+offset,protocEscrSwap->contenido,(sizeof(char)*tamanioContenido));
+	memcpy(buffer+offset,protocEscrSwap->contenido,(sizeof(char)*protocEscrSwap->tamanio));
 
 	send(swapSocket,buffer,tamanioBuffer,0);
 
