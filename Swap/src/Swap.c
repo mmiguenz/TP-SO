@@ -16,14 +16,19 @@
 #include <commons/temporal.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include <commons/collections/list.h>
 #include "servidor.h"
 #include "protocolos.h"
 #include "swapConfig.h"
 #include "particionSwap.h"
+#include "Swap.h"
 
 
 
 #define BACKLOG 5
+
+
+
 
 void atenderPedido(int memSocket, void* buffer );
 void iniciarProceso(int memSocket);
@@ -31,10 +36,11 @@ void realizarLectura(int memSocket);
 void realizarEscritura(int memSocket);
 void finalizarProceso(int memSocket);
 void tipoDePedidoIncorrecto(int memSocket);
+int hayEspacio(int cantidadNuevoProceso);
 
-t_dictionary* tablaPidsEnSwap;
 t_particion* particion;
 t_swapConfig* config;
+t_list* espacioUtilizado_lista;
 
 int main (){
 
@@ -44,7 +50,7 @@ int main (){
 	swapConfig_GetConfig(config);
 
 	particion = t_particion_crear(config);
-	tablaPidsEnSwap = dictionary_create();
+	espacioUtilizado_lista = list_create();
 
 	hints = configAddrSvr();
 
@@ -130,17 +136,17 @@ void iniciarProceso(int memSocket)
 
 	recv(memSocket,&pedido->paginas,sizeof(int),0);
 	recv(memSocket,&pedido->pid,sizeof(int),0);
-
-	int paginaComienzo =  t_particion_reservarPaginas(particion,pedido->paginas);
-
 	char respuestaMemoria;
 
-
-
-	if(paginaComienzo>=0)
+	if(hayEspacio(pedido->paginas))
 	{
-		dictionary_put(tablaPidsEnSwap,string_itoa(pedido->pid),&paginaComienzo);
+
+
+	    int paginaComienzo =  t_particion_reservarPaginas(particion,pedido->paginas,espacioUtilizado_lista);
+
 		respuestaMemoria = 1 ;
+		t_proceso* unProceso = t_proceso_crear(pedido->pid,paginaComienzo,pedido->paginas);
+		list_add(espacioUtilizado_lista,(void*)unProceso);
 
 
 	}else
@@ -148,10 +154,6 @@ void iniciarProceso(int memSocket)
 		respuestaMemoria = 0;
 
 	}
-
-
-
-
 	int error  =  send(memSocket,&respuestaMemoria,sizeof(char),0);
 
 	if (error>=0)
@@ -160,7 +162,7 @@ void iniciarProceso(int memSocket)
 		perror("Error Al comunicarse con Memoria");
 
 
-
+	free(pedido);
 
 
 }
@@ -183,10 +185,36 @@ void realizarEscritura(int memSocket)
 
 void finalizarProceso(int memSocket)
 {
+	// Recuperar Datos PEDIDO
+
+	t_protoc_Finaliza* pedido = malloc(sizeof(t_protoc_Finaliza));
+	pedido->tipoInstrucc = FINALIZAR;
+
+	recv(memSocket,&pedido->pid,sizeof(int),0);
 
 
+	bool buscarPid(t_proceso* proc)
+	{
+		return proc->pid==pedido->pid;
+
+	}
 
 
+	t_proceso* proceso = list_remove_by_condition(espacioUtilizado_lista,(void*)buscarPid);
+
+	t_hueco_agregar(particion,proceso->paginaComienzo,proceso->cantidad);
+
+	char respuestaMemoria = 1 ;
+
+	int error = send(memSocket,&respuestaMemoria,sizeof(char),0);
+
+	if(error<0)
+	{
+		perror("Error al notificar finalizacion de proceso a memoria");
+
+	}
+	free(pedido);
+	free(proceso);
 
 }
 void tipoDePedidoIncorrecto(int memSocket)
@@ -196,5 +224,68 @@ void tipoDePedidoIncorrecto(int memSocket)
 }
 
 
+int hayEspacio(int cantidadNuevoProceso)
+{
+	int obtenerPaginasOcupadas(t_proceso* unProceso)
+	{
+		return unProceso->cantidad;
+
+	}
 
 
+
+	t_list* listaAux = list_map(espacioUtilizado_lista,(void*)obtenerPaginasOcupadas);
+
+	int i ;
+	int espacioUtilizado=0;
+	for(i=0; i < list_size(listaAux); i++)
+	{
+		int espacio;
+		memcpy(&espacio,list_get(listaAux,i),sizeof(int));
+		espacioUtilizado+= espacio;
+
+	}
+
+
+	return (espacioUtilizado + cantidadNuevoProceso) <= particion->archivo_tamanio;
+
+
+}
+
+
+int calcularPaginaEnSwap(int pid, int pagina)
+{
+
+	bool buscarPid(t_proceso* proc)
+	{
+		return proc->pid==pid;
+
+	}
+
+	t_proceso* proceso = list_find(espacioUtilizado_lista,(void*)buscarPid);
+
+	return (proceso->paginaComienzo + pagina );
+
+
+}
+
+
+
+t_proceso* t_proceso_crear(int pid, int paginaInicio, int cantidad)
+{
+	t_proceso* unproceso  = malloc(sizeof(t_proceso));
+
+	unproceso ->cantidad= cantidad;
+	unproceso->pid = pid;
+	unproceso->paginaComienzo = paginaInicio;
+
+	return unproceso;
+
+}
+
+void t_proceso_eliminar(t_proceso*unProceso)
+{
+	free(unProceso);
+
+
+}
