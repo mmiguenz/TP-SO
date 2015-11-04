@@ -62,23 +62,33 @@ void enviarMesaje(int socket,char* mensaje) {
 
 //Para la memoria
 void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
-	t_msgHeaderMemoria header;
-	memset(&header, 0, sizeof(t_msgHeaderMemoria));
 
-	header.msgtype = instruccion;
-	/*header.msgtype = 2;leer
+	/*header.msgtype = instruccion;
+	 * header.msgtype = 2;leer
 	 * header.msgtype = 3;escribir
 	 * header.msgtype =5;entrada salida
 	 * header.msgtype = 4;finalizar
+	 * header.pagina = nroPag;
 	 * */
+
+	char* mensaje;
+	mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int));
+	int offset=0;
+
+	t_msgHeaderMemoria header;
+	header.msgtype = instruccion;
 	header.pagina = nroPag;
 	header.pid = pid;
-	/*printf("Los mensajes enviados a memoria son: \n");
-	printf("Pagina %d\n",header.pagina);
-	printf("Tipo de instruccion  %d \n",header.msgtype);
-	printf("PID de proc %d \n ",header.pid);*/
 
-	send(socket,&header,sizeof(t_msgHeaderMemoria),0);
+	memcpy(mensaje +offset  , &header.msgtype, sizeof(int));
+	offset+=sizeof(int);
+	memcpy(mensaje +offset  , &header.pid, sizeof(int));
+	offset+=sizeof(int);
+	memcpy(mensaje +offset  , &header.pagina, sizeof(int));
+	offset+=sizeof(int);
+
+	send(socket,mensaje,offset,0);
+	free(mensaje);
 	return;
 }
 
@@ -87,7 +97,8 @@ int recibirMsjMemoria(int memoria){
 	PROCESO mensaje;
 	memset(&mensaje, 0, sizeof(PROCESO));
 	recv(memoria, &mensaje, sizeof(PROCESO), 0);
-	return mensaje.aceptado;
+	int aceptado = atoi(mensaje.aceptado);
+	return aceptado;
 }
 
 void mandarMsjEscribir(int memoria, char texto[20],int pid, int instruccion, int nroPag){
