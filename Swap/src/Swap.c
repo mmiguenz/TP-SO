@@ -142,7 +142,7 @@ void iniciarProceso(int memSocket)
 	{
 
 
-	    int paginaComienzo =  t_particion_reservarPaginas(particion,pedido->paginas);
+	    int paginaComienzo =  t_particion_reservarPaginas(particion,pedido->paginas,espacioUtilizado_lista);
 
 		respuestaMemoria = 1 ;
 		t_proceso* unProceso = t_proceso_crear(pedido->pid,paginaComienzo,pedido->paginas);
@@ -162,7 +162,7 @@ void iniciarProceso(int memSocket)
 		perror("Error Al comunicarse con Memoria");
 
 
-
+	free(pedido);
 
 
 }
@@ -185,10 +185,36 @@ void realizarEscritura(int memSocket)
 
 void finalizarProceso(int memSocket)
 {
+	// Recuperar Datos PEDIDO
+
+	t_protoc_Finaliza* pedido = malloc(sizeof(t_protoc_Finaliza));
+	pedido->tipoInstrucc = FINALIZAR;
+
+	recv(memSocket,&pedido->pid,sizeof(int),0);
 
 
+	bool buscarPid(t_proceso* proc)
+	{
+		return proc->pid==pedido->pid;
+
+	}
 
 
+	t_proceso* proceso = list_remove_by_condition(espacioUtilizado_lista,(void*)buscarPid);
+
+	t_hueco_agregar(particion,proceso->paginaComienzo,proceso->cantidad);
+
+	char respuestaMemoria = 1 ;
+
+	int error = send(memSocket,&respuestaMemoria,sizeof(char),0);
+
+	if(error<0)
+	{
+		perror("Error al notificar finalizacion de proceso a memoria");
+
+	}
+	free(pedido);
+	free(proceso);
 
 }
 void tipoDePedidoIncorrecto(int memSocket)
@@ -208,7 +234,18 @@ int hayEspacio(int cantidadNuevoProceso)
 
 
 
-	int espacioUtilizado = list_map(espacioUtilizado_lista,(void*)obtenerPaginasOcupadas);
+	t_list* listaAux = list_map(espacioUtilizado_lista,(void*)obtenerPaginasOcupadas);
+
+	int i ;
+	int espacioUtilizado=0;
+	for(i=0; i < list_size(listaAux); i++)
+	{
+		int espacio;
+		memcpy(&espacio,list_get(listaAux,i),sizeof(int));
+		espacioUtilizado+= espacio;
+
+	}
+
 
 	return (espacioUtilizado + cantidadNuevoProceso) <= particion->archivo_tamanio;
 
@@ -216,4 +253,39 @@ int hayEspacio(int cantidadNuevoProceso)
 }
 
 
+int calcularPaginaEnSwap(int pid, int pagina)
+{
 
+	bool buscarPid(t_proceso* proc)
+	{
+		return proc->pid==pid;
+
+	}
+
+	t_proceso* proceso = list_find(espacioUtilizado_lista,(void*)buscarPid);
+
+	return (proceso->paginaComienzo + pagina );
+
+
+}
+
+
+
+t_proceso* t_proceso_crear(int pid, int paginaInicio, int cantidad)
+{
+	t_proceso* unproceso  = malloc(sizeof(t_proceso));
+
+	unproceso ->cantidad= cantidad;
+	unproceso->pid = pid;
+	unproceso->paginaComienzo = paginaInicio;
+
+	return unproceso;
+
+}
+
+void t_proceso_eliminar(t_proceso*unProceso)
+{
+	free(unProceso);
+
+
+}

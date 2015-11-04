@@ -39,12 +39,12 @@ t_particion* t_particion_crear(t_swapConfig*);
 void* t_particion_leerPagina(t_particion*,int numeroDePagina);
 
 //Retorna el nroDePAginaDondeComienzaElBloqueReservado
-int t_particion_reservarPaginas(t_particion*, int cantidadDePaginas);
+int t_particion_reservarPaginas(t_particion*, int cantidadDePaginas,t_list* espacioUtilizado_lista);
 
 
 t_hueco* t_hueco_crear(int paginaInicio, int cantidadDePaginas);
 void t_hueco_eliminar(t_hueco*);
-
+void t_hueco_agregar(t_particion* particion,int paginaComienzo,int cantidad);
 
 
 

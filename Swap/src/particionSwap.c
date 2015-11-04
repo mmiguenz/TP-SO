@@ -9,14 +9,15 @@
 #include "particionSwap.h"
 #include "swapConfig.h"
 #include <commons/string.h>
+#include "Swap.h"
 
 int paginaActual(t_particion* particion);
 void posicionarProximaPagina(t_particion*);
 void posicionarPagina(t_particion*, int );
-int hayEspacio(t_particion* particion, int espacio);
 int hayEspacioContiguo(t_particion* particion,int espacioRequerido);
-void compactar(t_particion* particion);
-void reAsignarHuecos( t_particion* particion, int paginaComienzo, int cantidadPaginas);
+void compactar(t_particion* particion,t_list* espacioUtilizado_lista);
+void reAsignarHuecosPorInicio( t_particion* particion, int paginaComienzo, int cantidadPaginas);
+void reAsignarHuecosPorCompactacion(t_particion* particion,int proximaPaginaLibre);
 
 t_particion* t_particion_crear(t_swapConfig* config)
 {
@@ -37,9 +38,8 @@ t_particion* t_particion_crear(t_swapConfig* config)
 	strcat(script," count=");
 	strcat(script,cantidad_Paginas);
 
-
-
 	system(script);
+
 
 	particion->archivoParticion = fopen(config->nombre_Swap,"r+");
 	particion->archivo_tamanio = config->cantidad_Paginas * config->tamanio_Pagina ;
@@ -123,19 +123,19 @@ void posicionarPagina(t_particion* particion, int numeroDePagina)
 }
 
 
-int t_particion_reservarPaginas(t_particion* particion, int cantidadDePaginas)
+int t_particion_reservarPaginas(t_particion* particion, int cantidadDePaginas,t_list* espacioUtilizado_lista)
 {
 
 	int paginaComienzo  =hayEspacioContiguo(particion,cantidadDePaginas);
 
 	if(paginaComienzo ==-1)
 	{
-		compactar(particion);
-		return t_particion_reservarPaginas(particion,cantidadDePaginas);
+		compactar(particion,espacioUtilizado_lista);
+		return t_particion_reservarPaginas(particion,cantidadDePaginas,espacioUtilizado_lista);
 
 	}else
 	{
-		reAsignarHuecos(particion,paginaComienzo,cantidadDePaginas);
+		reAsignarHuecosPorInicio(particion,paginaComienzo,cantidadDePaginas);
 		return paginaComienzo;
 
 	}
@@ -165,8 +165,34 @@ int hayEspacioContiguo(t_particion* particion,int espacioRequerido)
 }
 
 
-void compactar(t_particion* particion)
+void compactar(t_particion* particion,t_list* espacioUtilizado_lista)
 {
+	int pagina= 0 ;
+	int cantidadDeProcesos =  list_size( espacioUtilizado_lista);
+	int i ;
+
+	t_proceso* proceso;
+	for(i=0; i< cantidadDeProcesos; i++)
+	{
+		proceso  = list_get(espacioUtilizado_lista,i);
+		int tamaniobuff = (particion->pagina_tamanio) * (proceso->cantidad);
+		void* buffer = malloc(tamaniobuff);
+
+		posicionarPagina(particion,proceso->paginaComienzo);
+		fread( buffer,tamaniobuff,1,particion->archivoParticion);
+
+		posicionarPagina(particion,pagina);
+		fwrite( buffer,tamaniobuff,1,particion->archivoParticion);
+
+		proceso->paginaComienzo = pagina;
+		pagina+= proceso->cantidad;
+
+
+	}
+
+	int proximaPaginaLibre = (proceso->cantidad ) + pagina ;
+
+	reAsignarHuecosPorCompactacion(particion,proximaPaginaLibre);
 
 
 }
@@ -191,10 +217,42 @@ void t_hueco_eliminar(t_hueco* unHueco)
 }
 
 
-void reAsignarHuecos( t_particion* particion, int paginaComienzo, int cantidadPaginas)
+void reAsignarHuecosPorInicio( t_particion* particion, int paginaComienzo, int cantidadPaginas)
 {
+	bool buscarHuecoPorPagina(t_hueco* unHueco)
+	{
+		return unHueco->paginaInicio==paginaComienzo;
 
+	}
+
+
+	t_hueco* hueco = list_find(particion->espacioLibre,(void*)buscarHuecoPorPagina);
+
+	hueco->paginaInicio = paginaComienzo + cantidadPaginas;
+	hueco->cantidadPaginas-=cantidadPaginas;
+
+}
+
+
+void reAsignarHuecosPorCompactacion( t_particion* particion,int proximaPaginaLibre)
+{
+	list_clean_and_destroy_elements(particion->espacioLibre, (void*)t_hueco_eliminar);
+
+
+
+	t_hueco* unHueco = t_hueco_crear(proximaPaginaLibre,(particion->paginas_cantidad - proximaPaginaLibre));
+
+	list_add(particion->espacioLibre ,(void*) unHueco);
 
 
 }
 
+void t_hueco_agregar(t_particion* particion,int paginaComienzo,int cantidad)
+{
+	t_hueco* unHueco = t_hueco_crear(paginaComienzo,cantidad);
+
+	list_add(particion->espacioLibre,(void*)unHueco);
+
+
+
+}

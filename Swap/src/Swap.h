@@ -19,26 +19,10 @@ typedef struct
 
 } t_proceso ;
 
+t_proceso* t_proceso_crear(int pid, int paginaInicio, int cantidad);
+void t_proceso_eliminar(t_proceso*unProceso);
 
 
-t_proceso* t_proceso_crear(int pid, int paginaInicio, int cantidad)
-{
-	t_proceso* unproceso  = malloc(sizeof(t_proceso));
-
-	unproceso ->cantidad= cantidad;
-	unproceso->pid = pid;
-	unproceso->paginaComienzo = paginaInicio;
-
-	return unproceso;
-
-}
-
-void t_proceso_eliminar(t_proceso*unProceso)
-{
-	free(unProceso);
-
-
-}
 
 
 
