@@ -36,7 +36,8 @@ typedef struct hueco
 
 
 t_particion* t_particion_crear(t_swapConfig*);
-void* t_particion_leerPagina(t_particion*,int numeroDePagina);
+void* t_particion_leerPagina(t_particion* particion ,int numeroDePagina);
+void t_particion_escribirPagina(t_particion* particion ,int numeroDePagina, char* contenido);
 
 //Retorna el nroDePAginaDondeComienzaElBloqueReservado
 int t_particion_reservarPaginas(t_particion*, int cantidadDePaginas,t_list* espacioUtilizado_lista);
