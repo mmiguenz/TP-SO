@@ -62,6 +62,7 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 				char* tipoInstruccion = malloc(sizeof(char));
 				if (recv(socketCliente[i],tipoInstruccion,sizeof(char),0) > 0)
 				procesarPedido(socketCliente[i],swap,*tipoInstruccion);
+				free(tipoInstruccion);
 
 			}
 

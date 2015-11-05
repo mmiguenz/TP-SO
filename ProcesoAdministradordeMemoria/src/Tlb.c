@@ -49,10 +49,9 @@ t_regTLB** inicializarTLB(int entradasTLB){
 	for (i=0;i<entradasTLB;i++){
 		regsTLBtemp[i]=malloc(sizeof(t_regTLB));
 		regsTLBtemp[i]->frame = -1;
-		regsTLBtemp[i]->pagina = (-1+i);
+		regsTLBtemp[i]->pagina = -1;
 		regsTLBtemp[i]->pid = -1;
 	}
-	printf("blabla: %i \n",regsTLBtemp[3]->pagina);
 	return regsTLBtemp;
 
 	//int ColNumPagina = 0;
