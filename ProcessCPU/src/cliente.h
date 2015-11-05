@@ -31,7 +31,7 @@
 #include <commons/log.h>
 
 typedef struct {
-int aceptado;
+char aceptado;
 }PROCESO;
 
 
@@ -41,10 +41,10 @@ char* recibirMensaje(int socket);
 
 void enviarMesaje(int socket,char* mesaje);
 
-void enviarSolicitud (int pid,int instruccion, int nroPag,int socket);
+void enviarSolicitud (int pid,char instruccion, int nroPag,int socket);
 
 int recibirMsjMemoria(int memoria);
 
-void mandarMsjEscribir(int memoria, char texto[20],int pid, int instruccion, int nroPag);
+void mandarMsjEscribir(int memoria, char texto[20],int pid, char instruccion, int nroPag);
 
 #endif /* CLIENTE_H_ */
