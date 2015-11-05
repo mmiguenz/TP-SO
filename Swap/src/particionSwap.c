@@ -10,6 +10,7 @@
 #include "swapConfig.h"
 #include <commons/string.h>
 #include "Swap.h"
+#include "protocolos.h"
 
 #define finString '/0'
 
@@ -73,19 +74,14 @@ void* t_particion_leerPagina(t_particion* particion ,int numeroDePagina)
 {
 	posicionarPagina(particion,numeroDePagina);
 	char* contenidoPagina = malloc(sizeof(particion->pagina_tamanio));
-	int i = 0;
-	fread(contenidoPagina,sizeof(char),1,particion->archivoParticion);
-	while ((contenidoPagina[i] != '/0') && i < particion->pagina_tamanio){
-	i++;
-	fread(contenidoPagina+i,sizeof(char),1,particion->archivoParticion);
-	}
+	fread(contenidoPagina,particion->pagina_tamanio,1,particion->archivoParticion);
 	return contenidoPagina;
 }
 
-void t_particion_escribirPagina(t_particion* particion ,int numeroDePagina, char* contenido)
+void t_particion_escribirPagina(t_particion* particion ,int numeroDePagina, t_protoc_escrituraProceso* pedido)
 {
-	posicionarPagina(particion,numeroDePagina);
-	fwrite(contenido,sizeof(char),strlen(contenido)+1,particion->archivoParticion);
+	posicionarPagina(particion,pedido->pagina);
+	fwrite(pedido->contenido,sizeof(char),pedido->tamanio,particion->archivoParticion);
 	return;
 }
 

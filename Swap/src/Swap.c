@@ -37,6 +37,7 @@ void realizarEscritura(int memSocket);
 void finalizarProceso(int memSocket);
 void tipoDePedidoIncorrecto(int memSocket);
 int hayEspacio(int cantidadNuevoProceso);
+int calcularPaginaEnSwap(int pid,int paginas);
 
 t_particion* particion;
 t_swapConfig* config;
@@ -146,7 +147,7 @@ void iniciarProceso(int memSocket)
 
 		respuestaMemoria = 1 ;
 		t_proceso* unProceso = t_proceso_crear(pedido->pid,paginaComienzo,pedido->paginas);
-		list_add_in_index(espacioUtilizado_lista,unProceso->pid,(void*)unProceso);
+		list_add(espacioUtilizado_lista,(void*)unProceso);
 
 
 	}else
@@ -168,22 +169,20 @@ void iniciarProceso(int memSocket)
 }
 void realizarLectura(int memSocket)
 {
-		// Recepción de la solicitud de información de la Memoria
+	// Recepción de la solicitud de información de la Memoria
 		t_protoc_inicio_lectura_Proceso* pedido = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 		pedido->tipoInstrucc = LEER;
 
 		recv(memSocket,&pedido->paginas,sizeof(int),0);
 		recv(memSocket,&pedido->pid,sizeof(int),0);
 
-		// Búsqueda y posterior lectura de la página solicitada
-		t_proceso* procesoSelecc = malloc(sizeof(t_proceso));
-		procesoSelecc = list_get(espacioUtilizado_lista,pedido->pid);
-		int paginaALeer = (procesoSelecc->paginaComienzo + pedido->paginas - 1);
+	// Búsqueda y posterior lectura de la página solicitada
+		int paginaALeer = calcularPaginaEnSwap(pedido->pid,pedido->paginas);
 		void* contenidoPag = t_particion_leerPagina(particion,paginaALeer);
 		int* tamanioContenido = malloc(sizeof(int));
-		*tamanioContenido = strlen((char*)contenidoPag)+1;
+		*tamanioContenido = particion->pagina_tamanio;
 
-		//Serializo información solicitada y envío a Memoria
+	//Serializo información solicitada y envío a Memoria
 		void* buffer = malloc(sizeof(int)+*tamanioContenido);
 		int offset = sizeof(int);
 		memcpy(buffer,tamanioContenido,offset);
@@ -191,19 +190,18 @@ void realizarLectura(int memSocket)
 		offset += *tamanioContenido;
 		send(memSocket,buffer,offset,0);
 
-		//Liberación de estructuras dinámicas utilizadas
+	//Liberación de estructuras dinámicas utilizadas
 		free(pedido);
-		free(procesoSelecc);
 		free(contenidoPag);
 		free(buffer);
 
-		//Retardo simulado en la lectura de una página de acuerdo a configuración
+	//Retardo simulado en la lectura de una página de acuerdo a configuración
 		sleep(config->retardo_SWAP);
 }
 
 void realizarEscritura(int memSocket)
 {
-		// Recepción de la solicitud de escritura de la Memoria (refactorizar ya que es similar a lectura)
+	// Recepción de la solicitud de escritura de la Memoria
 		t_protoc_escrituraProceso* pedido = malloc(sizeof(t_protoc_escrituraProceso));
 		pedido->tipoInstrucc = ESCRIBIR;
 
@@ -212,23 +210,22 @@ void realizarEscritura(int memSocket)
 		recv(memSocket,&pedido->tamanio,sizeof(int),0);
 		recv(memSocket,&pedido->contenido,pedido->tamanio,0);
 
-		// Búsqueda y posterior escritura de la página solicitada
-		t_proceso* procesoSelecc = malloc(sizeof(t_proceso));
-		procesoSelecc = list_get(espacioUtilizado_lista,pedido->pid);
-		int paginaAEscribir = (procesoSelecc->paginaComienzo + pedido->pagina - 1);
-		t_particion_escribirPagina(particion,paginaAEscribir,pedido->contenido);
+	// Búsqueda y posterior escritura de la página solicitada
+		int paginaAEscribir = calcularPaginaEnSwap(pedido->pid,pedido->pagina);
+		t_particion_escribirPagina(particion,paginaAEscribir,pedido);
 
-		//Liberación de estructuras dinámicas utilizadas
+	//Envío confirmación de la operación a memoria
+		char* confirmMemoria = malloc(sizeof(char));
+		*confirmMemoria = 1;
+		send(memSocket,confirmMemoria,sizeof(char),0);
+
+	//Liberación de estructuras dinámicas utilizadas
 		free(pedido);
-		free(procesoSelecc);
+		free(confirmMemoria);
 
-		//Retardo simulado en la lectura de una página de acuerdo a configuración
+	//Retardo simulado en la lectura de una página de acuerdo a configuración
 		sleep(config->retardo_SWAP);
-
-
 }
-
-
 
 
 void finalizarProceso(int memSocket)

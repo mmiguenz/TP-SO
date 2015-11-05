@@ -211,6 +211,13 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp,int pagAModif,
 
 	send(swapSocket,buffer,tamanioBuffer,0);
 
+	char* confirmSwap = malloc(sizeof(char));
+	recv(swapSocket,confirmSwap,sizeof(char),0);
+
+	if (*confirmSwap == 1)
+	printf("Se ha reemplazado una página en memoria modificada previamente, actualizando su contenido en Swap de forma satisfactoria");
+
+
 	free(protocEscrSwap);
 	free(buffer);
 

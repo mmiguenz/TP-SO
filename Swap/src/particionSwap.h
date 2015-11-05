@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <commons/collections/list.h>
+#include "protocolos.h"
 #ifndef PARTICIONSWAP_H_
 #define PARTICIONSWAP_H_
 
@@ -37,7 +38,7 @@ typedef struct hueco
 
 t_particion* t_particion_crear(t_swapConfig*);
 void* t_particion_leerPagina(t_particion* particion ,int numeroDePagina);
-void t_particion_escribirPagina(t_particion* particion ,int numeroDePagina, char* contenido);
+void t_particion_escribirPagina(t_particion* particion ,int numeroDePagina, t_protoc_escrituraProceso* pedido);
 
 //Retorna el nroDePAginaDondeComienzaElBloqueReservado
 int t_particion_reservarPaginas(t_particion*, int cantidadDePaginas,t_list* espacioUtilizado_lista);
