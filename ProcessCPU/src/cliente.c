@@ -9,26 +9,9 @@
 #define CLIENTE_C_
 #include <sys/socket.h>
 #include "cliente.h"
+#include "protocolos.h"
 #include <commons/config.h>
 #include <commons/log.h>
-
-
-//--estructura para inviar msj a memoria
-typedef struct  {
-	int msgtype;
-	int pagina;
-	int pid;
-}t_msgHeaderMemoria;
-
-
-//--estructura para enviar solicitud de escribir a memoria
-typedef struct  {
-	int instruccion;
-	int pagina;
-	int pid;
-	char texto[20];
-}estructuraEscribir;
-
 
 
 int conectar_cliente(int puerto,char* ip){
@@ -61,7 +44,7 @@ void enviarMesaje(int socket,char* mensaje) {
 }
 
 //Para la memoria
-void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
+void enviarSolicitud (int pid, char instruccion, int nroPag, int socket){
 
 	/*header.msgtype = instruccion;
 	 * header.msgtype = 2;leer
@@ -71,24 +54,25 @@ void enviarSolicitud (int pid, int instruccion, int nroPag, int socket){
 	 * header.pagina = nroPag;
 	 * */
 
-	char* mensaje;
-	mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int));
+	void* mensaje;
+	mensaje= malloc(sizeof(char)+sizeof(int)+sizeof(int));
 	int offset=0;
 
-	t_msgHeaderMemoria header;
-	header.msgtype = instruccion;
-	header.pagina = nroPag;
-	header.pid = pid;
+	t_protoc_inicio_lectura_Proceso* header = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
+	header->tipoInstrucc = instruccion;
+	header->paginas= nroPag;
+	header->pid = pid;
 
-	memcpy(mensaje +offset  , &header.msgtype, sizeof(int));
+	memcpy(mensaje +offset  , &(header->tipoInstrucc), sizeof(char));
+	offset+=sizeof(char);
+	memcpy(mensaje +offset  , &(header->paginas), sizeof(int));
 	offset+=sizeof(int);
-	memcpy(mensaje +offset  , &header.pid, sizeof(int));
-	offset+=sizeof(int);
-	memcpy(mensaje +offset  , &header.pagina, sizeof(int));
+	memcpy(mensaje +offset  , &(header->pid), sizeof(int));
 	offset+=sizeof(int);
 
 	send(socket,mensaje,offset,0);
 	free(mensaje);
+	free(header);
 	return;
 }
 
@@ -101,25 +85,37 @@ int recibirMsjMemoria(int memoria){
 	return aceptado;
 }
 
-void mandarMsjEscribir(int memoria, char texto[20],int pid, int instruccion, int nroPag){
-	char* mensaje;
-	mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(texto)+1);
-	int tamanio= strlen(texto);
+void mandarMsjEscribir(int memoria, char texto[],int pid, char instruccion, int nroPag){
+	int tamanio= strlen(texto)+1;
+	void* mensaje;
+	mensaje= malloc(sizeof(char)+sizeof(int)+sizeof(int)+sizeof(int)+tamanio);
+
 	int offset=0;
 
-	memcpy(mensaje +offset  , &instruccion, sizeof(int));
+
+	t_protoc_escrituraProceso* header = malloc(sizeof(t_protoc_escrituraProceso));
+	header->tipoInstrucc= instruccion;
+	header->pid= pid;
+	header->pagina =nroPag;
+	header->tamanio=tamanio;
+	header->contenido =texto;
+
+
+
+	memcpy(mensaje +offset  , &(header->tipoInstrucc), sizeof(char));
+	offset+=sizeof(char);
+	memcpy(mensaje +offset  , &(header->pid), sizeof(int));
 	offset+=sizeof(int);
-	memcpy(mensaje +offset  , &pid, sizeof(int));
+	memcpy(mensaje +offset  , &(header->pagina), sizeof(int));
 	offset+=sizeof(int);
-	memcpy(mensaje +offset  , &nroPag, sizeof(int));
+	memcpy(mensaje +offset  , &(header->tamanio), sizeof(int));
 	offset+=sizeof(int);
-	memcpy(mensaje +offset  , &tamanio, sizeof(int));
-	offset+=sizeof(int);
-	memcpy(mensaje +offset  , texto, strlen(texto)+1);
+	memcpy(mensaje +offset  , header->contenido, strlen(texto)+1);
 	offset+=strlen(texto)+1;
 
 	send(memoria,mensaje,offset,0);
 	free(mensaje);
+	free(header);
 	return;
 }
 

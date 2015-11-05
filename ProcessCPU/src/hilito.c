@@ -185,7 +185,7 @@ int identificar_instruccion(char comando[15])
 
 int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20],time_t comienzo)
 {
-	int instruccion;
+	char instruccion;
 	time_t final;
 
 
