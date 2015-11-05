@@ -114,7 +114,7 @@ void finalizarProceso(MEMORIAPRINCIPAL* memoriaP ,t_tablaDePaginas* tablaDePagin
 		t_regPagina* pagina = tablaDePaginas->Pagina[i];
 
 		 inicializarMarco(memoriaP, memoriaP->Memoria[pagina->idFrame]);
-		 *(memoriaP->MemoriaLibre[pagina->idFrame]) = 0;
+		 memoriaP->MemoriaLibre[pagina->idFrame] = 0;
 
 
 	}
@@ -252,7 +252,7 @@ int t_cargarContenido(MEMORIAPRINCIPAL* memoriaP,char* contenido)
 	int frame = buscarFrameLibre(memoriaP);
 
 	memoriaP->Memoria[frame]  = contenido;
-	*(memoriaP->MemoriaLibre[frame]) = 1 ;
+	memoriaP->MemoriaLibre[frame] = 1 ;
 	return frame ;
 
 
@@ -267,7 +267,7 @@ int buscarFrameLibre(MEMORIAPRINCIPAL* memoria)
 	int i;
 	for (i = 0; memoria->cantMarcos;i++)
 	{
-		if(*(memoria->MemoriaLibre[i])==0)
+		if((memoria->MemoriaLibre[i])==0)
 			return i;
 	}
 
@@ -281,7 +281,7 @@ int t_hayFrameLibre(MEMORIAPRINCIPAL* memoriaPrincipal , t_tablaDePaginas* tabla
 {
 	int i,ocupados=0 ;
 	for (i = 0 ; i<memoriaPrincipal->cantMarcos;i++)
-		ocupados+=*(memoriaPrincipal->MemoriaLibre[i]);
+		ocupados+=(memoriaPrincipal->MemoriaLibre[i]);
 
 	if(ocupados==memoriaPrincipal->cantMarcos)
 		return -1;

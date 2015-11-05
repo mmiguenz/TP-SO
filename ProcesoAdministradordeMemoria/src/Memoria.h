@@ -15,7 +15,7 @@
 
 typedef struct{
 		char** Memoria;
-		char** MemoriaLibre;
+		char* MemoriaLibre;
 		int cantMarcos;
 		int tamanioMarco;
 	}MEMORIAPRINCIPAL;

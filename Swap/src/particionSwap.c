@@ -23,7 +23,7 @@ void reAsignarHuecosPorInicio( t_particion* particion, int paginaComienzo, int c
 void reAsignarHuecosPorCompactacion(t_particion* particion,int proximaPaginaLibre);
 void unificarHuecos(t_particion* particion);
 t_hueco* unificar(t_hueco* unHueco,t_hueco* otroHueco);
-int sonContinuos(t_hueco* unHueco,t_hueco* otroHueco);
+int sonContiguos(t_hueco* unHueco,t_hueco* otroHueco);
 
 
 t_particion* t_particion_crear(t_swapConfig* config)
@@ -288,29 +288,35 @@ void unificarHuecos(t_particion* particion)
 	cantidadHuecos = list_size(huecos);
 	int i;
 	unHueco= list_get(huecos,0);
-	for(i=0; i<cantidadHuecos; i++)
+	for(i=1; i<cantidadHuecos; i++)
 	{
-		otroHueco = list_get(huecos,(i+1));
+		otroHueco = list_get(huecos,(i));
 
-
-
-		if(sonContinuos(unHueco,otroHueco))
+		if(sonContiguos(unHueco,otroHueco))
 		{
 			t_hueco* huecoUnificado = unificar(unHueco,otroHueco);
-			list_add(huecos,huecoUnificado);
+
+			list_remove_and_destroy_element(huecos,(i-1),(void*)t_hueco_eliminar);
 			list_remove_and_destroy_element(huecos,(i),(void*)t_hueco_eliminar);
-			list_remove_and_destroy_element(huecos,(i+1),(void*)t_hueco_eliminar);
+
+			list_add_in_index(huecos,--i,huecoUnificado);
+
+			unHueco = list_get(huecos,i);
+
+		}else{
+
+			unHueco=otroHueco;
 
 		}
 
-		unHueco=otroHueco;
+
 
 	}
 
 }
 
 
-int sonContinuos(t_hueco* unHueco,t_hueco* otroHueco)
+int sonContiguos(t_hueco* unHueco,t_hueco* otroHueco)
 {
 	return ( (unHueco->paginaInicio + unHueco->cantidadPaginas) == otroHueco->paginaInicio)?
 			1:0;

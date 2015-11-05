@@ -251,7 +251,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 if(frame>=0)
 	 {
 		 memoriaPrincipal.Memoria[frame] = pedido->contenido;
-		 memoriaPrincipal.MemoriaLibre[frame]= "1";
+		 memoriaPrincipal.MemoriaLibre[frame]= 1;
 		 tablaDePaginas->Pagina[pedido->pagina]->bitPresencia=1;
 		 tablaDePaginas->Pagina[pedido->pagina]->bitModificado=1;
 
