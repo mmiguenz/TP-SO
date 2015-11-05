@@ -150,6 +150,7 @@ void iniciarProceso(int memSocket)
 		list_add(espacioUtilizado_lista,(void*)unProceso);
 
 
+
 	}else
 	{
 		respuestaMemoria = 0;
@@ -248,6 +249,9 @@ void finalizarProceso(int memSocket)
 	t_proceso* proceso = list_remove_by_condition(espacioUtilizado_lista,(void*)buscarPid);
 
 	t_hueco_agregar(particion,proceso->paginaComienzo,proceso->cantidad);
+
+
+
 
 	char respuestaMemoria = 1 ;
 

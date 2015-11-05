@@ -21,6 +21,10 @@ int hayEspacioContiguo(t_particion* particion,int espacioRequerido);
 void compactar(t_particion* particion,t_list* espacioUtilizado_lista);
 void reAsignarHuecosPorInicio( t_particion* particion, int paginaComienzo, int cantidadPaginas);
 void reAsignarHuecosPorCompactacion(t_particion* particion,int proximaPaginaLibre);
+void unificarHuecos(t_particion* particion);
+t_hueco* unificar(t_hueco* unHueco,t_hueco* otroHueco);
+int sonContinuos(t_hueco* unHueco,t_hueco* otroHueco);
+
 
 t_particion* t_particion_crear(t_swapConfig* config)
 {
@@ -238,6 +242,14 @@ void reAsignarHuecosPorInicio( t_particion* particion, int paginaComienzo, int c
 	hueco->paginaInicio = paginaComienzo + cantidadPaginas;
 	hueco->cantidadPaginas-=cantidadPaginas;
 
+	if (hueco->cantidadPaginas ==0)
+	{
+
+		list_remove_and_destroy_by_condition(particion->espacioLibre,(void*)buscarHuecoPorPagina,(void*)t_hueco_eliminar);
+
+
+	}
+
 }
 
 
@@ -260,6 +272,59 @@ void t_hueco_agregar(t_particion* particion,int paginaComienzo,int cantidad)
 
 	list_add(particion->espacioLibre,(void*)unHueco);
 
+	unificarHuecos(particion);
 
 
+}
+
+
+
+void unificarHuecos(t_particion* particion)
+{
+	t_hueco *unHueco, *otroHueco;
+	int cantidadHuecos;
+	t_list* huecos = particion->espacioLibre;
+
+	cantidadHuecos = list_size(huecos);
+	int i;
+	unHueco= list_get(huecos,0);
+	for(i=0; i<cantidadHuecos; i++)
+	{
+		otroHueco = list_get(huecos,(i+1));
+
+
+
+		if(sonContinuos(unHueco,otroHueco))
+		{
+			t_hueco* huecoUnificado = unificar(unHueco,otroHueco);
+			list_add(huecos,huecoUnificado);
+			list_remove_and_destroy_element(huecos,(i),(void*)t_hueco_eliminar);
+			list_remove_and_destroy_element(huecos,(i+1),(void*)t_hueco_eliminar);
+
+		}
+
+		unHueco=otroHueco;
+
+	}
+
+}
+
+
+int sonContinuos(t_hueco* unHueco,t_hueco* otroHueco)
+{
+	return ( (unHueco->paginaInicio + unHueco->cantidadPaginas) == otroHueco->paginaInicio)?
+			1:0;
+
+
+}
+
+t_hueco* unificar(t_hueco* unHueco,t_hueco* otroHueco)
+{
+	t_hueco* huecoUnificado = malloc(sizeof(t_hueco));
+
+	huecoUnificado->paginaInicio = unHueco->paginaInicio;
+	huecoUnificado->cantidadPaginas = unHueco->cantidadPaginas + otroHueco->cantidadPaginas ;
+
+
+	return huecoUnificado;
 }
