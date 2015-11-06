@@ -14,9 +14,11 @@ int conectar_cliente(char* puerto,char* ip){
 	dire_serv.sin_addr.s_addr = inet_addr(ip);
 	dire_serv.sin_port = htons(atoi(puerto));
 	int swap = socket(AF_INET, SOCK_STREAM, 0);
-	if (connect(swap, (void*) &dire_serv, sizeof(dire_serv)) > 0) {
-				perror("No se pudo conectar");
+	if (connect(swap, (void*) &dire_serv, sizeof(dire_serv)) < 0) {
+		perror("Error al intentar conectar al módulo Swap");
+		exit(0);
 	}
+	else printf("Conexión con Swap establecida \n");
 
 	return swap	;
 

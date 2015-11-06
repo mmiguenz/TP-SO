@@ -64,32 +64,35 @@ int main (){
 	char *tiempo=temporal_get_string_time();
 	printf("Se ha iniciado el SWAP a las %s.\n",tiempo);
 	free(tiempo);
-
-	int memSocket = connectToClient(listenningSocket);
-
-
-	int status = 1;
+	int status;
 	size_t packageSize = sizeof(char);
 	void* buffer = malloc(packageSize);
 
-	while (status != 0) {
+	int memSocket = connectToClient(listenningSocket);
 
-		status = recv(memSocket,buffer,packageSize,0);
-		if (status != 0){
+	while(1){
 
-			 atenderPedido(memSocket,buffer);
+		status = 1;
+		while (status != 0) {
 
+			status = recv(memSocket,buffer,packageSize,0);
+			if (status != 0){
 
+				atenderPedido(memSocket,buffer);
+
+			}
+		}
+
+		if (status == 0) {
+			printf("Se ha desconectado el administrador de Memoria \n");
 		}
 
 
-
+		memSocket = connectToClient(listenningSocket);
 
 	}
-	if (status == -1) {
-		printf("Se ha cerrado el SWAP porque la Memoria ha finalizado");
-	}
 
+	free(buffer);
 	close(memSocket);
 	close(listenningSocket);
 	swapConfig_Free(config);

@@ -54,8 +54,9 @@ int connectToClient(int listenningSocket){
 		socklen_t addrlen = sizeof(addr);
 		int cSocket =accept(listenningSocket, (struct sockaddr *) &addr, &addrlen);
 		if (cSocket < 0){
-			perror("Fallo al conectar al cliente");
+			perror("Fallo al conectar al cliente \n");
 		}
+		else printf("Se ha conectado el administrador de memoria \n");
 
 		return cSocket;
 

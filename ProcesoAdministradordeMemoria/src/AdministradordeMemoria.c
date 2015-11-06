@@ -86,21 +86,14 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 	 	 	 /* Se crea una estructura dinámica que contendrá las tablas de páginas de los procesos en ejecución*/
 
-	 	 	 	 tablasPags = malloc(sizeof(t_dictionary));
 	 	 	 	 tablasPags = dictionary_create();
+	 	 	 	 tablasPags = malloc(sizeof(t_dictionary));
 
 	 	 	 	 /*Conexión del administrador de memoria como cliente al Swap y como Servidor con CPU*/
 
-
 	 	 	 	 socketSwap = conectar_cliente(configAdmMem->puerto_swap,configAdmMem->ip_swap);
-	 	 	 	if(socketSwap>=0)
-	 	 	 		 	 	 	{
 
-	 	 	 		 	 	 		printf("Se conecto Al SWAP\n");
-
-	 	 	 		 	 	 	}
-
-	 	 		conectar_servidor(configAdmMem->puerto_escucha, socketSwap);
+	 	 	 	 conectar_servidor(configAdmMem->puerto_escucha, socketSwap);
 
 
 
@@ -162,7 +155,6 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 	 }
 
 	 	 free(confirmSwap);
-	 	 free(confirmCPU);
 	 	 free(protInic);
 	 	 free(buffer);
  };
