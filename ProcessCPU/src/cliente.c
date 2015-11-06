@@ -77,12 +77,10 @@ void enviarSolicitud (int pid, char instruccion, int nroPag, int socket){
 }
 
 //la memoria nos avisa si realizo la operacion con exito
-int recibirMsjMemoria(int memoria){
-	PROCESO mensaje;
-	memset(&mensaje, 0, sizeof(PROCESO));
-	recv(memoria, &mensaje, sizeof(PROCESO), 0);
-	int aceptado = atoi(mensaje.aceptado);
-	return aceptado;
+char* recibirMsjMemoria(int memoria){
+	char* msjMemoria = malloc(sizeof(char));
+	recv(memoria,msjMemoria,sizeof(char),0);
+	return msjMemoria;
 }
 
 void mandarMsjEscribir(int memoria, char texto[],int pid, char instruccion, int nroPag){

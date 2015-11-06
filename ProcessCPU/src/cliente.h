@@ -43,7 +43,7 @@ void enviarMesaje(int socket,char* mesaje);
 
 void enviarSolicitud (int pid,char instruccion, int nroPag,int socket);
 
-int recibirMsjMemoria(int memoria);
+char* recibirMsjMemoria(int memoria);
 
 void mandarMsjEscribir(int memoria, char texto[20],int pid, char instruccion, int nroPag);
 

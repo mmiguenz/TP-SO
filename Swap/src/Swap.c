@@ -162,7 +162,7 @@ void iniciarProceso(int memSocket)
 	int error  =  send(memSocket,&respuestaMemoria,sizeof(char),0);
 
 	if (error>=0)
-		printf("Se notifico al la memoria el inicio de proceso. Resultado= %d \n",respuestaMemoria);
+		printf("Se notifico a la memoria el inicio de proceso. Resultado= %d \n",respuestaMemoria);
 	else
 		perror("Error Al comunicarse con Memoria \n");
 

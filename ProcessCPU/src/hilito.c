@@ -202,7 +202,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 		//--mensaje para la MEMORIA
 		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
-		int msj = recibirMsjMemoria(memoria);
+		char msj = *(recibirMsjMemoria(memoria));
 		printf("mensaje de la memoria %d \n",msj);
 
 		if(msj==1)
@@ -241,7 +241,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 		printf("Encontro leer\n");
 		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
-		int msj = recibirMsjMemoria(memoria);
+		char msj = *(recibirMsjMemoria(memoria));
 
 		printf("mensaje de la memoria %d \n",msj);
 
@@ -286,8 +286,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 
 		mandarMsjEscribir(memoria, texto, PcbAux->PID, instruccion, paginas);
-		int msj = recibirMsjMemoria(memoria);
-
+		char msj = *(recibirMsjMemoria(memoria));
 		printf("El texto a escribir es: %s \n",texto);
 		printf("mensaje de la memoria %d \n",msj);
 
@@ -367,7 +366,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		int paginas=0;
 
 		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
-		int msj = recibirMsjMemoria(memoria);
+		char msj = *(recibirMsjMemoria(memoria));
 		printf("mensaje de la memoria %d \n",msj);
 
 		if(msj==1)
