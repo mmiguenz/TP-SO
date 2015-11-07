@@ -189,24 +189,9 @@ void realizarLectura(int memSocket)
 		int tamanioContenido;
 		tamanioContenido = particion->pagina_tamanio;
 
-	//Serializo información solicitada y envío a Memoria
-		unBuffer = malloc(sizeof(int) + (tamanioContenido));
+		send(memSocket, &tamanioContenido, sizeof(int),0);
+		send(memSocket,contenidoPag , tamanioContenido,0);
 
-
-		int offset = sizeof(int);
-
-		memcpy(unBuffer,&tamanioContenido,offset);
-		memcpy((unBuffer+offset),contenidoPag,tamanioContenido);
-		offset += tamanioContenido;
-		send(memSocket,unBuffer,offset,0);
-
-	//Liberación de estructuras dinámicas utilizadas
-		free(pedido);
-		free(contenidoPag);
-		free(unBuffer);
-
-	//Retardo simulado en la lectura de una página de acuerdo a configuración
-		sleep(config->retardo_SWAP);
 }
 
 void realizarEscritura(int memSocket)
