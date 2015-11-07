@@ -86,7 +86,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 	 	 	 /* Se crea una estructura dinámica que contendrá las tablas de páginas de los procesos en ejecución*/
 
-	 	 	 	 tablasPags = malloc(sizeof(t_dictionary));
+	 	 	 	 tablasPags = malloc(sizeof(t_dictionary*));
 	 	 	 	 tablasPags = dictionary_create();
 
 	 	 	 	 /*Conexión del administrador de memoria como cliente al Swap y como Servidor con CPU*/
@@ -176,9 +176,12 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 			 recv(socketSwap,&tamanioContenido,sizeof(int),0);
 			 recv(socketSwap,contenido,tamanioContenido,0);
 
-			 t_tablaDePaginas* tablaPagsProceso = dictionary_get(tablasdePagsProcesos,string_itoa(protInic->pid));
+			 char* pidBuscado = string_itoa(protInic->pid);
+			 t_tablaDePaginas* tablaPagsProceso = malloc(sizeof(t_tablaDePaginas));
+			 tablaPagsProceso = dictionary_get(tablasdePagsProcesos,pidBuscado);
 			 frame = insertarContenidoenMP(socketSwap,contenido,memPrincip,tablaPagsProceso);
 			 actualizarTablaPagina_porReemp(frame,protInic->paginas,tablaPagsProceso);
+			 free(tablaPagsProceso);
 
 		 }
 
@@ -380,15 +383,17 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 
  void crear_e_insertar_TabladePaginas(int paginas, int pid, t_dictionary* tablasPagsProcesos) {
+	 //t_tablaDePaginas* tablaPaginasProceso = malloc(sizeof(t_regPagina**)+(sizeof(int)*2));
+	 //tablaPaginasProceso->Pagina = calloc(paginas,sizeof(t_regPagina));
 	 t_tablaDePaginas* tablaPaginasProceso = malloc(sizeof(t_regPagina**)+(sizeof(int)*2));
-	 tablaPaginasProceso->Pagina = calloc(paginas,sizeof(t_regPagina));
+	 tablaPaginasProceso->Pagina = (t_regPagina**)calloc(paginas,sizeof(t_regPagina*));
 	 tablaPaginasProceso->pid = pid;
 	 tablaPaginasProceso->cantTotalPaginas = paginas;
 
 	 int i;
 	 for (i=0; i<paginas; ++i){
 		 tablaPaginasProceso->Pagina[i] = malloc(sizeof(t_regPagina));
-		 tablaPaginasProceso->Pagina[i]->idFrame = -1+i;
+		 tablaPaginasProceso->Pagina[i]->idFrame = -1;
 		 tablaPaginasProceso->Pagina[i]->bitPresencia = 0;
 		 tablaPaginasProceso->Pagina[i]->bitModificado = 0;
 		 tablaPaginasProceso->Pagina[i]->horaIngreso = 90000000;//Espacio que ocupa la hora en formato 'hh:mm:ss:mmmm'
@@ -399,7 +404,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 dictionary_put(tablasPagsProcesos,pidConv,tablaPaginasProceso);
 
 	 free(pidConv);
-	 free(tablaPaginasProceso);
+	 //free(tablaPaginasProceso);
  }
 
  void* deserializarInfoCPU_Inicio_Lectura(int socketCPU, t_protoc_inicio_lectura_Proceso* protInic_Lect, char InstrSent){
