@@ -528,15 +528,20 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	int i=0;
 	time_t comienzo, final;
 	comienzo = time( NULL );
-
-	while((strcmp(comando, "finalizar")) && quantum>i )
+int flag=0;
+	while(flag!=-1 && (strcmp(comando, "finalizar")) && quantum>i )
 	{
+
 		int aux;
 		aux= recolectar_instruccion(cadena,comando, punta);
 		punta=aux;
 
 		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto,comienzo);
 		punta=aux;
+		if(punta>1500){
+			flag=-1;
+		}
+
 		i++;
 	}
 
