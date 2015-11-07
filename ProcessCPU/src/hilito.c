@@ -228,6 +228,19 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			printf("mProc %s Fallo\n", PcbAux->nombreProc);
 			log_info(logger, "mProc %s Fallo\n", PcbAux->nombreProc);
 			PcbAux->contadorProgram = 0;
+
+			t_msgHeader header;
+			memset(&header, 0, sizeof(t_msgHeader));
+			header.msgtype = 3;
+			header.payload_size = 0;
+			send(planificador, &header, sizeof( t_msgHeader), 0);
+
+			PCB_PARCIAL parcial;
+			memset(&parcial, 0, sizeof(PCB_PARCIAL));
+			parcial.pid = PcbAux->PID;
+			parcial.tiempo = 0;
+			parcial.contadorDePrograma = PcbAux->contadorProgram;
+			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 			punta=1501;
 			sleep(retardo);
 		}
@@ -265,8 +278,22 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			log_info(logger, "El pid es %d", PcbAux->PID);
 			log_info(logger, "mProc %s Fallo lectura",PcbAux->nombreProc);
 			printf("mProc %s Fallo\n", PcbAux->nombreProc);
-			sleep(retardo);
+
+			t_msgHeader header;
+			memset(&header, 0, sizeof(t_msgHeader));
+			header.msgtype = 3;
+			header.payload_size = 0;
+			send(planificador, &header, sizeof( t_msgHeader), 0);
+
+			PCB_PARCIAL parcial;
+			memset(&parcial, 0, sizeof(PCB_PARCIAL));
+			parcial.pid = PcbAux->PID;
+			parcial.tiempo = 0;
+			parcial.contadorDePrograma = PcbAux->contadorProgram;
+			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 			punta=15001;
+			sleep(retardo);
+
 		}
 		break;
 	}
@@ -304,6 +331,20 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			printf("La escritura fallo");
 			log_info(logger, "El pid es %d", PcbAux->PID);
 			log_info(logger, "mProc %s Fallo lectura",PcbAux->nombreProc);
+
+			t_msgHeader header;
+			memset(&header, 0, sizeof(t_msgHeader));
+			header.msgtype = 3;
+			header.payload_size = 0;
+			send(planificador, &header, sizeof( t_msgHeader), 0);
+
+			PCB_PARCIAL parcial;
+			memset(&parcial, 0, sizeof(PCB_PARCIAL));
+			parcial.pid = PcbAux->PID;
+			parcial.tiempo = 0;
+			parcial.contadorDePrograma = PcbAux->contadorProgram;
+			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
+			punta=1501;
 		}
 		break;
 	}
@@ -379,13 +420,13 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 
-
+/*
 			final = time( NULL );
-			printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
+			//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 			int diff =  difftime(final, comienzo);
 			int porcentaje= porcentajeDeUso(diff, PcbAux->contadorProgram, retardo);
-			printf("El porcentaje de uso es %d\n", porcentaje);
-
+			//printf("El porcentaje de uso es %d\n", porcentaje);
+*/
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader));
 			header.msgtype = 3;
@@ -400,13 +441,13 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 
 			//actualizamos el porcentaje de cpu en la cola
-			usoCPU* nodo =malloc(sizeof(usoCPU*));
+			/*usoCPU* nodo =malloc(sizeof(usoCPU*));
 			nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
 			nodo->porcentaje=porcentaje;
 			pthread_mutex_lock(&mutex);
 			queue_push(porcentajes_CPU, nodo);
 			pthread_mutex_unlock(&mutex);
-			free(nodo);
+			free(nodo);*/
 			//-------
 
 			sleep(retardo);
@@ -416,7 +457,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 	case -1://Error
 	{
 		printf("Error de sentencias!!!");
-		punta++;
+		punta=1501;
 		break;
 	}
 	}
@@ -456,20 +497,20 @@ int ubicarPunta(char cadena [1500], PCB* PcbAux){
 void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 	int instruccion = 4;
 	int paginas=0;
-	enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
+	//enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
 
 	printf("El proceso Pudo finalizar\n");
 	log_info(logger, "El pid es %d", PcbAux->PID);
 	log_info(logger, "mProc %s solo ejecuta sentencia finalizado", PcbAux->nombreProc);
 
 	t_msgHeader header;
-	memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+	memset(&header, 0, sizeof(t_msgHeader));
 	header.msgtype = 3;
 	header.payload_size = 0;
 	send(planificador, &header, sizeof( t_msgHeader), 0);
 
 	PCB_PARCIAL parcial;
-	memset(&parcial, 0, sizeof(PCB_PARCIAL)); // Ahora el struct tiene cero en todos sus miembros
+	memset(&parcial, 0, sizeof(PCB_PARCIAL));
 	parcial.pid = PcbAux->PID;
 	parcial.tiempo = 0;
 	parcial.contadorDePrograma = PcbAux->contadorProgram;
@@ -499,11 +540,11 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 		i++;
 	}
 
-	final = time( NULL );
-	printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
+	/*final = time( NULL );
+	//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 	int diff =  difftime(final, comienzo);
 	int porcentaje= porcentajeDeUso(diff, quantum, retardo);
-	printf("El porcentaje de uso es %d\n", porcentaje);
+	//printf("El porcentaje de uso es %d\n", porcentaje);
 
 	//actualizamos el porcentaje de cpu en la cola
 	usoCPU* nodo =malloc(sizeof(usoCPU*));
@@ -512,7 +553,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	pthread_mutex_lock(&mutex);
 	queue_push(porcentajes_CPU, nodo);
 	pthread_mutex_unlock(&mutex);
-	free(nodo);
+	free(nodo);*/
 	//-------
 
 	//-- si el quamtum termino en otro sentencia le avisamos a PLANIFICADOR que termino por quantum
