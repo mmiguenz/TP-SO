@@ -83,7 +83,7 @@ int main (){
 			}
 		}
 
-		if (status == 0) {
+		if (status == 0 || status == -1) {
 			printf("Se ha desconectado el administrador de Memoria \n");
 		}
 

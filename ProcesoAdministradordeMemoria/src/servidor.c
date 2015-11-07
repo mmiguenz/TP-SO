@@ -60,8 +60,13 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 			{
 				// Recibo del cliente (CPU) el tipo de pedido a procesar)
 				char* tipoInstruccion = malloc(sizeof(char));
-				if (recv(socketCliente[i],tipoInstruccion,sizeof(char),0) > 0)
+				int receive = recv(socketCliente[i],tipoInstruccion,sizeof(char),0);
+				if (receive > 0)
 				procesarPedido(socketCliente[i],swap,*tipoInstruccion);
+				else {
+					printf ("Cliente %d ha cerrado la conexión \n\n", i+1);
+					socketCliente[i] = -1;
+				}
 				free(tipoInstruccion);
 
 			}
@@ -71,8 +76,6 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 					/* Se indica que el cliente ha cerrado la conexión y se
 					 * marca con -1 el descriptor para que compactaClaves() lo
 					 * elimine */
-					printf ("Cliente %d ha cerrado la conexión \n\n", i+1);
-					socketCliente[i] = -1;
 			}
 		}
 
