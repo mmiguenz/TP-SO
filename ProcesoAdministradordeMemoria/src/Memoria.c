@@ -46,6 +46,7 @@ char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,
 	memoriaPrincipal = malloc(sizeof(char*) * Cant_Marcos);
 
 
+
 		//Creo los MARCOS
 		for (i = 0; i < Cant_Marcos; i++)
 		{
@@ -64,8 +65,6 @@ void inicializarMarco(MEMORIAPRINCIPAL* memoriaP, char* marco)
 						memcpy(tmp, "Valor por defecto :D", tamanioDeTextoParaIniciar);
 						tmp[tamanioDeTextoParaIniciar] = '\0';
 						marco= tmp;
-
-
 
 }
 
@@ -127,7 +126,7 @@ void finalizarProceso(MEMORIAPRINCIPAL* memoriaP ,t_tablaDePaginas* tablaDePagin
 int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 	char* pidBuscado = string_itoa(pid);
 	int frame = -1;
-	t_tablaDePaginas* tablaPaginasProceso = malloc(sizeof(t_tablaDePaginas));
+	t_tablaDePaginas* tablaPaginasProceso;
 
 	if (!(dictionary_is_empty(tablasPagsProcesos) && dictionary_has_key(tablasPagsProcesos,pidBuscado))){
 		tablaPaginasProceso = dictionary_get(tablasPagsProcesos,pidBuscado);
@@ -135,7 +134,7 @@ int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 			frame = tablaPaginasProceso->Pagina[pagina]->idFrame;
 		}
 	}
-	free(tablaPaginasProceso);
+
 	return frame;
 }
 

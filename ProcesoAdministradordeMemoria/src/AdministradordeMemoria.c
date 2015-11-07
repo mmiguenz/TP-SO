@@ -139,7 +139,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 	 void* buffer = deserializarInfoCPU_Inicio_Lectura(socketCPU,protInic,instruccSentencia);
 
 	 	 /* Envío al Swap la info necesaria para que asigne las paginas correspondientes al proceso iniciado */
-	 	 send(socketSwap,buffer,sizeof(int)*2,0);
+	 	 send(socketSwap,buffer,sizeof(t_protoc_inicio_lectura_Proceso),0);
 	 	 /* Recibo del Swap la confirmación de asignación de memoria al proceso */
 	 	 recv(socketSwap,confirmSwap,sizeof(char),0);
 	 	 confirmCPU = confirmSwap;
@@ -161,10 +161,12 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 void* buffer = deserializarInfoCPU_Inicio_Lectura(socketCPU,protInic,LEER);
 
 	 // Búsqueda del frame asociado a la página del proceso en TLB
-	 int frame;
+	 int frame=-1;
 	 int tamanioContenido;
 	 char* contenido = malloc(configAdmMem->tamanio_marco*sizeof(char));
+
 	 frame = buscarPaginaTLB(tlb,protInic->pid,protInic->paginas);
+
 	 if (frame == -1)/*No se encontró página en TLB*/{
 
 		 frame = buscarPaginaenMemoria((protInic->pid),(protInic->paginas),tablasdePagsProcesos);
@@ -177,15 +179,15 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 			 recv(socketSwap,contenido,tamanioContenido,0);
 
 			 char* pidBuscado = string_itoa(protInic->pid);
-			 t_tablaDePaginas* tablaPagsProceso = malloc(sizeof(t_tablaDePaginas));
+			 t_tablaDePaginas* tablaPagsProceso;
 			 tablaPagsProceso = dictionary_get(tablasdePagsProcesos,pidBuscado);
 			 frame = insertarContenidoenMP(socketSwap,contenido,memPrincip,tablaPagsProceso);
 			 actualizarTablaPagina_porReemp(frame,protInic->paginas,tablaPagsProceso);
-			 free(tablaPagsProceso);
+
 
 		 }
 
-		 agregar_reemplazarRegistroTLB(tlb,protInic->pid,protInic->paginas,frame);
+	//	 agregar_reemplazarRegistroTLB(tlb,protInic->pid,protInic->paginas,frame);
 	 }
 	 contenido = memoriaPrincipal.Memoria[frame];
 
@@ -196,6 +198,8 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 int offset = sizeof(int);
 	 memcpy(bufferContAEnviar+offset,contenido,tamanioContenido+1);
 	 offset += tamanioContenido+1;
+	 char aux = 1 ;
+	 send(socketCPU,&aux,sizeof(char),0);
 	 send(socketCPU,bufferContAEnviar,offset,0);
 
 	 free(protInic);
@@ -409,7 +413,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
  void* deserializarInfoCPU_Inicio_Lectura(int socketCPU, t_protoc_inicio_lectura_Proceso* protInic_Lect, char InstrSent){
 
-	 void* buffer = malloc(sizeof(char)+sizeof(int)*2);
+	 void* buffer = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 
 	 protInic_Lect->tipoInstrucc = InstrSent;
 
@@ -418,12 +422,15 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
  	 memcpy(buffer,&(protInic_Lect->tipoInstrucc),sizeof(char));
  	 int offset = sizeof(char);
- 	 memcpy(buffer+offset,&protInic_Lect->paginas,sizeof(int));
+ 	 memcpy((buffer+offset),&protInic_Lect->paginas,sizeof(int));
  	 offset += sizeof(int);
- 	 memcpy(buffer+offset,&protInic_Lect->pid
- 			 ,sizeof(int));
+ 	 memcpy((buffer+offset),&protInic_Lect->pid,sizeof(int));
 
  	 return buffer;
+
+
+
+
 
  }
 

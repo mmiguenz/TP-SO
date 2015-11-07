@@ -173,6 +173,8 @@ void iniciarProceso(int memSocket)
 }
 void realizarLectura(int memSocket)
 {
+
+	void* unBuffer ;
 	// Recepción de la solicitud de información de la Memoria
 		t_protoc_inicio_lectura_Proceso* pedido = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 		pedido->tipoInstrucc = LEER;
@@ -183,21 +185,25 @@ void realizarLectura(int memSocket)
 	// Búsqueda y posterior lectura de la página solicitada
 		int paginaALeer = calcularPaginaEnSwap(pedido->pid,pedido->paginas);
 		void* contenidoPag = t_particion_leerPagina(particion,paginaALeer);
-		int* tamanioContenido = malloc(sizeof(int));
-		*tamanioContenido = particion->pagina_tamanio;
+
+		int tamanioContenido;
+		tamanioContenido = particion->pagina_tamanio;
 
 	//Serializo información solicitada y envío a Memoria
-		void* buffer = malloc(sizeof(int)+*tamanioContenido);
+		unBuffer = malloc(sizeof(int) + (tamanioContenido));
+
+
 		int offset = sizeof(int);
-		memcpy(buffer,tamanioContenido,offset);
-		memcpy(buffer+offset,contenidoPag,*tamanioContenido);
-		offset += *tamanioContenido;
-		send(memSocket,buffer,offset,0);
+
+		memcpy(unBuffer,&tamanioContenido,offset);
+		memcpy((unBuffer+offset),contenidoPag,tamanioContenido);
+		offset += tamanioContenido;
+		send(memSocket,unBuffer,offset,0);
 
 	//Liberación de estructuras dinámicas utilizadas
 		free(pedido);
 		free(contenidoPag);
-		free(buffer);
+		free(unBuffer);
 
 	//Retardo simulado en la lectura de una página de acuerdo a configuración
 		sleep(config->retardo_SWAP);
@@ -315,6 +321,7 @@ int calcularPaginaEnSwap(int pid, int pagina)
 	}
 
 	t_proceso* proceso = list_find(espacioUtilizado_lista,(void*)buscarPid);
+	t_proceso* otroproceso = list_get(espacioUtilizado_lista,0);
 
 	return (proceso->paginaComienzo + pagina );
 
