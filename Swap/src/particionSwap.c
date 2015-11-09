@@ -283,8 +283,16 @@ void t_hueco_agregar(t_particion* particion,int paginaComienzo,int cantidad)
 
 void unificarHuecos(t_particion* particion)
 {
+	bool ordenaDeMenorAMayorPorPaginaDeInicio(t_hueco* unHueco,t_hueco* otroHueco ){
+
+		return unHueco->paginaInicio<otroHueco->paginaInicio;
+
+	}
+
+
 	t_hueco *unHueco, *otroHueco;
 	int cantidadHuecos;
+	list_sort(particion->espacioLibre,(void*)ordenaDeMenorAMayorPorPaginaDeInicio);
 	t_list* huecos = particion->espacioLibre;
 
 	cantidadHuecos = list_size(huecos);
@@ -298,8 +306,9 @@ void unificarHuecos(t_particion* particion)
 		{
 			t_hueco* huecoUnificado = unificar(unHueco,otroHueco);
 
-			list_remove_and_destroy_element(huecos,(i-1),(void*)t_hueco_eliminar);
 			list_remove_and_destroy_element(huecos,(i),(void*)t_hueco_eliminar);
+			list_remove_and_destroy_element(huecos,(i-1),(void*)t_hueco_eliminar);
+
 
 			list_add_in_index(huecos,--i,huecoUnificado);
 
@@ -311,7 +320,7 @@ void unificarHuecos(t_particion* particion)
 
 		}
 
-
+		cantidadHuecos = list_size(huecos);
 
 	}
 
