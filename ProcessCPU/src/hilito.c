@@ -46,6 +46,7 @@
 t_queue * porcentajes_CPU;
 
 pthread_mutex_t mutex;
+int primLectBuffer = 1;
 
 //--param de los hilos
 typedef struct {
@@ -248,8 +249,12 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 	}
 	case 1://Leer
 	{
-		//void*bufferLimp = malloc(2);
-		//recv(memoria,bufferLimp,2,0);
+		/*if (primLectBuffer){
+			void*bufferLimp = malloc(16777216);
+			recv(memoria,bufferLimp,16777216,0);
+			primLectBuffer = 0;}*/
+		//FILE* archLimpiaBuffer = fopen("nombre", "w+");
+		//fflush(archLimpiaBuffer);
 		instruccion = 2;
 		punta=recolectar_pagina(cadena,punta,pagina) + 1;
 		int paginas = atoi(pagina);
@@ -650,7 +655,7 @@ void* conectar(void* mensa){
 	t_log* logger = param->logger;
 	int retardo = param->retardo;
 
-	printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
+	//printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
 
 	//--nos conectamos con planificador y memoria
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
@@ -658,7 +663,7 @@ void* conectar(void* mensa){
 
 	//--verificamos que nos hayamos conectado correctamente a memoria, loggueamos
 	if (memoria > 0) {
-		log_info(logger, "El hilo %u se conecto a memoria correctamente", (unsigned int) pthread_self());
+		//log_info(logger, "El hilo %u se conecto a memoria correctamente", (unsigned int) pthread_self());
 	} else {
 		log_info(logger, "error al conectarse con memoria");
 	}
