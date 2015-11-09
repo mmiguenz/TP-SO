@@ -221,10 +221,14 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 char respuesta =  escribirContenido(pedido, socketSwap);
 
-	 send(socketCPU,&respuesta,sizeof(char),0);
+	 void* buffer = malloc(sizeof(char));
+	 memcpy(buffer,&respuesta,sizeof(char));
+
+	 send(socketCPU,buffer,sizeof(char),0);
 	 printf("se envio confirmacion Escritura = %d\n",respuesta);
 
-
+	 free(buffer);
+	 free(pedido);
 
 
  }
@@ -273,7 +277,6 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 
 
-
  }
 
 
@@ -284,11 +287,11 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 pedidoLectura->paginas = pedido->pagina;
 	 pedidoLectura->tipoInstrucc = LEER;
 
-	int enviados= send(socketSwap,&pedido->tipoInstrucc,sizeof(char),0);
-	enviados+= send(socketSwap,&pedido->pagina,sizeof(int),0);
-	enviados+=send(socketSwap,&pedido->pid,sizeof(char),0);
+	int enviados= send(socketSwap,&pedidoLectura->tipoInstrucc,sizeof(char),0);
+	enviados+= send(socketSwap,&pedidoLectura->paginas,sizeof(int),0);
+	enviados+=send(socketSwap,&pedidoLectura->pid,sizeof(int),0);
 
-	 printf("Se solicito pagina a Swap. BytesEnviados =%d , PID= %d, PAGINA = %d \n",enviados,pedido->pid,pedido->pagina);
+	 printf("Se solicito pagina a Swap. BytesEnviados =%d , PID= %d, PAGINA = %d \n",enviados, pedidoLectura->pid, pedidoLectura->paginas);
 
 /*
 	 void* buffer = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
