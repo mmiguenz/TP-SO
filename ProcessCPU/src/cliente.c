@@ -158,7 +158,7 @@ char* enviarSolicitudLectura(int pid ,int  instruccion, int  paginas ,int  sMemo
 	 	 if(control<0)
 	 		 goto error;
 
-
+	 	printf("bytes recibidos:  %d \n",tamanioContenido);
 	 	 char * contenido = malloc(tamanioContenido);
 	 	 memcpy(contenido,bufferLectura,tamanioContenido);
 

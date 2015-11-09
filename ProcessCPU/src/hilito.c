@@ -248,6 +248,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 	}
 	case 1://Leer
 	{
+		//void*bufferLimp = malloc(2);
+		//recv(memoria,bufferLimp,2,0);
 		instruccion = 2;
 		punta=recolectar_pagina(cadena,punta,pagina) + 1;
 		int paginas = atoi(pagina);
@@ -258,8 +260,9 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		contenidoLeido =(char*) enviarSolicitudLectura(PcbAux->PID, instruccion, paginas , memoria);
 
 		char msj = (contenidoLeido>0)?1:0;
+		int bytesRecib = strlen(contenidoLeido)+1;
 
-		printf("bytes recibidos :  %d \n",msj);
+		printf("bytes recibidos :  %d \n",bytesRecib);
 
 		if(msj>0)
 		{
