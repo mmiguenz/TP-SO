@@ -83,7 +83,7 @@ char* recibirMsjMemoria(int memoria){
 	return msjMemoria;
 }
 
-void mandarMsjEscribir(int memoria, char texto[],int pid, char instruccion, int nroPag){
+char  mandarMsjEscribir(int memoria, char texto[],int pid, char instruccion, int nroPag){
 	int tamanio= strlen(texto)+1;
 	void* mensaje;
 	mensaje= malloc(sizeof(char)+sizeof(int)+sizeof(int)+sizeof(int)+tamanio);
@@ -114,7 +114,69 @@ void mandarMsjEscribir(int memoria, char texto[],int pid, char instruccion, int 
 	send(memoria,mensaje,offset,0);
 	free(mensaje);
 	free(header);
-	return;
+
+	char respuesta ;
+	recv(memoria,&respuesta,sizeof(char),0);
+
+	return respuesta;
 }
+
+
+char* enviarSolicitudLectura(int pid ,int  instruccion, int  paginas ,int  sMemoria)
+{
+
+	void* mensaje;
+	mensaje= malloc(sizeof(char)+sizeof(int)+sizeof(int));
+	int offset=0;
+
+	t_protoc_inicio_lectura_Proceso* header = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
+	header->tipoInstrucc = instruccion;
+	header->paginas= paginas;
+	header->pid = pid;
+
+	memcpy(mensaje +offset  , &(header->tipoInstrucc), sizeof(char));
+	offset+=sizeof(char);
+	memcpy(mensaje +offset  , &(header->paginas), sizeof(int));
+	offset+=sizeof(int);
+	memcpy(mensaje +offset  , &(header->pid), sizeof(int));
+	offset+=sizeof(int);
+
+	send(sMemoria,mensaje,offset,0);
+	free(mensaje);
+	free(header);
+
+	int tamanioContenido;
+	int control;
+
+	 control = recv(sMemoria,&tamanioContenido,sizeof(int),0);
+	 	 if(control<0)
+	 		 goto error;
+
+	 void* bufferLectura = malloc(tamanioContenido);
+	 control= recv(sMemoria,bufferLectura,tamanioContenido,0);
+
+	 	 if(control<0)
+	 		 goto error;
+
+
+	 	 char * contenido = malloc(tamanioContenido);
+	 	 memcpy(contenido,bufferLectura,tamanioContenido);
+
+	 	 free(bufferLectura);
+
+	 	contenido[tamanioContenido]='\0';
+	 	 return  contenido;
+
+
+
+	error:
+	 	 {
+	 		 perror("error al recibir datos de lectura");
+	 		 return (char*)NULL;
+
+	 	 }
+
+}
+
 
 #endif /* CLIENTE_C_ */

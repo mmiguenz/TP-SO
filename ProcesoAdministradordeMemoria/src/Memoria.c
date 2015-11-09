@@ -61,10 +61,9 @@ char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,
 void inicializarMarco(MEMORIAPRINCIPAL* memoriaP, char* marco)
 {
 	char* tmp = malloc(sizeof(char) * memoriaP->tamanioMarco);
-						int tamanioDeTextoParaIniciar = strlen("Valor por defecto :D");
-						memcpy(tmp, "Valor por defecto :D", tamanioDeTextoParaIniciar);
-						tmp[tamanioDeTextoParaIniciar] = '\0';
-						marco= tmp;
+						memset(tmp,'\0',memoriaP->tamanioMarco);
+						memcpy(tmp, "a", 2);
+						marco =tmp;
 
 }
 
@@ -289,7 +288,7 @@ int t_hayFrameLibre(MEMORIAPRINCIPAL* memoriaPrincipal , t_tablaDePaginas* tabla
 	 int paginasOcupadas=0;
 	for (  i = 0 ; i <tablaDePaginasDelProceso->cantTotalPaginas; i++)
 	{
-		if ( ! tablaDePaginasDelProceso->Pagina[i]->bitPresencia )
+		if (tablaDePaginasDelProceso->Pagina[i]->bitPresencia )
 			paginasOcupadas++;
 
 

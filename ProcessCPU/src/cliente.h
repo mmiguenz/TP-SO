@@ -43,8 +43,10 @@ void enviarMesaje(int socket,char* mesaje);
 
 void enviarSolicitud (int pid,char instruccion, int nroPag,int socket);
 
+char* enviarSolicitudLectura(int pid ,int  instruccion, int  paginas ,int  sMemoria);
+
 char* recibirMsjMemoria(int memoria);
 
-void mandarMsjEscribir(int memoria, char texto[20],int pid, char instruccion, int nroPag);
+char  mandarMsjEscribir(int memoria, char texto[20],int pid, char instruccion, int nroPag);
 
 #endif /* CLIENTE_H_ */

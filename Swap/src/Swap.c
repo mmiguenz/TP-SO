@@ -174,7 +174,7 @@ void iniciarProceso(int memSocket)
 void realizarLectura(int memSocket)
 {
 
-	void* unBuffer ;
+
 	// Recepción de la solicitud de información de la Memoria
 		t_protoc_inicio_lectura_Proceso* pedido = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 		pedido->tipoInstrucc = LEER;
@@ -189,8 +189,17 @@ void realizarLectura(int memSocket)
 		int tamanioContenido;
 		tamanioContenido = particion->pagina_tamanio;
 
-		send(memSocket, &tamanioContenido, sizeof(int),0);
-		send(memSocket,contenidoPag , tamanioContenido,0);
+	int enviado = 	send(memSocket, &tamanioContenido, sizeof(int),0);
+		enviado+=send(memSocket,contenidoPag , tamanioContenido,0);
+
+		char* contenido = malloc(tamanioContenido);
+		memcpy(contenido,contenidoPag,tamanioContenido);
+
+		printf("Se Enviaron %d Bytes. Tamanio Cont = %d , Cont = %s\n ",enviado,tamanioContenido,contenido);
+
+		free(contenido);
+		free(contenidoPag);
+		free(pedido);
 
 }
 
@@ -213,6 +222,9 @@ void realizarEscritura(int memSocket)
 		char* confirmMemoria = malloc(sizeof(char));
 		*confirmMemoria = 1;
 		send(memSocket,confirmMemoria,sizeof(char),0);
+
+		printf("Se envio confirmacion de Escritura = %d\n",*confirmMemoria);
+
 
 	//Liberación de estructuras dinámicas utilizadas
 		free(pedido);
@@ -306,7 +318,6 @@ int calcularPaginaEnSwap(int pid, int pagina)
 	}
 
 	t_proceso* proceso = list_find(espacioUtilizado_lista,(void*)buscarPid);
-	t_proceso* otroproceso = list_get(espacioUtilizado_lista,0);
 
 	return (proceso->paginaComienzo + pagina );
 

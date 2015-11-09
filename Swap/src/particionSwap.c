@@ -76,8 +76,9 @@ void t_particion_elminar(t_particion* particion)
 
 void* t_particion_leerPagina(t_particion* particion ,int numeroDePagina)
 {
+
 	posicionarPagina(particion,numeroDePagina);
-	char* contenidoPagina = malloc(sizeof(particion->pagina_tamanio));
+	char* contenidoPagina = malloc(particion->pagina_tamanio);
 	fread(contenidoPagina,particion->pagina_tamanio,1,particion->archivoParticion);
 	return contenidoPagina;
 }
@@ -115,6 +116,7 @@ void posicionarPagina(t_particion* particion, int numeroDePagina)
 	if(p_Actual > numeroDePagina)
 		{
 			rewind(particion->archivoParticion);
+			p_Actual=paginaActual(particion);
 
 		}
 

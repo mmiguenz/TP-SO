@@ -3923,3 +3923,185 @@
 [INFO] 02:02:23:901 PLANIFICADOR/(3694:3694): Se conecto exitosamente el CPU: -1
 [INFO] 00:42:26:764 PLANIFICADOR/(3738:3738): Se abrio el archivo de configuracion CONFIG
 [INFO] 00:42:50:889 PLANIFICADOR/(3738:3738): Se conecto exitosamente el CPU: 5
+[INFO] 20:23:59:175 PLANIFICADOR/(9336:9336): Se abrio el archivo de configuracion CONFIG
+[INFO] 20:27:33:675 PLANIFICADOR/(9808:9808): Se abrio el archivo de configuracion CONFIG
+[INFO] 20:27:38:970 PLANIFICADOR/(9808:9808): Se conecto exitosamente el CPU: 5
+[INFO] 20:27:42:584 PLANIFICADOR/(9808:9808): Se ha iniciado el proceso con el CPU: 5
+[INFO] 20:30:34:961 PLANIFICADOR/(9898:9898): Se abrio el archivo de configuracion CONFIG
+[INFO] 20:30:42:217 PLANIFICADOR/(9898:9898): Se conecto exitosamente el CPU: 5
+[INFO] 20:30:44:868 PLANIFICADOR/(9898:9898): Se ha iniciado el proceso con el CPU: 5
+[INFO] 20:30:45:887 PLANIFICADOR/(9898:9898): Se ha finalizado el proceso con el CPU: 5
+[INFO] 20:32:36:628 PLANIFICADOR/(10004:10004): Se abrio el archivo de configuracion CONFIG
+[INFO] 20:32:42:52 PLANIFICADOR/(10004:10004): Se conecto exitosamente el CPU: 5
+[INFO] 20:32:45:761 PLANIFICADOR/(10004:10004): Se ha iniciado el proceso con el CPU: 5
+[INFO] 20:54:06:59 PLANIFICADOR/(10131:10131): Se abrio el archivo de configuracion CONFIG
+[INFO] 20:54:07:600 PLANIFICADOR/(10131:10131): Se conecto exitosamente el CPU: 5
+[INFO] 20:54:16:972 PLANIFICADOR/(10131:10131): Se ha iniciado el proceso con el CPU: 5
+[INFO] 20:54:29:873 PLANIFICADOR/(10131:10131): Se ha iniciado el proceso con el CPU: 5
+[INFO] 22:40:11:724 PLANIFICADOR/(10732:10732): Se abrio el archivo de configuracion CONFIG
+[INFO] 22:40:13:271 PLANIFICADOR/(10732:10732): Se conecto exitosamente el CPU: 5
+[INFO] 22:40:16:981 PLANIFICADOR/(10732:10732): Se ha iniciado el proceso con el CPU: 5
+[INFO] 22:48:36:760 PLANIFICADOR/(11484:11484): Se abrio el archivo de configuracion CONFIG
+[INFO] 22:48:38:323 PLANIFICADOR/(11484:11484): Se conecto exitosamente el CPU: 5
+[INFO] 22:48:41:271 PLANIFICADOR/(11484:11484): Se ha iniciado el proceso con el CPU: 5
+[INFO] 22:48:43:295 PLANIFICADOR/(11484:11484): Se ha finalizado el proceso con el CPU: 5
+[INFO] 22:50:29:8 PLANIFICADOR/(11578:11578): Se abrio el archivo de configuracion CONFIG
+[INFO] 22:50:30:676 PLANIFICADOR/(11578:11578): Se conecto exitosamente el CPU: 5
+[INFO] 22:50:34:281 PLANIFICADOR/(11578:11578): Se ha iniciado el proceso con el CPU: 5
+[INFO] 22:50:36:310 PLANIFICADOR/(11578:11578): Se ha finalizado el proceso con el CPU: 5
+[INFO] 22:54:36:286 PLANIFICADOR/(11676:11676): Se abrio el archivo de configuracion CONFIG
+[INFO] 22:54:41:717 PLANIFICADOR/(11676:11676): Se conecto exitosamente el CPU: 5
+[INFO] 22:54:44:901 PLANIFICADOR/(11676:11676): Se ha iniciado el proceso con el CPU: 5
+[INFO] 22:57:59:288 PLANIFICADOR/(11938:11938): Se abrio el archivo de configuracion CONFIG
+[INFO] 22:58:00:887 PLANIFICADOR/(11938:11938): Se conecto exitosamente el CPU: 5
+[INFO] 22:58:04:321 PLANIFICADOR/(11938:11938): Se ha iniciado el proceso con el CPU: 5
+[INFO] 22:58:07:360 PLANIFICADOR/(11938:11938): Se ha finalizado el proceso con el CPU: 5
+[INFO] 23:02:24:274 PLANIFICADOR/(12427:12427): Se abrio el archivo de configuracion CONFIG
+[INFO] 23:02:31:253 PLANIFICADOR/(12427:12427): Se conecto exitosamente el CPU: 5
+[INFO] 23:02:37:241 PLANIFICADOR/(12427:12427): Se ha iniciado el proceso con el CPU: 5
+[INFO] 23:02:40:472 PLANIFICADOR/(12427:12427): Se ha finalizado el proceso con el CPU: 5
+[INFO] 23:09:38:238 PLANIFICADOR/(12855:12855): Se abrio el archivo de configuracion CONFIG
+[INFO] 23:09:42:3 PLANIFICADOR/(12855:12855): Se conecto exitosamente el CPU: 5
+[INFO] 23:09:46:228 PLANIFICADOR/(12855:12855): Se ha iniciado el proceso con el CPU: 5
+[INFO] 23:14:19:565 PLANIFICADOR/(13035:13035): Se abrio el archivo de configuracion CONFIG
+[INFO] 23:14:25:38 PLANIFICADOR/(13035:13035): Se conecto exitosamente el CPU: 5
+[INFO] 23:14:29:569 PLANIFICADOR/(13035:13035): Se ha iniciado el proceso con el CPU: 5
+[INFO] 23:16:36:68 PLANIFICADOR/(13076:13076): Se abrio el archivo de configuracion CONFIG
+[INFO] 23:16:53:644 PLANIFICADOR/(13076:13076): Se conecto exitosamente el CPU: 5
+[INFO] 23:17:24:947 PLANIFICADOR/(13076:13076): Se ha iniciado el proceso con el CPU: 5
+[INFO] 23:30:55:898 PLANIFICADOR/(13236:13236): Se abrio el archivo de configuracion CONFIG
+[INFO] 23:47:56:873 PLANIFICADOR/(13957:13957): Se abrio el archivo de configuracion CONFIG
+[INFO] 23:47:58:377 PLANIFICADOR/(13957:13957): Se conecto exitosamente el CPU: 5
+[INFO] 23:48:02:712 PLANIFICADOR/(13957:13957): Se ha iniciado el proceso con el CPU: 5
+[INFO] 23:51:42:463 PLANIFICADOR/(14220:14220): Se abrio el archivo de configuracion CONFIG
+[INFO] 23:51:43:878 PLANIFICADOR/(14220:14220): Se conecto exitosamente el CPU: 5
+[INFO] 23:51:48:970 PLANIFICADOR/(14220:14220): Se ha iniciado el proceso con el CPU: 5
+[INFO] 23:52:34:522 PLANIFICADOR/(14220:14220): Se ha cerrado la conexion con el CPU: 5
+[INFO] 23:54:47:772 PLANIFICADOR/(14247:14247): Se abrio el archivo de configuracion CONFIG
+[INFO] 23:55:20:968 PLANIFICADOR/(14247:14247): Se conecto exitosamente el CPU: 5
+[INFO] 23:56:58:334 PLANIFICADOR/(14383:14383): Se abrio el archivo de configuracion CONFIG
+[INFO] 23:57:22:210 PLANIFICADOR/(14383:14383): Se conecto exitosamente el CPU: 5
+[INFO] 23:57:41:620 PLANIFICADOR/(14383:14383): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:03:46:990 PLANIFICADOR/(14383:14383): Se ha cerrado la conexion con el CPU: 5
+[INFO] 00:04:48:728 PLANIFICADOR/(14605:14605): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:04:58:399 PLANIFICADOR/(14605:14605): Se conecto exitosamente el CPU: 5
+[INFO] 00:05:12:140 PLANIFICADOR/(14605:14605): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:10:23:13 PLANIFICADOR/(14605:14605): Se ha cerrado la conexion con el CPU: 5
+[INFO] 00:11:26:782 PLANIFICADOR/(14831:14831): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:12:03:110 PLANIFICADOR/(14831:14831): Se conecto exitosamente el CPU: 5
+[INFO] 00:12:20:817 PLANIFICADOR/(14831:14831): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:14:48:977 PLANIFICADOR/(14831:14831): Se ha cerrado la conexion con el CPU: 5
+[INFO] 00:15:14:152 PLANIFICADOR/(14972:14972): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:15:22:96 PLANIFICADOR/(14972:14972): Se conecto exitosamente el CPU: 5
+[INFO] 00:15:26:749 PLANIFICADOR/(14972:14972): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:21:37:458 PLANIFICADOR/(15296:15296): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:21:39:399 PLANIFICADOR/(15296:15296): Se conecto exitosamente el CPU: 5
+[INFO] 00:21:43:314 PLANIFICADOR/(15296:15296): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:25:31:617 PLANIFICADOR/(15337:15337): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:25:47:161 PLANIFICADOR/(15337:15337): Se conecto exitosamente el CPU: 5
+[INFO] 00:25:52:251 PLANIFICADOR/(15337:15337): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:28:55:56 PLANIFICADOR/(15337:15337): Se ha cerrado la conexion con el CPU: 5
+[INFO] 00:31:01:455 PLANIFICADOR/(15493:15493): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:31:04:799 PLANIFICADOR/(15493:15493): Se conecto exitosamente el CPU: 5
+[INFO] 00:31:08:667 PLANIFICADOR/(15493:15493): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:39:04:11 PLANIFICADOR/(15606:15606): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:39:37:9 PLANIFICADOR/(15606:15606): Se conecto exitosamente el CPU: 5
+[INFO] 00:39:40:460 PLANIFICADOR/(15606:15606): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:40:38:466 PLANIFICADOR/(15606:15606): Se ha cerrado la conexion con el CPU: 5
+[INFO] 00:40:44:246 PLANIFICADOR/(15724:15724): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:41:16:311 PLANIFICADOR/(15724:15724): Se conecto exitosamente el CPU: 5
+[INFO] 00:41:25:144 PLANIFICADOR/(15794:15794): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:41:26:597 PLANIFICADOR/(15794:15794): Se conecto exitosamente el CPU: 5
+[INFO] 00:41:29:648 PLANIFICADOR/(15794:15794): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:46:35:436 PLANIFICADOR/(15794:15794): Se ha cerrado la conexion con el CPU: 5
+[INFO] 00:47:01:327 PLANIFICADOR/(15923:15923): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:49:53:407 PLANIFICADOR/(15995:15995): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:49:56:421 PLANIFICADOR/(15995:15995): Se conecto exitosamente el CPU: 5
+[INFO] 00:50:00:902 PLANIFICADOR/(15995:15995): Se ha iniciado el proceso con el CPU: 5
+[INFO] 00:55:27:705 PLANIFICADOR/(16093:16093): Se abrio el archivo de configuracion CONFIG
+[INFO] 00:55:31:356 PLANIFICADOR/(16093:16093): Se conecto exitosamente el CPU: 5
+[INFO] 00:55:38:609 PLANIFICADOR/(16093:16093): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:04:12:508 PLANIFICADOR/(16550:16550): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:04:14:219 PLANIFICADOR/(16550:16550): Se conecto exitosamente el CPU: 5
+[INFO] 01:04:21:45 PLANIFICADOR/(16550:16550): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:04:32:319 PLANIFICADOR/(16550:16550): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:04:44:646 PLANIFICADOR/(16550:16550): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:04:56:309 PLANIFICADOR/(16550:16550): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:06:54:210 PLANIFICADOR/(16573:16573): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:06:56:775 PLANIFICADOR/(16573:16573): Se conecto exitosamente el CPU: 5
+[INFO] 01:06:59:889 PLANIFICADOR/(16573:16573): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:07:11:327 PLANIFICADOR/(16573:16573): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:08:03:767 PLANIFICADOR/(16573:16573): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:08:15:302 PLANIFICADOR/(16573:16573): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:08:30:624 PLANIFICADOR/(16573:16573): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:19:11:568 PLANIFICADOR/(16611:16611): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:19:13:65 PLANIFICADOR/(16611:16611): Se conecto exitosamente el CPU: 5
+[INFO] 01:19:16:378 PLANIFICADOR/(16611:16611): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:19:17:380 PLANIFICADOR/(16611:16611): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:19:36:494 PLANIFICADOR/(16622:16622): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:19:38:169 PLANIFICADOR/(16622:16622): Se conecto exitosamente el CPU: 5
+[INFO] 01:19:41:667 PLANIFICADOR/(16622:16622): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:19:52:966 PLANIFICADOR/(16622:16622): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:25:25:26 PLANIFICADOR/(16622:16622): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:25:26:34 PLANIFICADOR/(16622:16622): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:27:08:96 PLANIFICADOR/(17019:17019): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:27:09:813 PLANIFICADOR/(17019:17019): Se conecto exitosamente el CPU: 5
+[INFO] 01:27:17:87 PLANIFICADOR/(17019:17019): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:27:18:98 PLANIFICADOR/(17019:17019): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:33:42:276 PLANIFICADOR/(17345:17345): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:33:47:973 PLANIFICADOR/(17345:17345): Se conecto exitosamente el CPU: 5
+[INFO] 01:34:12:77 PLANIFICADOR/(17357:17357): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:34:14:38 PLANIFICADOR/(17357:17357): Se conecto exitosamente el CPU: 5
+[INFO] 01:34:17:790 PLANIFICADOR/(17357:17357): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:34:18:796 PLANIFICADOR/(17357:17357): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:35:01:549 PLANIFICADOR/(17371:17371): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:35:32:391 PLANIFICADOR/(17371:17371): Se conecto exitosamente el CPU: 5
+[INFO] 01:35:36:452 PLANIFICADOR/(17371:17371): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:35:37:455 PLANIFICADOR/(17371:17371): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:38:06:736 PLANIFICADOR/(17464:17464): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:38:26:14 PLANIFICADOR/(17464:17464): Se conecto exitosamente el CPU: 5
+[INFO] 01:38:30:89 PLANIFICADOR/(17464:17464): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:38:31:93 PLANIFICADOR/(17464:17464): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:41:56:822 PLANIFICADOR/(17595:17595): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:42:03:342 PLANIFICADOR/(17595:17595): Se conecto exitosamente el CPU: 5
+[INFO] 01:42:08:168 PLANIFICADOR/(17595:17595): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:42:09:173 PLANIFICADOR/(17595:17595): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:43:29:826 PLANIFICADOR/(17819:17819): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:43:35:769 PLANIFICADOR/(17819:17819): Se conecto exitosamente el CPU: 5
+[INFO] 01:43:39:600 PLANIFICADOR/(17819:17819): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:43:40:604 PLANIFICADOR/(17819:17819): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:47:34:199 PLANIFICADOR/(17888:17888): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:47:37:242 PLANIFICADOR/(17888:17888): Se conecto exitosamente el CPU: 5
+[INFO] 01:47:41:833 PLANIFICADOR/(17888:17888): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:47:42:837 PLANIFICADOR/(17888:17888): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:50:41:237 PLANIFICADOR/(17981:17981): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:50:44:994 PLANIFICADOR/(17981:17981): Se conecto exitosamente el CPU: 5
+[INFO] 01:50:49:46 PLANIFICADOR/(17981:17981): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:50:50:49 PLANIFICADOR/(17981:17981): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:57:43:132 PLANIFICADOR/(18388:18388): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:57:44:557 PLANIFICADOR/(18388:18388): Se conecto exitosamente el CPU: 5
+[INFO] 01:57:51:272 PLANIFICADOR/(18388:18388): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:57:52:276 PLANIFICADOR/(18388:18388): Se ha finalizado el proceso con el CPU: 5
+[INFO] 01:59:37:709 PLANIFICADOR/(18439:18439): Se abrio el archivo de configuracion CONFIG
+[INFO] 01:59:39:369 PLANIFICADOR/(18439:18439): Se conecto exitosamente el CPU: 5
+[INFO] 01:59:44:694 PLANIFICADOR/(18439:18439): Se ha iniciado el proceso con el CPU: 5
+[INFO] 01:59:45:700 PLANIFICADOR/(18439:18439): Se ha finalizado el proceso con el CPU: 5
+[INFO] 02:00:47:847 PLANIFICADOR/(18488:18488): Se abrio el archivo de configuracion CONFIG
+[INFO] 02:00:49:382 PLANIFICADOR/(18488:18488): Se conecto exitosamente el CPU: 5
+[INFO] 02:00:53:290 PLANIFICADOR/(18488:18488): Se ha iniciado el proceso con el CPU: 5
+[INFO] 02:00:54:299 PLANIFICADOR/(18488:18488): Se ha finalizado el proceso con el CPU: 5
+[INFO] 02:01:22:925 PLANIFICADOR/(18488:18488): Se ha iniciado el proceso con el CPU: 5
+[INFO] 02:02:40:839 PLANIFICADOR/(18560:18560): Se abrio el archivo de configuracion CONFIG
+[INFO] 02:02:42:554 PLANIFICADOR/(18560:18560): Se conecto exitosamente el CPU: 5
+[INFO] 02:02:51:91 PLANIFICADOR/(18560:18560): Se ha iniciado el proceso con el CPU: 5
+[INFO] 02:02:52:98 PLANIFICADOR/(18560:18560): Se ha finalizado el proceso con el CPU: 5
+[INFO] 02:03:42:516 PLANIFICADOR/(18615:18615): Se abrio el archivo de configuracion CONFIG
+[INFO] 02:03:44:407 PLANIFICADOR/(18615:18615): Se conecto exitosamente el CPU: 5
+[INFO] 02:03:50:217 PLANIFICADOR/(18615:18615): Se ha iniciado el proceso con el CPU: 5
+[INFO] 02:03:51:219 PLANIFICADOR/(18615:18615): Se ha finalizado el proceso con el CPU: 5
+[INFO] 02:06:29:465 PLANIFICADOR/(18683:18683): Se abrio el archivo de configuracion CONFIG
+[INFO] 02:06:36:354 PLANIFICADOR/(18683:18683): Se conecto exitosamente el CPU: 5
+[INFO] 02:06:40:409 PLANIFICADOR/(18683:18683): Se ha iniciado el proceso con el CPU: 5
+[INFO] 02:06:51:713 PLANIFICADOR/(18683:18683): Se ha finalizado el proceso con el CPU: 5
+[INFO] 02:07:05:661 PLANIFICADOR/(18683:18683): Se ha iniciado el proceso con el CPU: 5
+[INFO] 02:07:17:340 PLANIFICADOR/(18683:18683): Se ha finalizado el proceso con el CPU: 5

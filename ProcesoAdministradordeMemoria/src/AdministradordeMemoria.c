@@ -131,7 +131,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
  void inicializacionProceso(int socketCPU, int socketSwap){
 
 	 	 char* confirmSwap = malloc(sizeof(char));
-	 	 char* confirmCPU = malloc(sizeof(char));
+	 	 char* confirmCPU;
 	 	 char instruccSentencia = 1;
 
 	 	 //Recibo la estructura serializada del CPU y la cargo en estructura correspondiente
@@ -192,15 +192,15 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 contenido = memoriaPrincipal.Memoria[frame];
 
 	 // Serializo el contenido del frame leido para su envío al CPU
-	 tamanioContenido = strlen(contenido);
-	 void* bufferContAEnviar = malloc(sizeof(int)+(sizeof(char)*tamanioContenido)+1);
+	 tamanioContenido = configAdmMem->tamanio_marco;
+	 void* bufferContAEnviar = malloc(sizeof(int)+(sizeof(char)*tamanioContenido));
 	 memcpy(bufferContAEnviar,&tamanioContenido,sizeof(int));
 	 int offset = sizeof(int);
-	 memcpy(bufferContAEnviar+offset,contenido,tamanioContenido+1);
-	 offset += tamanioContenido+1;
-	 char aux = 1 ;
-	 send(socketCPU,&aux,sizeof(char),0);
-	 send(socketCPU,bufferContAEnviar,offset,0);
+	 memcpy(bufferContAEnviar+offset,contenido,tamanioContenido);
+	 offset += tamanioContenido;
+	 int enviado = send(socketCPU,bufferContAEnviar,offset,0);
+
+	 printf("Se Enviaron %d Bytes. Tamanio Cont = %d , Cont = %s\n ",enviado,tamanioContenido,contenido);
 
 	 free(protInic);
 	 free(contenido);
@@ -224,6 +224,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 char respuesta =  escribirContenido(pedido, socketSwap);
 
 	 send(socketCPU,&respuesta,sizeof(char),0);
+	 printf("se envio confirmacion Escritura = %d\n",respuesta);
 
 
 
@@ -285,6 +286,13 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 pedidoLectura->paginas = pedido->pagina;
 	 pedidoLectura->tipoInstrucc = LEER;
 
+	int enviados= send(socketSwap,&pedido->tipoInstrucc,sizeof(char),0);
+	enviados+= send(socketSwap,&pedido->pagina,sizeof(int),0);
+	enviados+=send(socketSwap,&pedido->pid,sizeof(char),0);
+
+	 printf("Se solicito pagina a Swap. BytesEnviados =%d , PID= %d, PAGINA = %d \n",enviados,pedido->pid,pedido->pagina);
+
+/*
 	 void* buffer = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 	 int offset = 0 ;
 
@@ -297,7 +305,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 send(socketSwap,buffer,sizeof(t_protoc_inicio_lectura_Proceso),0);
 	 free(buffer);
-
+*/
 	 int tamanioContenido= 0 ;
 	 recv(socketSwap,&tamanioContenido,sizeof(int),0);
 
@@ -324,12 +332,18 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
  void finalizacionProceso(int socketCpu,int socketSwap){
 
+	 t_protoc_inicio_lectura_Proceso* pedidoCpu = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
+
+
 	 t_protoc_Finaliza* pedido = malloc(sizeof(t_protoc_Finaliza));
 
 
 	 pedido->tipoInstrucc = FINALIZAR ;
 
-	 recv(socketCpu,&pedido->pid,sizeof(int),0);
+	 recv(socketCpu,&pedidoCpu->paginas,sizeof(int),0);
+	 recv(socketCpu,&pedidoCpu->pid,sizeof(int),0);
+
+	 memcpy(&pedido->pid, &pedidoCpu->pid,sizeof(int));
 
 
 	 if (configAdmMem->tlb_habilitada)
@@ -348,6 +362,11 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 		notificarFinalizarCpu(socketCpu);
 
 	 }
+
+
+
+	 free(pedido);
+	 free(pedidoCpu);
 
 
  }

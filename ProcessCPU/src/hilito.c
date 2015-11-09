@@ -253,25 +253,26 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		int paginas = atoi(pagina);
 
 		printf("Encontro leer\n");
-		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
-		char msj = *(recibirMsjMemoria(memoria));
 
-		printf("mensaje de la memoria %d \n",msj);
+		char* contenidoLeido;
+		contenidoLeido =(char*) enviarSolicitudLectura(PcbAux->PID, instruccion, paginas , memoria);
+
+		char msj = (contenidoLeido>0)?1:0;
+
+		printf("bytes recibidos :  %d \n",msj);
 
 		if(msj>0)
 		{
 			//--msj es el tamaño de lo que leyo
 			printf("Pude leer\n");
-			char* mensaje;
-			mensaje = malloc(msj);
-			recv(memoria, mensaje, msj, 0);
-			printf("El contenido leido es:%s\n", mensaje);
+			printf("El contenido leido es:%s\n", contenidoLeido);
 
 			log_info(logger, "El pid es %d", PcbAux->PID);
-			log_info(logger, "mProc %s - Pagina %d leida: %s", PcbAux->nombreProc, paginas, mensaje);
+			log_info(logger, "mProc %s - Pagina %d leida: %s", PcbAux->nombreProc, paginas, contenidoLeido);
 
 			PcbAux->contadorProgram++;
 			sleep(retardo);
+			free(contenidoLeido);
 
 		}else{
 			printf("No pudo leer\n");
@@ -312,8 +313,9 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		printf("El comando es Escribir en la pagina: %d \n", paginas);
 
 
-		mandarMsjEscribir(memoria, texto, PcbAux->PID, instruccion, paginas);
-		char msj = *(recibirMsjMemoria(memoria));
+		char msj= mandarMsjEscribir(memoria, texto, PcbAux->PID, instruccion, paginas);
+
+
 		printf("El texto a escribir es: %s \n",texto);
 		printf("mensaje de la memoria %d \n",msj);
 
@@ -328,7 +330,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 
 		}else{
-			printf("La escritura fallo");
+			printf("La escritura fallo \n");
 			log_info(logger, "El pid es %d", PcbAux->PID);
 			log_info(logger, "mProc %s Fallo lectura",PcbAux->nombreProc);
 
@@ -786,3 +788,15 @@ void* conectar(void* mensa){
 	//free(param);
 	return EXIT_SUCCESS;
 }
+
+
+
+
+
+
+
+
+
+
+
+
