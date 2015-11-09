@@ -24,7 +24,7 @@ t_paramConfigAdmMem* establecerConfigMemoria(t_config* archConfiguracion){
 	config->cantidad_marcos = config_get_int_value(archConfiguracion,"CANTIDAD_MARCOS");
 	config->tamanio_marco = config_get_int_value(archConfiguracion,"TAMANIO_MARCO");
 	config->entradas_TLB = config_get_int_value(archConfiguracion,"ENTRADAS_TLB");
-	config->tlb_habilitada = config_get_string_value(archConfiguracion,"TLB_HABILITADA");
+	config->tlb_habilitada = strcmp(config_get_string_value(archConfiguracion,"TLB_HABILITADA"),"SI");
 	config->retardo_memoria = config_get_int_value(archConfiguracion,"RETARDO_MEMORIA");
 	config->algoritmo_reemplazo = malloc(sizeof(char)*16);
 	strcpy(config->algoritmo_reemplazo,config_get_string_value(archConfiguracion,"ALGORITMO_REEMPLAZO"));
