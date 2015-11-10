@@ -249,22 +249,16 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 	}
 	case 1://Leer
 	{
-		/*if (primLectBuffer){
-			void*bufferLimp = malloc(16777216);
-			recv(memoria,bufferLimp,16777216,0);
-			primLectBuffer = 0;}*/
-		//FILE* archLimpiaBuffer = fopen("nombre", "w+");
-		//fflush(archLimpiaBuffer);
 		instruccion = 2;
 		punta=recolectar_pagina(cadena,punta,pagina) + 1;
 		int paginas = atoi(pagina);
 
 		printf("Encontro leer\n");
 
-		char* contenidoLeido;
+		char* contenidoLeido = NULL;
 		contenidoLeido =(char*) enviarSolicitudLectura(PcbAux->PID, instruccion, paginas , memoria);
 
-		char msj = (contenidoLeido>0)?1:0;
+		char msj = (contenidoLeido > 0)?1:0;
 		int bytesRecib = strlen(contenidoLeido)+1;
 
 		printf("bytes recibidos :  %d \n",bytesRecib);

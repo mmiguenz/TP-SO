@@ -302,7 +302,7 @@ int hayEspacio(int cantidadNuevoProceso)
 	}
 
 
-	return (espacioUtilizado + cantidadNuevoProceso) <= particion->archivo_tamanio;
+	return (espacioUtilizado + cantidadNuevoProceso) <= particion->paginas_cantidad;
 
 
 }

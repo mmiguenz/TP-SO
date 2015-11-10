@@ -70,13 +70,6 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 				free(tipoInstruccion);
 
 			}
-
-			else
-			{
-					/* Se indica que el cliente ha cerrado la conexión y se
-					 * marca con -1 el descriptor para que compactaClaves() lo
-					 * elimine */
-			}
 		}
 
 		/* Se comprueba si algún cliente nuevo desea conectarse y se le
@@ -111,9 +104,6 @@ void nuevoCliente (int servidor, int *clientes, int *nClientes)
 		(*nClientes)--;
 		return;
 	}
-
-	/* Envía su número de cliente al cliente */
-	Escribe_Socket (clientes[(*nClientes)-1], (char *)nClientes, sizeof(int));
 
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
 	printf ("Aceptado cliente %d \n\n", *nClientes);
