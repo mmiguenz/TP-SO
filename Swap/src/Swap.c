@@ -5,22 +5,7 @@
  *      Author: utnso
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/socketvar.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <commons/temporal.h>
-#include <commons/config.h>
-#include <commons/string.h>
-#include <commons/collections/list.h>
-#include "servidor.h"
-#include "protocolos.h"
-#include "swapConfig.h"
-#include "particionSwap.h"
+
 #include "Swap.h"
 
 
@@ -39,9 +24,13 @@ void tipoDePedidoIncorrecto(int memSocket);
 int hayEspacio(int cantidadNuevoProceso);
 int calcularPaginaEnSwap(int pid,int paginas);
 
+
+
+
 t_particion* particion;
 t_swapConfig* config;
 t_list* espacioUtilizado_lista;
+t_log* logSwap;
 
 int main (){
 
@@ -50,7 +39,9 @@ int main (){
 	 config = swapConfig_Create();
 	swapConfig_GetConfig(config);
 
-	particion = t_particion_crear(config);
+	logSwap = log_create("swap.log","Swap",false,LOG_LEVEL_INFO);
+
+	particion = t_particion_crear(config,logSwap);
 	espacioUtilizado_lista = list_create();
 
 	hints = configAddrSvr();
@@ -83,7 +74,7 @@ int main (){
 			}
 		}
 
-		if (status == 0) {
+		if (status == 0 || status == -1) {
 			printf("Se ha desconectado el administrador de Memoria \n");
 		}
 
@@ -96,6 +87,7 @@ int main (){
 	close(memSocket);
 	close(listenningSocket);
 	swapConfig_Free(config);
+	log_destroy(logSwap);
 
 	return 0;
 
@@ -106,6 +98,7 @@ int main (){
 
 void atenderPedido(int memSocket, void* buffer )
 {
+	sleep(config->retardo_SWAP);
 
 	char tipoPedido;
 	memcpy(&tipoPedido,buffer,sizeof(char));
@@ -153,10 +146,20 @@ void iniciarProceso(int memSocket)
 		list_add(espacioUtilizado_lista,(void*)unProceso);
 
 
+		t_SwapLog* swapLog  = t_swapLog_crear(pedido->pid,(unProceso->paginaComienzo)* config->tamanio_Pagina,unProceso->cantidad * config->tamanio_Pagina,NULL);
+		t_loguear(logSwap,ASIGNADO,swapLog);
+		free(swapLog);
+
+
 
 	}else
 	{
 		respuestaMemoria = 0;
+
+		 t_SwapLog* swapLog  = t_swapLog_crear(0,0,0,NULL);
+		 t_loguear(logSwap,RECHAZADO,swapLog);
+		 t_swapLog_eliminar(swapLog);
+
 
 	}
 	int error  =  send(memSocket,&respuestaMemoria,sizeof(char),0);
@@ -167,6 +170,8 @@ void iniciarProceso(int memSocket)
 		perror("Error Al comunicarse con Memoria \n");
 
 
+
+
 	free(pedido);
 
 
@@ -174,7 +179,7 @@ void iniciarProceso(int memSocket)
 void realizarLectura(int memSocket)
 {
 
-	void* unBuffer ;
+
 	// Recepción de la solicitud de información de la Memoria
 		t_protoc_inicio_lectura_Proceso* pedido = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 		pedido->tipoInstrucc = LEER;
@@ -189,24 +194,23 @@ void realizarLectura(int memSocket)
 		int tamanioContenido;
 		tamanioContenido = particion->pagina_tamanio;
 
-	//Serializo información solicitada y envío a Memoria
-		unBuffer = malloc(sizeof(int) + (tamanioContenido));
+	int enviado = 	send(memSocket, &tamanioContenido, sizeof(int),0);
+		enviado+=send(memSocket,contenidoPag , tamanioContenido,0);
+
+		char* contenido = malloc(tamanioContenido);
+		memcpy(contenido,contenidoPag,tamanioContenido);
+
+		printf("Se Enviaron %d Bytes. Tamanio Cont = %d , Cont = %s\n ",enviado,tamanioContenido,contenido);
+
+			t_SwapLog* swapLog  = t_swapLog_crear(pedido->pid,(pedido->paginas)* config->tamanio_Pagina,tamanioContenido,contenido);
+			t_loguear(logSwap,LECTURA,swapLog);
+			t_swapLog_eliminar(swapLog);
 
 
-		int offset = sizeof(int);
-
-		memcpy(unBuffer,&tamanioContenido,offset);
-		memcpy((unBuffer+offset),contenidoPag,tamanioContenido);
-		offset += tamanioContenido;
-		send(memSocket,unBuffer,offset,0);
-
-	//Liberación de estructuras dinámicas utilizadas
-		free(pedido);
+		free(contenido);
 		free(contenidoPag);
-		free(unBuffer);
+		free(pedido);
 
-	//Retardo simulado en la lectura de una página de acuerdo a configuración
-		sleep(config->retardo_SWAP);
 }
 
 void realizarEscritura(int memSocket)
@@ -229,12 +233,19 @@ void realizarEscritura(int memSocket)
 		*confirmMemoria = 1;
 		send(memSocket,confirmMemoria,sizeof(char),0);
 
+		printf("Se envio confirmacion de Escritura = %d\n",*confirmMemoria);
+
+
 	//Liberación de estructuras dinámicas utilizadas
+
+				t_SwapLog* swapLog  = t_swapLog_crear(pedido->pid,(pedido->pagina)* config->tamanio_Pagina,pedido->tamanio,pedido->contenido);
+				t_loguear(logSwap,ESCRITURA,swapLog);
+				t_swapLog_eliminar(swapLog);
+
+
 		free(pedido);
 		free(confirmMemoria);
 
-	//Retardo simulado en la lectura de una página de acuerdo a configuración
-		sleep(config->retardo_SWAP);
 }
 
 
@@ -271,6 +282,12 @@ void finalizarProceso(int memSocket)
 		perror("Error al notificar finalizacion de proceso a memoria");
 
 	}
+
+	    t_SwapLog* swapLog  = t_swapLog_crear(pedido->pid,(proceso->paginaComienzo)* config->tamanio_Pagina,proceso->cantidad * config->tamanio_Pagina,NULL);
+		t_loguear(logSwap,LIBERADO,swapLog);
+		t_swapLog_eliminar(swapLog);
+
+
 	free(pedido);
 	free(proceso);
 
@@ -305,7 +322,7 @@ int hayEspacio(int cantidadNuevoProceso)
 	}
 
 
-	return (espacioUtilizado + cantidadNuevoProceso) <= particion->archivo_tamanio;
+	return (espacioUtilizado + cantidadNuevoProceso) <= particion->paginas_cantidad;
 
 
 }
@@ -321,7 +338,6 @@ int calcularPaginaEnSwap(int pid, int pagina)
 	}
 
 	t_proceso* proceso = list_find(espacioUtilizado_lista,(void*)buscarPid);
-	t_proceso* otroproceso = list_get(espacioUtilizado_lista,0);
 
 	return (proceso->paginaComienzo + pagina );
 
@@ -348,3 +364,6 @@ void t_proceso_eliminar(t_proceso*unProceso)
 
 
 }
+
+
+

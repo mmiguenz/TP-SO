@@ -9,10 +9,11 @@
 #include "particionSwap.h"
 #include "swapConfig.h"
 #include <commons/string.h>
-#include "Swap.h"
 #include "protocolos.h"
+#include "logueoSwap.h"
 
-#define finString '/0'
+
+
 
 int paginaActual(t_particion* particion);
 void posicionarProximaPagina(t_particion*);
@@ -26,8 +27,10 @@ t_hueco* unificar(t_hueco* unHueco,t_hueco* otroHueco);
 int sonContiguos(t_hueco* unHueco,t_hueco* otroHueco);
 
 
-t_particion* t_particion_crear(t_swapConfig* config)
+t_particion* t_particion_crear(t_swapConfig* config,t_log* logSwap)
 {
+
+
 	t_particion* particion  = malloc(sizeof(t_particion));
 	char* script= malloc(100);
 	char* cantidad_Paginas= malloc(4);
@@ -52,7 +55,8 @@ t_particion* t_particion_crear(t_swapConfig* config)
 	particion->archivo_tamanio = config->cantidad_Paginas * config->tamanio_Pagina ;
 	particion->pagina_tamanio= config->tamanio_Pagina ;
 	particion->paginas_cantidad= config ->cantidad_Paginas;
-
+	particion->retardoCompactacion=config->retardo_Compact;
+	particion->logSwap = logSwap;
 
 	particion->espacioLibre = list_create();
 
@@ -76,8 +80,9 @@ void t_particion_elminar(t_particion* particion)
 
 void* t_particion_leerPagina(t_particion* particion ,int numeroDePagina)
 {
+
 	posicionarPagina(particion,numeroDePagina);
-	char* contenidoPagina = malloc(sizeof(particion->pagina_tamanio));
+	char* contenidoPagina = malloc(particion->pagina_tamanio);
 	fread(contenidoPagina,particion->pagina_tamanio,1,particion->archivoParticion);
 	return contenidoPagina;
 }
@@ -85,7 +90,7 @@ void* t_particion_leerPagina(t_particion* particion ,int numeroDePagina)
 void t_particion_escribirPagina(t_particion* particion ,int numeroDePagina, t_protoc_escrituraProceso* pedido)
 {
 	posicionarPagina(particion,pedido->pagina);
-	fwrite(pedido->contenido,sizeof(char),pedido->tamanio,particion->archivoParticion);
+	fwrite(pedido->contenido,pedido->tamanio,1,particion->archivoParticion);
 	return;
 }
 
@@ -115,6 +120,7 @@ void posicionarPagina(t_particion* particion, int numeroDePagina)
 	if(p_Actual > numeroDePagina)
 		{
 			rewind(particion->archivoParticion);
+			p_Actual=paginaActual(particion);
 
 		}
 
@@ -141,7 +147,13 @@ int t_particion_reservarPaginas(t_particion* particion, int cantidadDePaginas,t_
 
 	if(paginaComienzo ==-1)
 	{
+	    t_SwapLog* swapLog  = t_swapLog_crear(0,0,0,NULL);
+
+	    t_loguear(particion->logSwap,COMPATACION,swapLog);
 		compactar(particion,espacioUtilizado_lista);
+		t_loguear(particion->logSwap,COMPATACION,swapLog);
+
+		t_swapLog_eliminar(swapLog);
 		return t_particion_reservarPaginas(particion,cantidadDePaginas,espacioUtilizado_lista);
 
 	}else
@@ -178,6 +190,8 @@ int hayEspacioContiguo(t_particion* particion,int espacioRequerido)
 
 void compactar(t_particion* particion,t_list* espacioUtilizado_lista)
 {
+	sleep(particion->retardoCompactacion);
+
 	int pagina= 0 ;
 	int cantidadDeProcesos =  list_size( espacioUtilizado_lista);
 	int i ;
@@ -281,9 +295,18 @@ void t_hueco_agregar(t_particion* particion,int paginaComienzo,int cantidad)
 
 void unificarHuecos(t_particion* particion)
 {
+	bool ordenaDeMenorAMayorPorPaginaDeInicio(t_hueco* unHueco,t_hueco* otroHueco ){
+
+		return unHueco->paginaInicio<otroHueco->paginaInicio;
+
+	}
+
+
 	t_hueco *unHueco, *otroHueco;
 	int cantidadHuecos;
 	t_list* huecos = particion->espacioLibre;
+	list_sort(huecos,(void*)ordenaDeMenorAMayorPorPaginaDeInicio);
+
 
 	cantidadHuecos = list_size(huecos);
 	int i;
@@ -296,16 +319,19 @@ void unificarHuecos(t_particion* particion)
 		{
 			t_hueco* huecoUnificado = unificar(unHueco,otroHueco);
 
-			list_remove_and_destroy_element(huecos,(i-1),(void*)t_hueco_eliminar);
 			list_remove_and_destroy_element(huecos,(i),(void*)t_hueco_eliminar);
+			list_remove_and_destroy_element(huecos,(i-1),(void*)t_hueco_eliminar);
 
 			list_add_in_index(huecos,--i,huecoUnificado);
 
 			unHueco = list_get(huecos,i);
 
+			cantidadHuecos = list_size(huecos);
+
 		}else{
 
 			unHueco=otroHueco;
+
 
 		}
 
@@ -318,8 +344,8 @@ void unificarHuecos(t_particion* particion)
 
 int sonContiguos(t_hueco* unHueco,t_hueco* otroHueco)
 {
-	return ( (unHueco->paginaInicio + unHueco->cantidadPaginas) == otroHueco->paginaInicio)?
-			1:0;
+	return (unHueco->paginaInicio + unHueco->cantidadPaginas) == otroHueco->paginaInicio;
+
 
 
 }

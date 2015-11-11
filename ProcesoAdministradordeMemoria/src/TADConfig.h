@@ -19,7 +19,7 @@ typedef struct {
 	int cantidad_marcos;
 	int tamanio_marco;
 	int entradas_TLB;
-	char* tlb_habilitada;
+	int tlb_habilitada;
 	int retardo_memoria;
 	char* algoritmo_reemplazo;
 }t_paramConfigAdmMem;

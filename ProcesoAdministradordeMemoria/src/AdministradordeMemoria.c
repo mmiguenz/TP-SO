@@ -75,13 +75,10 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 	 	 	 t_memoria_crear(&memoriaPrincipal,configAdmMem);
 
 
-	 	 	 	 char* habilitacionTLB = malloc(sizeof(char)*2);
-	 	 	 	 habilitacionTLB = configAdmMem->tlb_habilitada;
 
-	 	 	 	 if (!strcmp(habilitacionTLB,SI)) {
-	 	 	 	 tlb = malloc(sizeof(TLB));
-	 	 	 	 tlb = t_tlb_crear(configAdmMem);
-	 	 	 	 //tlb.CacheTLB=inicializarTLB(configAdmMem->entradas_TLB);
+	 	 	 	 if (configAdmMem->tlb_habilitada) {
+	 	 	        tlb = t_tlb_crear(configAdmMem);
+
 	 	 	 	 }
 
 	 	 	 	 /* Se crea una estructura dinámica que contendrá las tablas de páginas de los procesos en ejecución*/
@@ -94,8 +91,6 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 	 	 	 socketSwap = conectar_cliente(configAdmMem->puerto_swap,configAdmMem->ip_swap);
 
 	 	 	 	 conectar_servidor(configAdmMem->puerto_escucha, socketSwap);
-
-
 
 
 	 	 	 	 return EXIT_SUCCESS;
@@ -131,7 +126,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
  void inicializacionProceso(int socketCPU, int socketSwap){
 
 	 	 char* confirmSwap = malloc(sizeof(char));
-	 	 char* confirmCPU = malloc(sizeof(char));
+	 	 char* confirmCPU;
 	 	 char instruccSentencia = 1;
 
 	 	 //Recibo la estructura serializada del CPU y la cargo en estructura correspondiente
@@ -163,9 +158,11 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 // Búsqueda del frame asociado a la página del proceso en TLB
 	 int frame=-1;
 	 int tamanioContenido;
-	 char* contenido = malloc(configAdmMem->tamanio_marco*sizeof(char));
+	 char* contenido;
 
-	 frame = buscarPaginaTLB(tlb,protInic->pid,protInic->paginas);
+
+	 if(configAdmMem->tlb_habilitada)
+		 frame = buscarPaginaTLB(tlb,protInic->pid,protInic->paginas);
 
 	 if (frame == -1)/*No se encontró página en TLB*/{
 
@@ -176,6 +173,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 			 //enviarSolicitudSwap() y recibirContenido de Swap;
 			 send(socketSwap,buffer,sizeof(char)+(sizeof(int)*2),0);
 			 recv(socketSwap,&tamanioContenido,sizeof(int),0);
+			 contenido = malloc(tamanioContenido);
 			 recv(socketSwap,contenido,tamanioContenido,0);
 
 			 char* pidBuscado = string_itoa(protInic->pid);
@@ -192,19 +190,19 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 contenido = memoriaPrincipal.Memoria[frame];
 
 	 // Serializo el contenido del frame leido para su envío al CPU
-	 tamanioContenido = strlen(contenido);
-	 void* bufferContAEnviar = malloc(sizeof(int)+(sizeof(char)*tamanioContenido)+1);
+	 tamanioContenido = configAdmMem->tamanio_marco;
+	 void* bufferContAEnviar = malloc(sizeof(int)+(sizeof(char)*tamanioContenido));
 	 memcpy(bufferContAEnviar,&tamanioContenido,sizeof(int));
 	 int offset = sizeof(int);
-	 memcpy(bufferContAEnviar+offset,contenido,tamanioContenido+1);
-	 offset += tamanioContenido+1;
-	 char aux = 1 ;
-	 send(socketCPU,&aux,sizeof(char),0);
-	 send(socketCPU,bufferContAEnviar,offset,0);
+	 memcpy(bufferContAEnviar+offset,contenido,tamanioContenido);
+	 offset += tamanioContenido;
+	 int enviado = send(socketCPU,bufferContAEnviar,offset,0);
+
+	 printf("Se Enviaron %d Bytes. Tamanio Cont = %d , Cont = %s\n ",enviado,tamanioContenido,contenido);
 
 	 free(protInic);
-	 free(contenido);
 	 free(bufferContAEnviar);
+	 free(contenido);
 
  };
 
@@ -223,9 +221,14 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 char respuesta =  escribirContenido(pedido, socketSwap);
 
-	 send(socketCPU,&respuesta,sizeof(char),0);
+	 void* buffer = malloc(sizeof(char));
+	 memcpy(buffer,&respuesta,sizeof(char));
 
+	 send(socketCPU,buffer,sizeof(char),0);
+	 printf("se envio confirmacion Escritura = %d\n",respuesta);
 
+	 free(buffer);
+	 free(pedido);
 
 
  }
@@ -256,7 +259,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 }else
 	 {
-		 if(t_hayFrameLibre(&memoriaPrincipal, tablaDePaginas,configAdmMem->max_marcos_proceso)<=0)
+		 if(! t_hayFrameLibre(&memoriaPrincipal, tablaDePaginas,configAdmMem->max_marcos_proceso))
 		 {
 			/*
 			 * en este punto, quizas tendria sentido que el cpu sepa el motivo de porque se rechazo la lectura.
@@ -274,7 +277,6 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 
 
-
  }
 
 
@@ -285,6 +287,13 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 pedidoLectura->paginas = pedido->pagina;
 	 pedidoLectura->tipoInstrucc = LEER;
 
+	int enviados= send(socketSwap,&pedidoLectura->tipoInstrucc,sizeof(char),0);
+	enviados+= send(socketSwap,&pedidoLectura->paginas,sizeof(int),0);
+	enviados+=send(socketSwap,&pedidoLectura->pid,sizeof(int),0);
+
+	 printf("Se solicito pagina a Swap. BytesEnviados =%d , PID= %d, PAGINA = %d \n",enviados, pedidoLectura->pid, pedidoLectura->paginas);
+
+/*
 	 void* buffer = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 	 int offset = 0 ;
 
@@ -297,8 +306,8 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 send(socketSwap,buffer,sizeof(t_protoc_inicio_lectura_Proceso),0);
 	 free(buffer);
-
-	 int tamanioContenido= 0 ;
+*/
+	 int tamanioContenido;
 	 recv(socketSwap,&tamanioContenido,sizeof(int),0);
 
 	 char* contenido = malloc(tamanioContenido);
@@ -315,7 +324,9 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	tabla->Pagina[pedido->pagina]->idFrame=frame;
 	tabla->Pagina[pedido->pagina]->horaIngreso=90000000;
 
-	agregar_reemplazarRegistroTLB(tlb,pedido->pid,pedido->pagina,frame);
+
+	if(configAdmMem->tlb_habilitada)
+		agregar_reemplazarRegistroTLB(tlb,pedido->pid,pedido->pagina,frame);
 
 
  }
@@ -324,12 +335,18 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
  void finalizacionProceso(int socketCpu,int socketSwap){
 
+	 t_protoc_inicio_lectura_Proceso* pedidoCpu = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
+
+
 	 t_protoc_Finaliza* pedido = malloc(sizeof(t_protoc_Finaliza));
 
 
 	 pedido->tipoInstrucc = FINALIZAR ;
 
-	 recv(socketCpu,&pedido->pid,sizeof(int),0);
+	 recv(socketCpu,&pedidoCpu->paginas,sizeof(int),0);
+	 recv(socketCpu,&pedidoCpu->pid,sizeof(int),0);
+
+	 memcpy(&pedido->pid, &pedidoCpu->pid,sizeof(int));
 
 
 	 if (configAdmMem->tlb_habilitada)
@@ -348,6 +365,11 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 		notificarFinalizarCpu(socketCpu);
 
 	 }
+
+
+
+	 free(pedido);
+	 free(pedidoCpu);
 
 
  }

@@ -46,6 +46,7 @@
 t_queue * porcentajes_CPU;
 
 pthread_mutex_t mutex;
+int primLectBuffer = 1;
 
 //--param de los hilos
 typedef struct {
@@ -253,25 +254,27 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		int paginas = atoi(pagina);
 
 		printf("Encontro leer\n");
-		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
-		char msj = *(recibirMsjMemoria(memoria));
 
-		printf("mensaje de la memoria %d \n",msj);
+		char* contenidoLeido = NULL;
+		contenidoLeido =(char*) enviarSolicitudLectura(PcbAux->PID, instruccion, paginas , memoria);
+
+		char msj = (contenidoLeido > 0)?1:0;
+		int bytesRecib = strlen(contenidoLeido)+1;
+
+		printf("bytes recibidos :  %d \n",bytesRecib);
 
 		if(msj>0)
 		{
 			//--msj es el tamaño de lo que leyo
 			printf("Pude leer\n");
-			char* mensaje;
-			mensaje = malloc(msj);
-			recv(memoria, mensaje, msj, 0);
-			printf("El contenido leido es:%s\n", mensaje);
+			printf("El contenido leido es:%s\n", contenidoLeido);
 
 			log_info(logger, "El pid es %d", PcbAux->PID);
-			log_info(logger, "mProc %s - Pagina %d leida: %s", PcbAux->nombreProc, paginas, mensaje);
+			log_info(logger, "mProc %s - Pagina %d leida: %s", PcbAux->nombreProc, paginas, contenidoLeido);
 
 			PcbAux->contadorProgram++;
 			sleep(retardo);
+			free(contenidoLeido);
 
 		}else{
 			printf("No pudo leer\n");
@@ -312,8 +315,9 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		printf("El comando es Escribir en la pagina: %d \n", paginas);
 
 
-		mandarMsjEscribir(memoria, texto, PcbAux->PID, instruccion, paginas);
-		char msj = *(recibirMsjMemoria(memoria));
+		char msj= mandarMsjEscribir(memoria, texto, PcbAux->PID, instruccion, paginas);
+
+
 		printf("El texto a escribir es: %s \n",texto);
 		printf("mensaje de la memoria %d \n",msj);
 
@@ -328,7 +332,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 
 		}else{
-			printf("La escritura fallo");
+			printf("La escritura fallo \n");
 			log_info(logger, "El pid es %d", PcbAux->PID);
 			log_info(logger, "mProc %s Fallo lectura",PcbAux->nombreProc);
 
@@ -645,7 +649,7 @@ void* conectar(void* mensa){
 	t_log* logger = param->logger;
 	int retardo = param->retardo;
 
-	printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
+	//printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
 
 	//--nos conectamos con planificador y memoria
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
@@ -653,7 +657,7 @@ void* conectar(void* mensa){
 
 	//--verificamos que nos hayamos conectado correctamente a memoria, loggueamos
 	if (memoria > 0) {
-		log_info(logger, "El hilo %u se conecto a memoria correctamente", (unsigned int) pthread_self());
+		//log_info(logger, "El hilo %u se conecto a memoria correctamente", (unsigned int) pthread_self());
 	} else {
 		log_info(logger, "error al conectarse con memoria");
 	}
@@ -786,3 +790,15 @@ void* conectar(void* mensa){
 	//free(param);
 	return EXIT_SUCCESS;
 }
+
+
+
+
+
+
+
+
+
+
+
+

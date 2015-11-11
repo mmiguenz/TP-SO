@@ -204,10 +204,11 @@ void *shell(int mutex){
 		pcb_block->path = malloc(200);
 		sem_wait(&sem_consumidor_block);
 		pcb_block = queue_pop(block_PCB);
-
+		printf("El proceso blokeado es........ %s",pcb_block->nombreProc );
 		sleep(pcb_block->retardo_io);
 
 		queue_push(fifo_PCB_ready,pcb_block);
+		sem_post(&sem_consumidor);
 
 	 }
  }
