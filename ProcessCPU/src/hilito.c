@@ -294,6 +294,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			parcial.tiempo = 0;
 			parcial.contadorDePrograma = PcbAux->contadorProgram;
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
+
 			punta=15001;
 			sleep(retardo);
 
@@ -489,12 +490,15 @@ int ubicarPunta(char cadena [1500], PCB* PcbAux){
 	int contador = PcbAux->contadorProgram;
 	while (punta<(tamBuff-1) && contador>i){
 
-		if(cadena[punta]!=';'){
-			punta++;
+		if(cadena[punta]==';'){
+			i++;
 		}
-		i++;
+		punta++;
 	}
-	return i;
+	if (contador !=0){
+		punta++;
+	}
+	return punta;
 }
 
 
@@ -525,7 +529,7 @@ void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux
 
 void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 
-	int punta=ubicarPunta(cadena, PcbAux);;
+	int punta=ubicarPunta(cadena, PcbAux);
 	char comando[15];
 	char pagina[3];
 	char texto[20];

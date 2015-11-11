@@ -496,6 +496,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 		printf("El proceso a blokear es........ %s",Pcb_IO->nombreProc );
 
 		Pcb_IO->retardo_io=pcb_parc.tiempo;
+		Pcb_IO->contadorProgram= pcb_parc.contadorDePrograma;
 
 		queue_push(block_PCB,Pcb_IO);
 		sem_post(&sem_consumidor_block);
