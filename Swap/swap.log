@@ -1,0 +1,68 @@
+[INFO] 02:27:16:211 Swap/(28996:28996): mProc asignado. || PID = 266 || Byte Inicial = 0 || Tamanio = 40 Bytes
+[INFO] 02:27:19:279 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 0 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:22:273 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 4 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:25:280 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 8 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:28:291 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 12 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:31:310 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 16 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:34:309 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 36 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:37:327 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 32 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:40:333 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 28 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:43:347 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 24 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:46:356 Swap/(28996:28996): Lectura Solicitada. || PID = 266 || Byte Inicial = 20 || Tamanio = 4 || Contenido = 
+[INFO] 02:27:49:386 Swap/(28996:28996): mProc Liberado. || PID = 266 || Byte Inicial = 0 || Bytes liberados = 0
+[INFO] 02:32:02:549 Swap/(29106:29106): mProc asignado. || PID = 266 || Byte Inicial = 0 || Tamanio = 40 Bytes
+[INFO] 02:32:03:569 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 0 || Tamanio = 4 || Contenido = 
+[INFO] 02:32:04:579 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 4 || Tamanio = 4 || Contenido = 
+[INFO] 02:32:05:586 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 8 || Tamanio = 4 || Contenido = 
+[INFO] 02:32:06:597 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 12 || Tamanio = 4 || Contenido = 
+[INFO] 02:32:07:605 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 16 || Tamanio = 4 || Contenido = 
+[INFO] 02:32:08:614 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 36 || Tamanio = 4 || Contenido = 
+[INFO] 02:32:09:620 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 32 || Tamanio = 4 || Contenido = 
+[INFO] 02:32:10:627 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 28 || Tamanio = 4 || Contenido = 
+[INFO] 02:32:11:639 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 24 || Tamanio = 4 || Contenido = 
+[INFO] 02:32:12:647 Swap/(29106:29106): Lectura Solicitada. || PID = 266 || Byte Inicial = 20 || Tamanio = 4 || Contenido = 
+[INFO] 02:34:45:719 Swap/(29106:29106): mProc Liberado. || PID = 266 || Byte Inicial = 0 || Bytes liberados = 0
+[INFO] 02:39:19:577 Swap/(29324:29324): mProc asignado. || PID = 266 || Byte Inicial = 0 || Tamanio = 40 Bytes
+[INFO] 02:39:20:651 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 0 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:21:643 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 4 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:22:654 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 8 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:23:668 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 12 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:24:674 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 16 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:25:722 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 36 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:26:718 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 32 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:27:729 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 28 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:28:738 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 24 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:29:739 Swap/(29324:29324): Lectura Solicitada. || PID = 266 || Byte Inicial = 20 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:30:810 Swap/(29324:29324): mProc Liberado. || PID = 266 || Byte Inicial = 0 || Bytes liberados = 40
+[INFO] 02:39:36:688 Swap/(29324:29324): mProc Rechazado por falta de espacio. || PID = 0 ||
+[INFO] 02:39:44:732 Swap/(29324:29324): mProc asignado. || PID = 230 || Byte Inicial = 0 || Tamanio = 40 Bytes
+[INFO] 02:39:45:748 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 0 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:46:755 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 4 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:47:769 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 8 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:48:777 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 12 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:49:783 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 16 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:50:797 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 36 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:51:819 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 32 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:52:819 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 28 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:53:837 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 24 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:54:845 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 20 || Tamanio = 4 || Contenido = 
+[INFO] 02:39:55:845 Swap/(29324:29324): mProc Liberado. || PID = 230 || Byte Inicial = 0 || Bytes liberados = 40
+[INFO] 02:40:02:613 Swap/(29324:29324): mProc asignado. || PID = 163 || Byte Inicial = 0 || Tamanio = 256 Bytes
+[INFO] 02:40:03:631 Swap/(29324:29324): Lectura Solicitada. || PID = 163 || Byte Inicial = 0 || Tamanio = 4 || Contenido = 
+[INFO] 02:40:04:642 Swap/(29324:29324): Lectura Solicitada. || PID = 163 || Byte Inicial = 4 || Tamanio = 4 || Contenido = 
+[INFO] 02:40:05:643 Swap/(29324:29324): Lectura Solicitada. || PID = 163 || Byte Inicial = 8 || Tamanio = 4 || Contenido = 
+[INFO] 02:40:06:662 Swap/(29324:29324): Lectura Solicitada. || PID = 163 || Byte Inicial = 240 || Tamanio = 4 || Contenido = 
+[INFO] 02:40:07:668 Swap/(29324:29324): Lectura Solicitada. || PID = 163 || Byte Inicial = 252 || Tamanio = 4 || Contenido = 
+[INFO] 02:40:08:674 Swap/(29324:29324): mProc Liberado. || PID = 163 || Byte Inicial = 0 || Bytes liberados = 256
+[INFO] 02:43:34:796 Swap/(29324:29324): mProc asignado. || PID = 230 || Byte Inicial = 0 || Tamanio = 40 Bytes
+[INFO] 02:43:35:806 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 0 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:36:817 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 4 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:37:823 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 8 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:38:829 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 12 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:39:843 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 16 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:40:852 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 36 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:41:855 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 32 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:42:860 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 28 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:43:863 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 24 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:44:884 Swap/(29324:29324): Lectura Solicitada. || PID = 230 || Byte Inicial = 20 || Tamanio = 4 || Contenido = 
+[INFO] 02:43:45:886 Swap/(29324:29324): mProc Liberado. || PID = 230 || Byte Inicial = 0 || Bytes liberados = 40

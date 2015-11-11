@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <commons/collections/list.h>
 #include "protocolos.h"
+#include <unistd.h>
+#include "Swap.h"
+#include <commons/log.h>
 #ifndef PARTICIONSWAP_H_
 #define PARTICIONSWAP_H_
 
@@ -21,6 +24,8 @@ typedef struct particion {
 	int pagina_tamanio;
 	int paginas_cantidad;
 	t_list* espacioLibre;
+	unsigned int retardoCompactacion;
+	t_log* logSwap;
 
 
 } t_particion;
@@ -36,7 +41,7 @@ typedef struct hueco
 
 
 
-t_particion* t_particion_crear(t_swapConfig*);
+t_particion* t_particion_crear(t_swapConfig*,t_log* logSwap);
 void* t_particion_leerPagina(t_particion* particion ,int numeroDePagina);
 void t_particion_escribirPagina(t_particion* particion ,int numeroDePagina, t_protoc_escrituraProceso* pedido);
 
