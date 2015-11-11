@@ -497,7 +497,7 @@ int ubicarPunta(char cadena [1500], PCB* PcbAux){
 void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 	int instruccion = 4;
 	int paginas=0;
-	//enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
+	enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
 
 	printf("El proceso Pudo finalizar\n");
 	log_info(logger, "El pid es %d", PcbAux->PID);
@@ -528,7 +528,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	int i=0;
 	time_t comienzo, final;
 	comienzo = time( NULL );
-int flag=0;
+	int flag=0;
 	while(flag!=-1 && (strcmp(comando, "finalizar")) && quantum>i )
 	{
 
