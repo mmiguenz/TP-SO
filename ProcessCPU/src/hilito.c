@@ -247,6 +247,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			parcial.contadorDePrograma = PcbAux->contadorProgram;
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 			punta=1501;
+			comando="fallo";
 			sleep(retardo);
 		}
 		break;
@@ -586,7 +587,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	//-------
 
 	//-- si el quamtum termino en otro sentencia le avisamos a PLANIFICADOR que termino por quantum
-	if(strcmp(comando, "finalizar") && strcmp(comando, "entrada-salida")){
+	if(strcmp(comando, "finalizar") && strcmp(comando, "entrada-salida")&& strcmp(comando, "fallo")){
 		t_msgHeader header;
 		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 		header.msgtype = 5;
