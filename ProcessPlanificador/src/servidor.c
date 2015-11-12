@@ -410,7 +410,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 					 pcb_parc.pid=0;
 					 pcb_parc.tiempo=0;
 
-					 time_t salida_ready;
+
 
 	printf("-------------------EL MSJ type es %d \n",header.msgtype);
 	switch(header.msgtype){
@@ -477,6 +477,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	PcbRun->cpu_asignada=socketCliente;
 	PcbRun->cant_ready++;
 	PcbRun->tiempo_espera=((PcbRun->tiempo_espera)+(difftime(time(NULL),PcbRun->t_entrada_cola_ready)))/PcbRun->cant_ready;
+	PcbRun->t_entrada_cola_run=time(NULL);
 	queue_push(running_PCB,PcbRun);
 	sem_post(&sem_mutex1);
 	}
@@ -514,8 +515,10 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
 
 	PcbFin=search_and_return(pcb_parc.pid,running_PCB);
-	printf("-----------El Tiempo de espera fue de %d segundos aproximadamente--------\n\n",PcbFin->tiempo_espera);
-
+	PcbFin->cant_run++;
+	PcbFin->tiempo_ejecucion=((PcbFin->tiempo_ejecucion)+(difftime(time(NULL),PcbFin->t_entrada_cola_run)))/PcbFin->cant_run;
+	printf("-----------El Tiempo de espera fue de %d segundos aproximadamente--------\n",PcbFin->tiempo_espera);
+	printf("-----------El Tiempo de ejecucion fue de %d segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
 							break;
 						}
 
@@ -530,6 +533,8 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 
 		Pcb_IO->retardo_io=pcb_parc.tiempo;
 		Pcb_IO->contadorProgram= pcb_parc.contadorDePrograma;
+		Pcb_IO->cant_run++;
+		Pcb_IO->tiempo_ejecucion=((Pcb_IO->tiempo_ejecucion)+(difftime(time(NULL),Pcb_IO->t_entrada_cola_run)))/Pcb_IO->cant_run;
 
 		queue_push(block_PCB,Pcb_IO);
 		sem_post(&sem_consumidor_block);
@@ -550,6 +555,9 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 		pcbAux=search_and_return(pcb_parc.pid,running_PCB);
 		pcbAux->contadorProgram=pcb_parc.contadorDePrograma;
 		pcbAux->t_entrada_cola_ready=time(NULL);
+		pcbAux->cant_run++;
+		pcbAux->tiempo_ejecucion=((pcbAux->tiempo_ejecucion)+(difftime(time(NULL),pcbAux->t_entrada_cola_run)))/pcbAux->cant_run;
+
 		queue_push(fifo_PCB,pcbAux);
 
 		break;
