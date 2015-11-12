@@ -582,7 +582,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	//-------
 
 	//-- si el quamtum termino en otro sentencia le avisamos a PLANIFICADOR que termino por quantum
-	if(strcmp(comando, "finalizar")){
+	if(strcmp(comando, "finalizar") && strcmp(comando, "entrada-salida")){
 		t_msgHeader header;
 		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
 		header.msgtype = 5;
@@ -596,6 +596,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 		parcial.contadorDePrograma = PcbAux->contadorProgram;
 		send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 	}
+
 	log_info(logger, "El pid es %d", PcbAux->PID);
 	log_info(logger, "mProc %s finalizo el quantum de %d", PcbAux->nombreProc, quantum);
 	return;
