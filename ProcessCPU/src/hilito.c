@@ -121,9 +121,13 @@ int porcentajeDeUso(int diff, int instrucciones, int retardo){
 	//--regla de 3simple los pulsos que transcurrieron desde que empezo
 	//por las instruccion que deberia haber hecho en 60s divido 60
 	int cantInstOptima = (diff*instruccionesTotal)/pulsos;
-
+	if(cantInstOptima == 0){
+		porcentaje = 0;
+	}else{
 	//ese valor de instrucciones representa el 100% calculamos el % para las cant que hizo
+
 	porcentaje = (instrucciones*100)/cantInstOptima;
+	}
 
 	return porcentaje;
 }
@@ -425,13 +429,13 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 
-/*
+
 			final = time( NULL );
 			//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 			int diff =  difftime(final, comienzo);
 			int porcentaje= porcentajeDeUso(diff, PcbAux->contadorProgram, retardo);
 			//printf("El porcentaje de uso es %d\n", porcentaje);
-*/
+
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader));
 			header.msgtype = 3;
@@ -565,7 +569,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 		i++;
 	}
 
-	/*final = time( NULL );
+	final = time( NULL );
 	//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 	int diff =  difftime(final, comienzo);
 	int porcentaje= porcentajeDeUso(diff, quantum, retardo);
@@ -578,7 +582,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	pthread_mutex_lock(&mutex);
 	queue_push(porcentajes_CPU, nodo);
 	pthread_mutex_unlock(&mutex);
-	free(nodo);*/
+	free(nodo);
 	//-------
 
 	//-- si el quamtum termino en otro sentencia le avisamos a PLANIFICADOR que termino por quantum
