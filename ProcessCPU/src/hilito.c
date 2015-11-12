@@ -537,6 +537,18 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	time_t comienzo, final;
 	comienzo = time( NULL );
 	int flag=0;
+
+
+	if (punta != 0){
+		t_msgHeader header;
+		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+		header.msgtype = 2;
+		header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+		send(planificador, &header, sizeof( t_msgHeader), 0);
+
+
+	}
+
 	while(flag!=-1 && (strcmp(comando, "finalizar")) && quantum>i )
 	{
 
@@ -600,6 +612,16 @@ void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logg
 
 	time_t comienzo;
 	comienzo = time( NULL );
+
+	if (punta != 0){
+		t_msgHeader header;
+		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+		header.msgtype = 2;
+		header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+		send(planificador, &header, sizeof( t_msgHeader), 0);
+
+
+	}
 
 	//--mientras no punta sea menor al tamaño del mProc
 	while(punta<(tamBuff-1))
