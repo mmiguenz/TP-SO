@@ -25,7 +25,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <fcntl.h>
-
+#include <time.h>
 /*-------Comandos del Shell-------*/
 #define CORRER 0
 #define FINALIZAR 1
@@ -56,7 +56,12 @@ char* path;
 int cpu_asignada;
 int quantum;//Si el quantum es -1 la planificacion es fifo caso contrario round robin
 int retardo_io;
-
+time_t t_entrada_cola_ready;
+int tiempo_respuesta;
+int cant_ready;
+time_t t_entrada_cola_run;
+int tiempo_ejecucion;
+int cant_run;
 }PCB ;
 
 //#include "PCB.h"
@@ -206,6 +211,7 @@ void *shell(int mutex){
 		pcb_block = queue_pop(block_PCB);
 		printf("El proceso blokeado es........ %s",pcb_block->nombreProc );
 		sleep(pcb_block->retardo_io);
+		pcb_block->t_entrada_cola_ready=time(NULL);
 
 		queue_push(fifo_PCB_ready,pcb_block);
 		sem_post(&sem_consumidor);
@@ -401,6 +407,10 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 	new->contadorProgram=0;
 	new->path=ruta;
 	new->quantum=quantum;
+	new->t_entrada_cola_ready=time(NULL);
+	new->cant_ready=0;
+	new->cant_run=0;
+	new->tiempo_respuesta=0;
 
 	return new;
 }

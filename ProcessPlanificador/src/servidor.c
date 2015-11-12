@@ -4,6 +4,8 @@
 #include "semaph.h"
 
 #include <semaphore.h>
+#include <time.h>
+
 sem_t sem_mutex1;
 sem_t sem_consumidor;
 sem_t sem_consumidor_block;
@@ -18,6 +20,12 @@ char* path;
 int cpu_asignada;
 int quantum;
 int retardo_io;
+time_t t_entrada_cola_ready;
+int tiempo_espera;
+int cant_ready;
+time_t t_entrada_cola_run;
+int tiempo_ejecucion;
+int cant_run;
 
 } __attribute__((packed)) PCB ;
 
@@ -402,6 +410,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 					 pcb_parc.pid=0;
 					 pcb_parc.tiempo=0;
 
+					 time_t salida_ready;
 
 	printf("-------------------EL MSJ type es %d \n",header.msgtype);
 	switch(header.msgtype){
@@ -466,6 +475,8 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	sem_wait(&sem_consumidor);
 	PcbRun=queue_pop(fifo_PCB);
 	PcbRun->cpu_asignada=socketCliente;
+	PcbRun->cant_ready++;
+	PcbRun->tiempo_espera=((PcbRun->tiempo_espera)+(difftime(time(NULL),PcbRun->t_entrada_cola_ready)))/PcbRun->cant_ready;
 	queue_push(running_PCB,PcbRun);
 	sem_post(&sem_mutex1);
 	}
@@ -493,12 +504,17 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	}
 
 	case 3 : {
+		PCB* PcbFin;
+		PcbFin=malloc(sizeof(PCB*));
+		PcbFin->nombreProc=malloc(50);
+		PcbFin->path=malloc(200);
+
 	printf("El proceso %d finalizo correctamente \n",header.payload_size);
 	log_info(logger, "Se ha finalizado el proceso con el CPU: %d", socketCliente);
 	recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
 
-	search_and_destroy(pcb_parc.pid,running_PCB);
-
+	PcbFin=search_and_return(pcb_parc.pid,running_PCB);
+	printf("-----------El Tiempo de espera fue de %d segundos aproximadamente--------\n\n",PcbFin->tiempo_espera);
 
 							break;
 						}
@@ -533,6 +549,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 		pcbAux->nombreProc=malloc(300);
 		pcbAux=search_and_return(pcb_parc.pid,running_PCB);
 		pcbAux->contadorProgram=pcb_parc.contadorDePrograma;
+		pcbAux->t_entrada_cola_ready=time(NULL);
 		queue_push(fifo_PCB,pcbAux);
 
 		break;
