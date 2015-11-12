@@ -378,7 +378,7 @@ int Abre_Socket_Inet (char* puerto_escucha_planif)
 	PCB* pcbAux ;
 
 	int tamanio=queue_size(running_PCB);
-			while(tamanio!=0){
+			while(tamanio>0){
 			pcbAux=queue_pop(running_PCB);
 			//printf("El pid del proceso es: %d \n",auxPCB->PID);
 			tamanio--;
@@ -449,8 +449,10 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 
 	free(mensaje);
 
-	//Controlar por mensage erroneo falta
 	recv(socketCliente,&header,sizeof(header),0);
+
+	if(header.msgtype == 2)
+	{
 	printf("El proceso inicio correctamente \n");
 	log_info(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente);
 
@@ -466,7 +468,22 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	PcbRun->cpu_asignada=socketCliente;
 	queue_push(running_PCB,PcbRun);
 	sem_post(&sem_mutex1);
+	}
+	else{
 
+		printf("El proceso %d fallo \n",header.payload_size);
+		log_info(logger, "Se ha finalizado el proceso con el CPU: %d", socketCliente);
+		recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
+
+			sem_wait(&sem_consumidor);
+			queue_pop(fifo_PCB);
+
+
+
+								break;
+
+
+	}
 	//free(PcbRun);
 
 
