@@ -247,8 +247,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			parcial.contadorDePrograma = PcbAux->contadorProgram;
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 			punta=1501;
-			comando="fallo";
-			sleep(retardo);
+			strcpy(comando,"fallo");
+						sleep(retardo);
 		}
 		break;
 	}
