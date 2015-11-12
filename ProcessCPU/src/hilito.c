@@ -237,7 +237,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader));
 			header.msgtype = 3;
-			header.payload_size = 0;
+			header.payload_size =PcbAux->PID;
 			send(planificador, &header, sizeof( t_msgHeader), 0);
 
 			PCB_PARCIAL parcial;
@@ -246,7 +246,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			parcial.tiempo = 0;
 			parcial.contadorDePrograma = PcbAux->contadorProgram;
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
-			punta=1501;
+			punta=15001;
 			strcpy(comando,"fallo");
 						sleep(retardo);
 		}
@@ -435,7 +435,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 			int diff =  difftime(final, comienzo);
 			int porcentaje= porcentajeDeUso(diff, PcbAux->contadorProgram, retardo);
-			//printf("El porcentaje de uso es %d\n", porcentaje);
+			printf("El porcentaje de uso es %d\n", porcentaje);
 
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader));
