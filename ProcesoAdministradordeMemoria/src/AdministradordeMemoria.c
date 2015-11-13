@@ -34,6 +34,7 @@
 #include "ProtocsyFuncsRecvMsjs.h"
 #include "Memoria.h"
 #include "Tlb.h"
+#include "LoggingAdmMem.h"
 
 #define SI "SI"
 /*
@@ -68,17 +69,15 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 	 	 	 /* Se levanta el archivo de configuración y se crea log del Administrador de Memoria*/
 	 	 	 	 config = config_create("configAdmMem.cfg");
 	 	 	 	 configAdmMem = establecerConfigMemoria(config);
-	 	 	 	 logAdmMem = log_create("log.txt", "Administrador de memoria",false, LOG_LEVEL_INFO);
+	 	 	 	 logAdmMem = log_create("AdmMemoria.log", "Administrador de memoria",false, LOG_LEVEL_INFO);
 
 	 	 	 	 /* Inicialización de espacio de memoria, array indicador de memoria libre y TLB */
 
 	 	 	 	 t_memoria_crear(&memoriaPrincipal,configAdmMem);
 
 
-
 	 	 	 	 if (configAdmMem->tlb_habilitada) {
 	 	 	        tlb = t_tlb_crear(configAdmMem);
-
 	 	 	 	 }
 
 	 	 	 	 /* Se crea una estructura dinámica que contendrá las tablas de páginas de los procesos en ejecución*/
@@ -144,7 +143,13 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 	 if (*confirmSwap == 1) {
 	 	 //Creación de la tabla de páginas del proceso y agregado de la misma a la Lista de Tablas de Páginas
 	 		 crear_e_insertar_TabladePaginas((protInic->paginas), protInic->pid, tablasPags);
+	 		 sleep(configAdmMem->retardo_memoria);
 	 	 }
+
+	 	 //---------Logging creacion de MProc--------------------//
+	 	 t_tempLogueo* tempLog = cargaDatosLogCrearMProc(protInic);
+	 	 loguearEvento(logAdmMem,tempLog);
+	 	 //------------------------------------------------------//
 
 	 	 free(confirmSwap);
 	 	 free(protInic);
@@ -155,18 +160,39 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 t_protoc_inicio_lectura_Proceso* protInic = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 	 void* buffer = deserializarInfoCPU_Inicio_Lectura(socketCPU,protInic,LEER);
 
+	 //---------Logging de solicitud de lectura-------------//
+	 t_tempLogueo* tempLog = cargaDatosLogSolicLect(protInic);
+	 loguearEvento(logAdmMem,tempLog);
+	 //-----------------------------------------------------//
+
 	 // Búsqueda del frame asociado a la página del proceso en TLB
 	 int frame=-1;
 	 int tamanioContenido;
 	 char* contenido;
+	 int entradaTLB;
+	 int paginaReemp;
 
 
-	 if(configAdmMem->tlb_habilitada)
-		 frame = buscarPaginaTLB(tlb,protInic->pid,protInic->paginas);
+	 configAdmMem->tlb_habilitada?:(frame = buscarPaginaTLB(tlb,protInic->pid,protInic->paginas,&entradaTLB));
+
+	 //----Logging Acceso TLB(hit) -------//
+	 if(frame != -1){
+		 t_tempLogueo* datosLogTLB = cargaDatosAccesoTLB(protInic->pid,protInic->paginas,frame,entradaTLB);
+		 loguearEvento(logAdmMem,datosLogTLB);}
+	 //-----------------------------------//
 
 	 if (frame == -1)/*No se encontró página en TLB*/{
 
-		 frame = buscarPaginaenMemoria((protInic->pid),(protInic->paginas),tablasdePagsProcesos);
+		 frame = buscarPaginaenMemoria(protInic->pid,protInic->paginas,tablasdePagsProcesos);
+		 sleep(configAdmMem->retardo_memoria);
+
+		 //-----------Logging Acceso Memoria (hit)--------//
+		 if(frame !=-1){
+			 t_tempLogueo* datosLogMemoria = cargaDatosAccesoMemoria(protInic->pid,protInic->paginas,frame);
+			 datosLogMemoria->hit = true;
+			 loguearEvento(logAdmMem,datosLogMemoria);
+		 }
+		 //-----------------------------------------------//
 
 		 if(frame == -1)/*No se encontró página en MP*/{
 
@@ -179,14 +205,24 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 			 char* pidBuscado = string_itoa(protInic->pid);
 			 t_tablaDePaginas* tablaPagsProceso;
 			 tablaPagsProceso = dictionary_get(tablasdePagsProcesos,pidBuscado);
-			 frame = insertarContenidoenMP(socketSwap,contenido,memPrincip,tablaPagsProceso);
+			 frame = insertarContenidoenMP(socketSwap,contenido,memPrincip,tablaPagsProceso,&paginaReemp);
+
+			 //----------------------------Logging Acceso Memoria(Page Fault)-----------------------//
+			 loguearActualizacionMemoria(logAdmMem,protInic->paginas,paginaReemp,protInic->pid,frame);
+			 //-------------------------------------------------------------------------------------//
+
 			 actualizarTablaPagina_porReemp(frame,protInic->paginas,tablaPagsProceso);
-
-
+			 sleep(configAdmMem->retardo_memoria);
 		 }
 
-	//	 agregar_reemplazarRegistroTLB(tlb,protInic->pid,protInic->paginas,frame);
 	 }
+
+	// if (configAdmMem->tlb_habilitada){
+	 //---------------------------------Logging Acceso TLB(miss)----------------------------------------//
+	// t_tempLogueo* datosLogTLBmiss = agregar_reemplazarRegistroTLB(tlb,protInic->pid,protInic->paginas,frame);
+	// loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,protInic->pid,protInic->paginas);
+	 //-------------------------------------------------------------------------------------------------//
+	// }
 	 contenido = memoriaPrincipal.Memoria[frame];
 
 	 // Serializo el contenido del frame leido para su envío al CPU
@@ -218,6 +254,10 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 pedido->contenido = malloc(pedido->tamanio);
 	 recv(socketCPU,pedido->contenido, pedido->tamanio,0);
 
+	 //---------Logging de solicitud de escritura---------//
+	 t_tempLogueo* tempLog = cargaDatosLogSolicEscr(pedido);
+	 loguearEvento(logAdmMem,tempLog);
+	 //---------------------------------------------------//
 
 	 char respuesta =  escribirContenido(pedido, socketSwap);
 
@@ -236,16 +276,30 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
  char escribirContenido(t_protoc_escrituraProceso* pedido, int socketSwap)
  {	int frame =-1;
+ 	int entradaTLB;
 
- t_tablaDePaginas* tablaDePaginas =   dictionary_get(tablasPags,string_itoa(pedido->pid));
+ 	t_tablaDePaginas* tablaDePaginas =   dictionary_get(tablasPags,string_itoa(pedido->pid));
 
  	 if(configAdmMem->tlb_habilitada)
- 		 frame = buscarPaginaTLB(tlb,pedido->pid,pedido->pagina);
+ 		 frame = buscarPaginaTLB(tlb,pedido->pid,pedido->pagina,&entradaTLB);
 
-
+ 	 	 //-----------Logging Acceso TLB (hit)--------//
+ 	 if(frame != -1){
+ 		 t_tempLogueo* datosLogTLB = cargaDatosAccesoTLB(pedido->pid,pedido->pagina,frame,entradaTLB);
+ 		 loguearEvento(logAdmMem,datosLogTLB);
+ 	 }
+ 	 	 //-------------------------------------------//
 
 	  frame = (frame <0)?buscarPaginaenMemoria(pedido->pid, pedido->pagina,tablasPags):frame;
+	  sleep(configAdmMem->retardo_memoria);
 
+	  //-----------Logging Acceso Memoria (hit)--------//
+	  if(frame !=-1){
+		  t_tempLogueo* datosLogMemoria = cargaDatosAccesoMemoria(pedido->pid,pedido->pagina,frame);
+		  datosLogMemoria->hit = true;
+		  loguearEvento(logAdmMem,datosLogMemoria);
+	  }
+	  //-----------------------------------------------//
 
 	 if(frame>=0)
 	 {
@@ -254,6 +308,11 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 		 tablaDePaginas->Pagina[pedido->pagina]->bitPresencia=1;
 		 tablaDePaginas->Pagina[pedido->pagina]->bitModificado=1;
 
+		 //--------------------Logging Acceso Memoria (Page Fault)------------------------------//
+		 t_tempLogueo* datosPagAgrMem = cargaDatosAccesoMemoria(pedido->pid,pedido->pagina,frame);
+		 datosPagAgrMem->hit = false;
+		 loguearEvento(logAdmMem,datosPagAgrMem);
+		 //------------------------------------------------------------------------------------//
 
 		 return 1 ;
 
@@ -325,10 +384,8 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	tabla->Pagina[pedido->pagina]->horaIngreso=90000000;
 
 
-	if(configAdmMem->tlb_habilitada)
-		agregar_reemplazarRegistroTLB(tlb,pedido->pid,pedido->pagina,frame);
-
-
+	//if(configAdmMem->tlb_habilitada)
+	//agregar_reemplazarRegistroTLB(tlb,pedido->pid,pedido->pagina,frame);
  }
 
 
@@ -355,6 +412,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 	 finalizarProceso(&memoriaPrincipal, dictionary_get(tablasPags, string_itoa(pedido->pid)));
 	 elminarTablaDePaginasDelProceso(tablasPags,pedido->pid);
+	 sleep(configAdmMem->retardo_memoria);
 
 
 	 char respuestaSwap = notificarFinalizarSwap(socketSwap,*pedido);

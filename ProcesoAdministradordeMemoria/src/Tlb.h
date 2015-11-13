@@ -9,6 +9,7 @@
 #define TLB_H_
 #include "TADConfig.h"
 #include <commons/collections/queue.h>
+#include "LoggingAdmMem.h"
 
 
 	typedef struct{
@@ -28,9 +29,9 @@ void t_tlb_eliminar(TLB*,t_paramConfigAdmMem*);
 void t_tlb_limpiar(TLB*, int pid); // recibe un pid e itera todos los registros liberando los que contangan el pid recibido
 char t_tlb_estaLibre(t_regTLB* cacheTLB); // recibe un registro tlb e indica si esta libre
 //t_regTLB** inicializarTLB(int entradasTLB);
-int buscarPaginaTLB(TLB* tlb,int pid, int pagina);
+int buscarPaginaTLB(TLB* tlb,int pid, int pagina,int* entradaTLB);
 
-void agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int frame);
+t_tempLogueo* agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int frame);
 
 #endif /* TLB_H_ */
 

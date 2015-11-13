@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Tlb.h"
+#include "LoggingAdmMem.h"
 t_regTLB** inicializarTLB(int entradasTLB);
 
 
@@ -100,7 +101,7 @@ void t_tlb_limpiar(TLB* tlb, int pid )
 
 }
 
-int buscarPaginaTLB(TLB* tlb,int pid, int pagina){
+int buscarPaginaTLB(TLB* tlb,int pid, int pagina, int* entradaTLB){
 	int i;
 	int frame;
 	frame = -1;
@@ -109,6 +110,7 @@ int buscarPaginaTLB(TLB* tlb,int pid, int pagina){
 	for (i=0; i < tlb->entradasTLB;i++){
 		if (regTLBtemp[i]->pid == pid && regTLBtemp[i]->pagina == pagina){
 			frame = regTLBtemp[i]->frame;
+			*entradaTLB = i;
 			i = tlb->entradasTLB;
 		}
 	}
@@ -116,29 +118,35 @@ int buscarPaginaTLB(TLB* tlb,int pid, int pagina){
 	return frame;
 }
 
-void agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int frame){
+t_tempLogueo* agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int frame){
 	int i=0;
-	int* posCacheTLB = malloc(sizeof(int));
-
-	if (queue_size(tlb->sOrdenDeIngresoTLB)< tlb->entradasTLB){
+	int posCacheTLB;
+	if (queue_size(tlb->sOrdenDeIngresoTLB)< tlb->entradasTLB && (!queue_is_empty(tlb->sOrdenDeIngresoTLB))){
 		 while (tlb->CacheTLB[i]->pid == -1){
 			 i++;
 		 }
 		 tlb->CacheTLB[i]->pid = pid;
 		 tlb->CacheTLB[i]->pagina = pagina;
 		 tlb->CacheTLB[i]->frame = frame;
-		 *(posCacheTLB) = i;
-		 queue_push(tlb->sOrdenDeIngresoTLB,posCacheTLB);
+		 posCacheTLB = i;
+		 queue_push(tlb->sOrdenDeIngresoTLB,&posCacheTLB);
+		 t_tempLogueo* tempLog = cargaDatosAccesoTLB (pid,pagina,frame,posCacheTLB);
+		 tempLog->regSaliente = 0;
+		 return tempLog;
 		}
 	else{
-		 posCacheTLB = queue_peek(tlb->sOrdenDeIngresoTLB);
+		 int* posCacheTLB = queue_peek(tlb->sOrdenDeIngresoTLB);
+		 t_tempLogueo* tempLog = cargaDatosAccesoTLB(tlb->CacheTLB[*posCacheTLB]->pid,tlb->CacheTLB[*posCacheTLB]->pagina,tlb->CacheTLB[*posCacheTLB]->frame,*posCacheTLB);
+		 tempLog->regSaliente = 1;
 		 tlb->CacheTLB[*posCacheTLB]->pid = pid;
 		 tlb->CacheTLB[*posCacheTLB]->pagina = pagina;
 		 tlb->CacheTLB[*posCacheTLB]->frame = frame;
 		 queue_pop(tlb->sOrdenDeIngresoTLB);
-		 queue_push(tlb->sOrdenDeIngresoTLB,posCacheTLB);
+		 queue_push(tlb->sOrdenDeIngresoTLB,&posCacheTLB);
+		 return tempLog;
 	}
-	free(posCacheTLB);
+
+
 }
 
 
