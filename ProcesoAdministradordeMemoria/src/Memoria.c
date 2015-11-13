@@ -137,22 +137,29 @@ int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 	return frame;
 }
 
-int insertarContenidoenMP(int socketSwap,char*contenido,MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso){
+int insertarContenidoenMP(int socketSwap,char*contenido,MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso,int* paginaReemp){
+
+int paginaAReemp;
 
 int marco = buscarFrameLibre(memoria);
 
 	if (marco != -1){
 		memoria->Memoria[marco] = contenido;
+		memoria->MemoriaLibre[marco] = 1;
+		*paginaReemp = -1;
+		return marco;
 	}
 
 	else {//posible switch a implementar con el algoritmo de reemplazo indicado por arch de config.
-	marco = reemplazarPaginaFIFO(socketSwap,contenido,memoria,tablaPagsProceso);
+	marco = reemplazarPaginaFIFO(socketSwap,contenido,memoria,tablaPagsProceso,&paginaAReemp);
 	memoria->Memoria[marco] = contenido;
-	}
+	*paginaReemp = paginaAReemp;
 	return marco;
+	}
+
 }
 
-int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso){
+int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso,int* pagAReemp){
 	int i;
 	int pagAModif = 0;
 	int frame;
@@ -166,6 +173,9 @@ int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memo
 		}
 	}
 	PaginaFirstIn->bitPresencia = 0;
+
+	*pagAReemp = pagAModif;
+
 	int tamanioContenido;
 	if(PaginaFirstIn->bitModificado){
 		tamanioContenido = strlen(memoria->Memoria[PaginaFirstIn->idFrame]);
