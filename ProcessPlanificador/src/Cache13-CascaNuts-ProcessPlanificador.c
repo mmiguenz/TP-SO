@@ -117,7 +117,7 @@ int main(void)
                         	planificacion=config_get_string_value(config,"PLANIFICACION");
                         	if(!strcmp(planificacion,"ROUNDROBIN")){quantum=config_get_int_value(config,"QUANTUM");};
 
-                        	 log_info(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
+                        	 log_trace(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
                         	}
 //------------------Soy una barra separadora ;p------------------------------------//
 //------------------Creacion de semaforos------------------------------------------//
@@ -163,7 +163,7 @@ void *shell(int mutex){
 	//sem_open("sem_consumidor",O_CREAT,0644,0);
 
 
-	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V3.5----------------\n");
+	printf("\n\n-----------------Bienvenido al Planificador Cache 13 V3.8----------------\n");
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
 	printf("----o bien los comandos que desea que realize el planificador------------\n");
 	printf("--------------------------------------------------------------------------\n\n\n\n");
@@ -321,9 +321,9 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		semWait(mutex);
 		while(tamanio!=0){
 		auxPCB=queue_pop(fifo_PCB_ready);
-		printf("El pid del proceso es: %d \n",auxPCB->PID);
+		//printf("El pid del proceso es: %d \n",auxPCB->PID);
 		if(auxPCB->PID==pid)
-		{printf("Encontre  al proceso!!!\n");
+		{printf("Encontre  al proceso a finalizar\n");
 		auxPCB->contadorProgram=-1;}//Si el cpu encuentra -1 lo finaliza automaticamente
 
 		queue_push(fifo_PCB_ready,auxPCB);
