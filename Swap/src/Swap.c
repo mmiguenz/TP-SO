@@ -301,23 +301,16 @@ void tipoDePedidoIncorrecto(int memSocket)
 
 int hayEspacio(int cantidadNuevoProceso)
 {
-	int obtenerPaginasOcupadas(t_proceso* unProceso)
-	{
-		return unProceso->cantidad;
-
-	}
 
 
-
-	t_list* listaAux = list_map(espacioUtilizado_lista,(void*)obtenerPaginasOcupadas);
 
 	int i ;
 	int espacioUtilizado=0;
-	for(i=0; i < list_size(listaAux); i++)
+	for(i=0; i < list_size(espacioUtilizado_lista); i++)
 	{
-		int espacio;
-		memcpy(&espacio,list_get(listaAux,i),sizeof(int));
-		espacioUtilizado+= espacio;
+		t_proceso* procAux = list_get(espacioUtilizado_lista,i);
+
+		espacioUtilizado+= procAux->cantidad;
 
 	}
 
