@@ -19,10 +19,6 @@
 #define MAXTIME 90000000;
 
 
-int buscarFrameLibre(MEMORIAPRINCIPAL* memoria);
-
-
-
 void t_memoria_crear(MEMORIAPRINCIPAL* memoriaP , t_paramConfigAdmMem* config)
 {
 
@@ -30,10 +26,6 @@ void t_memoria_crear(MEMORIAPRINCIPAL* memoriaP , t_paramConfigAdmMem* config)
 	memoriaP->tamanioMarco = config->tamanio_marco;
 	memoriaP->Memoria=inicializarMemoriaPrincipal(memoriaP,config->cantidad_marcos,config->tamanio_marco);
 	memoriaP->MemoriaLibre=inicializarMemoriaLibre(config->cantidad_marcos);
-
-
-
-
 
 }
 
@@ -107,13 +99,14 @@ void finalizarProceso(MEMORIAPRINCIPAL* memoriaP ,t_tablaDePaginas* tablaDePagin
 {
 	int i ;
 
-	for (i = 0 ; i < tablaDePaginas->cantTotalPaginas; i++)
+	for (i = 0 ; i < (tablaDePaginas->cantTotalPaginas); i++)
 	{
 		t_regPagina* pagina = tablaDePaginas->Pagina[i];
 
+		if (tablaDePaginas->Pagina[i]->idFrame != -1){
 		 inicializarMarco(memoriaP, memoriaP->Memoria[pagina->idFrame]);
 		 memoriaP->MemoriaLibre[pagina->idFrame] = 0;
-
+		}
 
 	}
 
@@ -137,25 +130,10 @@ int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 	return frame;
 }
 
-int insertarContenidoenMP(int socketSwap,char*contenido,MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso,int* paginaReemp){
+void insertarPaginaenMP(char*contenido,MEMORIAPRINCIPAL* memoria,int* marco){
 
-int paginaAReemp;
-
-int marco = buscarFrameLibre(memoria);
-
-	if (marco != -1){
-		memoria->Memoria[marco] = contenido;
-		memoria->MemoriaLibre[marco] = 1;
-		*paginaReemp = -1;
-		return marco;
-	}
-
-	else {//posible switch a implementar con el algoritmo de reemplazo indicado por arch de config.
-	marco = reemplazarPaginaFIFO(socketSwap,contenido,memoria,tablaPagsProceso,&paginaAReemp);
-	memoria->Memoria[marco] = contenido;
-	*paginaReemp = paginaAReemp;
-	return marco;
-	}
+	memoria->Memoria[*marco] = contenido;
+	memoria->MemoriaLibre[*marco] = 1;
 
 }
 
@@ -248,7 +226,7 @@ int convertirTimeStringToInt(char* time){
 	return timeConverted;
 }
 
-void actualizarTablaPagina_porReemp(int frame,int pagina,t_tablaDePaginas* tablaPagsProceso){
+void actualizarTablaPaginas(int frame,int pagina,t_tablaDePaginas* tablaPagsProceso){
 	tablaPagsProceso->Pagina[pagina]->bitPresencia = 1;
 	tablaPagsProceso->Pagina[pagina]->horaIngreso = convertirTimeStringToInt(temporal_get_string_time());
 	tablaPagsProceso->Pagina[pagina]->idFrame = frame;
@@ -273,8 +251,9 @@ int t_cargarContenido(MEMORIAPRINCIPAL* memoriaP,char* contenido)
 int buscarFrameLibre(MEMORIAPRINCIPAL* memoria)
 {
 	int i;
-	for (i = 0; memoria->cantMarcos;i++)
+	for (i = 0;i < memoria->cantMarcos;i++)
 	{
+
 		if((memoria->MemoriaLibre[i])==0)
 			return i;
 	}
@@ -306,5 +285,15 @@ int t_hayFrameLibre(MEMORIAPRINCIPAL* memoriaPrincipal , t_tablaDePaginas* tabla
 
 	return (paginasOcupadas>=maximoDeMarcos)?0:1;
 
+}
+
+int marcosUtilizadosProceso(t_tablaDePaginas* tablaPagsProceso){
+	int marcosUtilizados = 0;
+	int i = 0;
+	for (i = 0; i < tablaPagsProceso->cantTotalPaginas; ++i) {
+		if(tablaPagsProceso->Pagina[i]->bitPresencia)
+		marcosUtilizados++;
+	}
+	return marcosUtilizados;
 }
 

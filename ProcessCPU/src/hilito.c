@@ -261,12 +261,14 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		printf("Encontro leer\n");
 
 		char* contenidoLeido = NULL;
-		contenidoLeido =(char*) enviarSolicitudLectura(PcbAux->PID, instruccion, paginas , memoria);
+		contenidoLeido = enviarSolicitudLectura(PcbAux->PID, instruccion, paginas , memoria);
 
 		char msj = (contenidoLeido > 0)?1:0;
 		int bytesRecib = strlen(contenidoLeido)+1;
 
 		printf("bytes recibidos :  %d \n",bytesRecib);
+
+		if(msj>0 && (strcmp(contenidoLeido,"-1") != 0))
 
 		if(msj>0)
 		{

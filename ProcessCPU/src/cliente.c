@@ -152,6 +152,7 @@ char* enviarSolicitudLectura(int pid ,int  instruccion, int  paginas ,int  sMemo
 	 	 if(control<0)
 	 		 goto error;
 
+	 if (tamanioContenido != 0){
 	 void* bufferLectura = malloc(tamanioContenido);
 	 control= recv(sMemoria,bufferLectura,tamanioContenido,0);
 
@@ -166,17 +167,22 @@ char* enviarSolicitudLectura(int pid ,int  instruccion, int  paginas ,int  sMemo
 
 	 	contenido[tamanioContenido]='\0';
 	 	 return  contenido;
+	 }
+	 else{
+		 char* contenido = malloc(sizeof(int));
+		 contenido = string_itoa(tamanioContenido);
+		 return contenido;
+	 }
 
+	 error:
+	 {
+		 perror("error al recibir datos de lectura");
+		 return (char*)NULL;
 
-
-	error:
-	 	 {
-	 		 perror("error al recibir datos de lectura");
-	 		 return (char*)NULL;
-
-	 	 }
+	 }
 
 }
+
 
 
 #endif /* CLIENTE_C_ */

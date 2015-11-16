@@ -52,13 +52,14 @@ typedef struct{
 	void finalizarProceso(MEMORIAPRINCIPAL* memoria,t_tablaDePaginas* tablaDePaginas);
 	void resetearMarco(void * numeroMarco);
 	int buscarPaginaenMemoria(int, int,t_dictionary*);
-	int insertarContenidoenMP(int,char*,MEMORIAPRINCIPAL*, t_tablaDePaginas*,int*);
+	void insertarPaginaenMP(char*,MEMORIAPRINCIPAL*,int*);
 	int reemplazarPaginaFIFO (int,char*, MEMORIAPRINCIPAL*, t_tablaDePaginas*,int*);
 	void enviarDatosPorModifASwap(int,char*,int,int);
-	void actualizarTablaPagina_porReemp(int,int,t_tablaDePaginas*);
+	void actualizarTablaPaginas(int,int,t_tablaDePaginas*);
 	void inicializarMarco(MEMORIAPRINCIPAL*, char* marco);
 	void t_memoria_crear(MEMORIAPRINCIPAL* ,t_paramConfigAdmMem* config);
-
+	int buscarFrameLibre(MEMORIAPRINCIPAL* memoria);
+	int marcosUtilizadosProceso(t_tablaDePaginas* tablaPagsProceso);
 
 
 	/*Recorro el vector de paginas. Contando cuales tienen el bit de presencia en 1 .
