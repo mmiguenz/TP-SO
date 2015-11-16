@@ -12,6 +12,7 @@
 #include "protocolos.h"
 #include <commons/config.h>
 #include <commons/log.h>
+#include <commons/string.h>
 
 
 int conectar_cliente(int puerto,char* ip){

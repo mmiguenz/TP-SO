@@ -269,8 +269,6 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		printf("bytes recibidos :  %d \n",bytesRecib);
 
 		if(msj>0 && (strcmp(contenidoLeido,"-1") != 0))
-
-		if(msj>0)
 		{
 			//--msj es el tamaño de lo que leyo
 			printf("Pude leer\n");

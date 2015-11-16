@@ -473,7 +473,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 
 
 
-	 memcpy(buffer,&pedido,sizeof(t_protoc_Finaliza));
+	 memcpy(buffer,pedido,sizeof(t_protoc_Finaliza));
 
 	 send(socket,buffer,sizeof(t_protoc_Finaliza),0);
 
