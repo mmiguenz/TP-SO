@@ -215,7 +215,7 @@ void compactar(t_particion* particion,t_list* espacioUtilizado_lista)
 
 	}
 
-	int proximaPaginaLibre = (proceso->cantidad ) + pagina ;
+	int proximaPaginaLibre = pagina ;
 
 	reAsignarHuecosPorCompactacion(particion,proximaPaginaLibre);
 
