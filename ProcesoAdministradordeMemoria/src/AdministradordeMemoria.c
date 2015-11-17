@@ -174,7 +174,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 	 int paginaReemp = 0;
 
 
-	 configAdmMem->tlb_habilitada?:(frame = buscarPaginaTLB(tlb,protInic->pid,protInic->paginas,&entradaTLB));
+	 frame = configAdmMem->tlb_habilitada?buscarPaginaTLB(tlb,protInic->pid,protInic->paginas,&entradaTLB):frame;
 
 	 //----Logging Acceso TLB(hit) -------//
 	 if(frame != -1){
@@ -219,6 +219,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 				 sleep(configAdmMem->retardo_memoria);
 				 loguearActualizacionMemoria(logAdmMem,protInic->paginas,paginaReemp,protInic->pid,frame);
 			 }
+			 else{
 			 if (frame == -1){
 				 if(marcosAsignados == 0) {
 					finalizarProceso(&memoriaPrincipal, dictionary_get(tablasPags, string_itoa(protInic->pid)));
@@ -246,6 +247,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 				 paginaReemp = -1;
 				 loguearActualizacionMemoria(logAdmMem,protInic->paginas,paginaReemp,protInic->pid,frame);
 			 	 }
+			 }
 		 }
 
 		 // if (configAdmMem->tlb_habilitada){
@@ -254,7 +256,7 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 		 // loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,protInic->pid,protInic->paginas);
 		 //--------------------------------------------------------------------------------------------------------//
 		 // }
-
+		 if (frame != -1){
 			 contenido = memoriaPrincipal.Memoria[frame];
 
 			 // Serializo el contenido del frame leido para su envío al CPU
@@ -267,11 +269,10 @@ void solicitarPagina(t_protoc_escrituraProceso* pedido, int socketSwap);
 			 int enviado = send(socketCPU,bufferContAEnviar,offset,0);
 
 			 printf("Se Enviaron %d Bytes. Tamanio Cont = %d , Cont = %s\n ",enviado,tamanioContenido,contenido);
-
-			 free(protInic);
 			 free(bufferContAEnviar);
+		 	 }
+			 free(protInic);
 			 free(contenido);
-
 	 }
 
 

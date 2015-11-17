@@ -151,18 +151,17 @@ int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memo
 		}
 	}
 	PaginaFirstIn->bitPresencia = 0;
-
 	*pagAReemp = pagAModif;
 
-	int tamanioContenido;
 	if(PaginaFirstIn->bitModificado){
-		tamanioContenido = strlen(memoria->Memoria[PaginaFirstIn->idFrame]);
-		char* contenidoReemp = malloc((sizeof(char)*(tamanioContenido+1)));
+		int tamanioContenido = memoria->tamanioMarco;
+		char* contenidoReemp = malloc(memoria->tamanioMarco);
 		contenidoReemp = memoria->Memoria[PaginaFirstIn->idFrame];
-		enviarDatosPorModifASwap(socketSwap,contenidoReemp,pagAModif,tablaPagsProceso->pid);
-		frame = PaginaFirstIn->idFrame;
+		enviarDatosPorModifASwap(socketSwap,contenidoReemp,tamanioContenido,pagAModif,tablaPagsProceso->pid);
 		free(contenidoReemp);
 	}
+
+	frame = PaginaFirstIn->idFrame;
 	PaginaFirstIn->bitPresencia = 0;
 	PaginaFirstIn->bitModificado = 0;
 	PaginaFirstIn->horaIngreso = MAXTIME;
@@ -172,17 +171,17 @@ int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memo
 
 }
 
-void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp,int pagAModif,int pid){
+void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp, int tamanioContenido,int pagAModif,int pid){
 	t_protoc_escrituraProceso* protocEscrSwap = malloc(sizeof(t_protoc_escrituraProceso));
-	int tamanioContenido = strlen(contenidoReemp)+1;
 	int offset;
-	int tamanioBuffer = (sizeof(int)*3)+(sizeof(char)*(tamanioContenido))+1;
+	int tamanioBuffer = ((sizeof(int)*3)+tamanioContenido+1);
 	void* buffer = malloc(tamanioBuffer);
 
-	protocEscrSwap->tipoInstrucc = 2;
+	protocEscrSwap->tipoInstrucc = ESCRIBIR;
 	protocEscrSwap->pid = pid;
 	protocEscrSwap->pagina = pagAModif;
 	protocEscrSwap->tamanio = tamanioContenido;
+	protocEscrSwap->contenido = malloc(sizeof(tamanioContenido));
 	protocEscrSwap->contenido = contenidoReemp;
 
 	offset = sizeof(char);
@@ -193,7 +192,7 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp,int pagAModif,
 	offset += sizeof(int);
 	memcpy(buffer+offset,&(protocEscrSwap->tamanio),sizeof(int));
 	offset += sizeof(int);
-	memcpy(buffer+offset,protocEscrSwap->contenido,(sizeof(char)*protocEscrSwap->tamanio));
+	memcpy(buffer+offset,protocEscrSwap->contenido,protocEscrSwap->tamanio);
 
 	send(swapSocket,buffer,tamanioBuffer,0);
 
@@ -201,7 +200,7 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp,int pagAModif,
 	recv(swapSocket,confirmSwap,sizeof(char),0);
 
 	if (*confirmSwap == 1)
-	printf("Se ha reemplazado una página en memoria modificada previamente, actualizando su contenido en Swap de forma satisfactoria");
+	printf("Se ha reemplazado una página en memoria modificada previamente, actualizando su contenido en Swap de forma satisfactoria \n");
 
 
 	free(protocEscrSwap);

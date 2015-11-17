@@ -153,7 +153,7 @@ char* enviarSolicitudLectura(int pid ,int  instruccion, int  paginas ,int  sMemo
 	 	 if(control<0)
 	 		 goto error;
 
-	 if (tamanioContenido != 0){
+	 if (tamanioContenido != -1){
 	 void* bufferLectura = malloc(tamanioContenido);
 	 control= recv(sMemoria,bufferLectura,tamanioContenido,0);
 

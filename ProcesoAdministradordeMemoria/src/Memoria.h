@@ -54,7 +54,7 @@ typedef struct{
 	int buscarPaginaenMemoria(int, int,t_dictionary*);
 	void insertarPaginaenMP(char*,MEMORIAPRINCIPAL*,int*);
 	int reemplazarPaginaFIFO (int,char*, MEMORIAPRINCIPAL*, t_tablaDePaginas*,int*);
-	void enviarDatosPorModifASwap(int,char*,int,int);
+	void enviarDatosPorModifASwap(int,char*,int,int,int);
 	void actualizarTablaPaginas(int,int,t_tablaDePaginas*);
 	void inicializarMarco(MEMORIAPRINCIPAL*, char* marco);
 	void t_memoria_crear(MEMORIAPRINCIPAL* ,t_paramConfigAdmMem* config);
