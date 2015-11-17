@@ -26,7 +26,6 @@ int calcularPaginaEnSwap(int pid,int paginas);
 
 
 
-
 t_particion* particion;
 t_swapConfig* config;
 t_list* espacioUtilizado_lista;
@@ -222,7 +221,8 @@ void realizarEscritura(int memSocket)
 		recv(memSocket,&pedido->pid,sizeof(int),0);
 		recv(memSocket,&pedido->pagina,sizeof(int),0);
 		recv(memSocket,&pedido->tamanio,sizeof(int),0);
-		recv(memSocket,&pedido->contenido,pedido->tamanio,0);
+		pedido->contenido= malloc(pedido->tamanio);
+		recv(memSocket,pedido->contenido,pedido->tamanio,0);
 
 	// Búsqueda y posterior escritura de la página solicitada
 		int paginaAEscribir = calcularPaginaEnSwap(pedido->pid,pedido->pagina);
@@ -357,6 +357,4 @@ void t_proceso_eliminar(t_proceso*unProceso)
 
 
 }
-
-
 

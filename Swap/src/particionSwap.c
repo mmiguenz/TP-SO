@@ -89,6 +89,7 @@ void* t_particion_leerPagina(t_particion* particion ,int numeroDePagina)
 
 void t_particion_escribirPagina(t_particion* particion ,int numeroDePagina, t_protoc_escrituraProceso* pedido)
 {
+
 	posicionarPagina(particion,pedido->pagina);
 	fwrite(pedido->contenido,pedido->tamanio,1,particion->archivoParticion);
 	return;
