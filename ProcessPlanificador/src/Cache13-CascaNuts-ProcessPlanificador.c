@@ -212,10 +212,18 @@ void *shell(int mutex){
 		pcb_block->path = malloc(200);
 		sem_wait(&sem_consumidor_block);
 		pcb_block = queue_pop(block_PCB);
-		printf("El proceso blokeado es........ %s",pcb_block->nombreProc );
+		//printf("El proceso blokeado es........ %s\n",pcb_block->nombreProc );
 		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
+		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
+		printf("-------------------------------------------------\n");
+		printf("-         Entrada Salida del Proceso            --\n");
+		printf("-                    %s                  -\n",pcb_block->nombreProc);
+		printf("-			Su Pid es %d                         -\n",pcb_block->PID);
+		printf("---------------------------------------------------\n\n");
 		usleep(pcb_block->retardo_io*1000000);
 		pcb_block->t_entrada_cola_ready=time(NULL);
+
+		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
 
 		queue_push(fifo_PCB_ready,pcb_block);
 		sem_post(&sem_consumidor);
@@ -348,7 +356,8 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		printf("mProc %d: %s -> Listo \n",auxPCBrun->PID,auxPCBrun->nombreProc);
 		queue_push(fifo_PCB_ready,auxPCBrun);
 		tamanio--;
-		}
+				}
+		tamanio=0;
 		tamanio=queue_size(PCB_running);
 		while(tamanio!=0){
 		auxPCBrun=queue_pop(PCB_running);
@@ -356,6 +365,7 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		queue_push(PCB_running,auxPCBrun);
 		tamanio--;
 		}
+		tamanio=0;
 		tamanio=queue_size(block_PCB);
 		while(tamanio!=0){
 		auxPCBrun=queue_pop(block_PCB);

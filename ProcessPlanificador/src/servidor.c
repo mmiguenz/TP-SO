@@ -519,8 +519,8 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	PcbFin=search_and_return(pcb_parc.pid,running_PCB);
 	PcbFin->cant_run++;
 	PcbFin->tiempo_ejecucion=((PcbFin->tiempo_ejecucion)+(difftime(time(NULL),PcbFin->t_entrada_cola_run)));
-	log_info(logger,"-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n",PcbFin->tiempo_espera);
-	printf("-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n",PcbFin->tiempo_espera);
+	log_info(logger,"-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n\n",PcbFin->tiempo_espera);
+	printf("-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n\n",PcbFin->tiempo_espera);
 	log_info(logger,"-----------El Tiempo de ejecucion fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
 	printf("-----------El Tiempo de ejecucion fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
 	log_info(logger,"-----------El Tiempo de respuesta fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_respuesta);
