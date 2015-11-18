@@ -18,11 +18,9 @@ TLB* t_tlb_crear(t_paramConfigAdmMem* config){
 		TLB* tlb = malloc(sizeof(TLB));
 		tlb->CacheTLB = inicializarTLB(config->entradas_TLB);
 		tlb->sOrdenDeIngresoTLB = queue_create();
-		tlb->entradasTLB = config->entradas_TLB;
+		tlb->nroEntradasTLB = config->entradas_TLB;
 
 		return tlb;
-	//tlb->CacheTLB = inicializarTLB(config->entradas_TLB);
-	//tlb->sOrdenDeIngresoTLB = queue_create();
 
 }
 
@@ -45,36 +43,18 @@ void t_tlb_eliminar(TLB* tlb,t_paramConfigAdmMem* config)
 t_regTLB** inicializarTLB(int entradasTLB){
 
 	int i;
-	t_regTLB ** regsTLBtemp = calloc(entradasTLB,sizeof(t_regTLB));
+	t_regTLB ** regsTLB = malloc(sizeof(t_regTLB)*(entradasTLB));
 
 	for (i=0;i<entradasTLB;i++){
-		regsTLBtemp[i]=malloc(sizeof(t_regTLB));
-		regsTLBtemp[i]->frame = -1;
-		regsTLBtemp[i]->pagina = -1;
-		regsTLBtemp[i]->pid = -1;
+		t_regTLB* registroTLBTemp = malloc(sizeof(t_regTLB));
+		registroTLBTemp->frame = -1;
+		registroTLBTemp->pagina = -1;
+		registroTLBTemp->pid = -1;
+		regsTLB[i]= registroTLBTemp;
 	}
-	return regsTLBtemp;
 
-	//int ColNumPagina = 0;
-	//int i;
+	return regsTLB;
 
-
-	/*
-		Columnas de la tabla a definir con grupo CASCANUECES  :
-
-	*/
-
-				//    int** TLB = malloc(entradas_TLB*sizeof(int*));
-				//    for (i=0; i<entradas_TLB; ++i)
-				//    {
-				 //   	TLB[i] = calloc(3, sizeof(int));
-				 //   }
-		//cargo valores por defecto -1 para saber que esta vacia:
-	//	for (i = 0; i < entradas_TLB; i++)
-	//	{
-	//		TLB[i][ColNumPagina] = -1;
-	//	}
-	// return TLB;
 }
 
 
@@ -82,7 +62,7 @@ void t_tlb_limpiar(TLB* tlb, int pid )
 {
 	int i ;
 
-	for (i = 0; i< tlb->entradasTLB ; i++)
+	for (i = 0; i< tlb->nroEntradasTLB ; i++)
 	{
 		t_regTLB*  cacheTlb = tlb->CacheTLB[i];
 
@@ -105,44 +85,47 @@ int buscarPaginaTLB(TLB* tlb,int pid, int pagina, int* entradaTLB){
 	int i;
 	int frame;
 	frame = -1;
-	t_regTLB** regTLBtemp;
-	regTLBtemp = tlb->CacheTLB;
-	for (i=0; i < tlb->entradasTLB;i++){
-		if (regTLBtemp[i]->pid == pid && regTLBtemp[i]->pagina == pagina){
-			frame = regTLBtemp[i]->frame;
+	for (i=0; i < tlb->nroEntradasTLB;i++){
+		if (tlb->CacheTLB[i]->pid == pid && tlb->CacheTLB[i]->pagina == pagina){
+			frame = tlb->CacheTLB[i]->frame;
 			*entradaTLB = i;
-			i = tlb->entradasTLB;
+			i = tlb->nroEntradasTLB;
 		}
 	}
-
 	return frame;
 }
 
 t_tempLogueo* agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int frame){
 	int i=0;
-	int posCacheTLB;
-	if (queue_size(tlb->sOrdenDeIngresoTLB)< tlb->entradasTLB && (!queue_is_empty(tlb->sOrdenDeIngresoTLB))){
-		 while (tlb->CacheTLB[i]->pid == -1){
+	int* posCacheTLB = malloc(sizeof(int));
+	t_tempLogueo* tempLog;
+
+	if (queue_size(tlb->sOrdenDeIngresoTLB)< tlb->nroEntradasTLB){
+
+		while (tlb->CacheTLB[i]->pid != -1){
 			 i++;
 		 }
 		 tlb->CacheTLB[i]->pid = pid;
 		 tlb->CacheTLB[i]->pagina = pagina;
 		 tlb->CacheTLB[i]->frame = frame;
-		 posCacheTLB = i;
-		 queue_push(tlb->sOrdenDeIngresoTLB,&posCacheTLB);
-		 t_tempLogueo* tempLog = cargaDatosAccesoTLB (pid,pagina,frame,posCacheTLB);
+		 *posCacheTLB = i;
+		 queue_push(tlb->sOrdenDeIngresoTLB,posCacheTLB);
+		 tempLog = cargaDatosAccesoTLB(pid,pagina,frame,*posCacheTLB);
 		 tempLog->regSaliente = 0;
+		 tempLog->hit = false;
 		 return tempLog;
 		}
+
 	else{
-		 int* posCacheTLB = queue_peek(tlb->sOrdenDeIngresoTLB);
-		 t_tempLogueo* tempLog = cargaDatosAccesoTLB(tlb->CacheTLB[*posCacheTLB]->pid,tlb->CacheTLB[*posCacheTLB]->pagina,tlb->CacheTLB[*posCacheTLB]->frame,*posCacheTLB);
-		 tempLog->regSaliente = 1;
+		 posCacheTLB = queue_peek(tlb->sOrdenDeIngresoTLB);
+		 tempLog = cargaDatosAccesoTLB(tlb->CacheTLB[*posCacheTLB]->pid,tlb->CacheTLB[*posCacheTLB]->pagina,tlb->CacheTLB[*posCacheTLB]->frame,*posCacheTLB);
+		 tempLog->regSaliente = true;
+		 tempLog->hit = false;
 		 tlb->CacheTLB[*posCacheTLB]->pid = pid;
 		 tlb->CacheTLB[*posCacheTLB]->pagina = pagina;
 		 tlb->CacheTLB[*posCacheTLB]->frame = frame;
 		 queue_pop(tlb->sOrdenDeIngresoTLB);
-		 queue_push(tlb->sOrdenDeIngresoTLB,&posCacheTLB);
+		 queue_push(tlb->sOrdenDeIngresoTLB,posCacheTLB);
 		 return tempLog;
 	}
 

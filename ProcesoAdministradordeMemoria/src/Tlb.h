@@ -21,7 +21,7 @@
 	typedef struct{
 			t_regTLB** CacheTLB;
 			t_queue* sOrdenDeIngresoTLB;
-			int entradasTLB;
+			int nroEntradasTLB;
 	}TLB;
 
 TLB* t_tlb_crear(t_paramConfigAdmMem*);

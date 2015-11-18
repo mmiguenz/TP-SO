@@ -71,20 +71,20 @@ void loguearAccesoTLB(t_log*logAdmMem,t_tempLogueo* estructDatosALoguear){
 	char* lineaALoguear = malloc(120);
 	if (estructDatosALoguear->hit == true){
 
-		sprintf(lineaALoguear,"ACCESO TLB - PAGINA ENCONTRADA (TLB HIT) || Entrada_TLB: %i || PID: %i || Página: %i || Frame: %i",estructDatosALoguear->pid,estructDatosALoguear->paginas,estructDatosALoguear->entradaTLB,estructDatosALoguear->frame);
+		sprintf(lineaALoguear,"ACCESO TLB - PAGINA ENCONTRADA (TLB HIT) || #Entrada_TLB: %i || PID: %i || Página: %i || Frame: %i",estructDatosALoguear->entradaTLB,estructDatosALoguear->pid,estructDatosALoguear->paginas,estructDatosALoguear->frame);
 		log_info(logAdmMem,lineaALoguear);
 		free(lineaALoguear);
 		free(estructDatosALoguear);
 	}
 	else {
 		if (estructDatosALoguear->regSaliente){
-			sprintf(lineaALoguear,"ACCESO TLB - REEMPLAZO (TLB MISS) - PAGINA REEMPLAZADA || #Entrada_TLB: %i || PID: %i || Página: %i || Frame: %i",estructDatosALoguear->pid,estructDatosALoguear->paginas,estructDatosALoguear->entradaTLB,estructDatosALoguear->frame);
+			sprintf(lineaALoguear,"ACCESO TLB - TLB MISS - PAGINA REEMPLAZADA || #Entrada_TLB: %i || PID: %i || Página: %i || Frame: %i",estructDatosALoguear->entradaTLB,estructDatosALoguear->pid,estructDatosALoguear->paginas,estructDatosALoguear->frame);
 			log_info(logAdmMem,lineaALoguear);
 			free(lineaALoguear);
 			free(estructDatosALoguear);
 		}
 		else{
-			sprintf(lineaALoguear,"ACCESO TLB - REEMPLAZO (TLB MISS) - PAGINA INCORPORADA || #Entrada_TLB: %i || PID: %i || Página: %i || Frame: %i",estructDatosALoguear->pid,estructDatosALoguear->paginas,estructDatosALoguear->entradaTLB,estructDatosALoguear->frame);
+			sprintf(lineaALoguear,"ACCESO TLB - TLB MISS - PAGINA INCORPORADA || #Entrada_TLB: %i || PID: %i || Página: %i || Frame: %i",estructDatosALoguear->entradaTLB,estructDatosALoguear->pid,estructDatosALoguear->paginas,estructDatosALoguear->frame);
 			log_info(logAdmMem,lineaALoguear);
 			free(lineaALoguear);
 			free(estructDatosALoguear);
@@ -148,7 +148,7 @@ t_tempLogueo* datosLogMemPF;
 
 		datosLogMemPF2 = cargaDatosAccesoMemoria(pid,paginaReemp,frame);
 		datosLogMemPF2->regSaliente = true;
-		datosLogMemPF-> hit = false;
+		datosLogMemPF2-> hit = false;
 		loguearEvento(logAdmMem,datosLogMemPF2);
 }
 	else{

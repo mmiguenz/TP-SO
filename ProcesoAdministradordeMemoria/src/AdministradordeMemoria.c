@@ -162,6 +162,7 @@ void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 	 char* contenido;
 	 int entradaTLB;
 	 int paginaReemp = 0;
+	 int tlbHit = false;
 
 
 	 frame = configAdmMem->tlb_habilitada?buscarPaginaTLB(tlb,protInic->pid,protInic->paginas,&entradaTLB):frame;
@@ -169,16 +170,16 @@ void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 	 //----Logging Acceso TLB(hit) -------//
 	 if(frame != -1){
 		 t_tempLogueo* datosLogTLB = cargaDatosAccesoTLB(protInic->pid,protInic->paginas,frame,entradaTLB);
+		 datosLogTLB->hit = true;
+		 tlbHit = datosLogTLB->hit;
 		 loguearEvento(logAdmMem,datosLogTLB);
 	 }
 	 //-----------------------------------//
 
-	 if (frame == -1)/*No se encontró página en TLB*/{
+	 if (frame == -1 && tlbHit != true )/*No se encontró página en TLB*/{
 
 		 frame = buscarPaginaenMemoria(protInic->pid,protInic->paginas,tablasPags);
 		 sleep(configAdmMem->retardo_memoria);
-	 }
-
 		 //-----------Logging Acceso Memoria (hit)--------//
 		 if(frame != -1){
 			 t_tempLogueo* datosLogMemoria = cargaDatosAccesoMemoria(protInic->pid,protInic->paginas,frame);
@@ -186,6 +187,7 @@ void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 			 loguearEvento(logAdmMem,datosLogMemoria);
 		 }
 		 //-----------------------------------------------//
+	 }
 
 		 char* pidBuscado = string_itoa(protInic->pid);
 		 t_tablaDePaginas* tablaPagsProceso = malloc(sizeof(t_tablaDePaginas));
@@ -197,7 +199,7 @@ void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 		 contenido = malloc(tamanioContenido);
 		 recv(socketSwap,contenido,tamanioContenido,0);
 
-		 if(frame == -1)/*No se encontró página en MP*/{
+		 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
 
 			 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
 			 frame = buscarFrameLibre(&memoriaPrincipal);
@@ -240,13 +242,17 @@ void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 			 }
 		 }
 
-		 // if (configAdmMem->tlb_habilitada){
-		 //---------------------------------Logging Acceso TLB(miss)-----------------------------------------------//
-		 // t_tempLogueo* datosLogTLBmiss = agregar_reemplazarRegistroTLB(tlb,protInic->pid,protInic->paginas,frame);
-		 // loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,protInic->pid,protInic->paginas);
-		 //--------------------------------------------------------------------------------------------------------//
-		 // }
+
 		 if (frame != -1){
+
+			 if (configAdmMem->tlb_habilitada && tlbHit != true){
+				 //---------------------------------Logging Acceso TLB(miss)-----------------------------------------------//
+				 t_tempLogueo* datosLogTLBmiss = agregar_reemplazarRegistroTLB(tlb,protInic->pid,protInic->paginas,frame);
+				 loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,protInic->pid,protInic->paginas);
+				 //--------------------------------------------------------------------------------------------------------//
+			 }
+
+
 			 contenido = memoriaPrincipal.Memoria[frame];
 
 			 // Serializo el contenido del frame leido para su envío al CPU
@@ -285,18 +291,22 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 	int marcosAsignados;
 	int entradaTLB;
 	int paginaReemp = 0;
+	int tlbHit = false;
 
 
 	frame = configAdmMem->tlb_habilitada?buscarPaginaTLB(tlb,pedido->pid,pedido->pagina,&entradaTLB):frame;
 
 	//----Logging Acceso TLB(hit) -------//
-	if(frame != -1){
-		t_tempLogueo* datosLogTLB = cargaDatosAccesoTLB(pedido->pid,pedido->pagina,frame,entradaTLB);
-		loguearEvento(logAdmMem,datosLogTLB);
-	}
+		 if(frame != -1){
+			 t_tempLogueo* datosLogTLB = cargaDatosAccesoTLB(pedido->pid,pedido->pagina,frame,entradaTLB);
+			 datosLogTLB->hit = true;
+			 tlbHit = datosLogTLB->hit;
+			 loguearEvento(logAdmMem,datosLogTLB);
+		 }
 	//-----------------------------------//
 
-		 if (frame == -1)/*No se encontró página en TLB*/{
+
+		 if (frame == -1 && tlbHit != true)/*No se encontró página en TLB*/{
 
 			 frame = buscarPaginaenMemoria(pedido->pid,pedido->pagina,tablasPags);
 			 sleep(configAdmMem->retardo_memoria);
@@ -318,7 +328,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 		 }
 
 
-			 if(frame == -1)/*No se encontró página en MP*/{
+			 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
 
 				 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
 				 frame = buscarFrameLibre(&memoriaPrincipal);
@@ -360,14 +370,14 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				 }
 			 }
 
-			 // if (configAdmMem->tlb_habilitada){
-			 //---------------------------------Logging Acceso TLB(miss)-----------------------------------------------//
-			 // t_tempLogueo* datosLogTLBmiss = agregar_reemplazarRegistroTLB(tlb,protInic->pid,protInic->paginas,frame);
-			 // loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,protInic->pid,protInic->paginas);
-			 //--------------------------------------------------------------------------------------------------------//
-			 // }
-
 			 if (frame != -1){
+
+				 if (configAdmMem->tlb_habilitada && tlbHit != true){
+					 //---------------------------------Logging Acceso TLB(miss)-----------------------------------------------//
+					 t_tempLogueo* datosLogTLBmiss = agregar_reemplazarRegistroTLB(tlb,pedido->pid,pedido->pagina,frame);
+					 loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,pedido->pid,pedido->pagina);
+					 //--------------------------------------------------------------------------------------------------------//
+				 }
 
 				 char respuesta = 1;
 
