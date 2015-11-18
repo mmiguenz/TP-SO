@@ -158,7 +158,7 @@ int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memo
 		char* contenidoReemp = malloc(memoria->tamanioMarco);
 		contenidoReemp = memoria->Memoria[PaginaFirstIn->idFrame];
 		enviarDatosPorModifASwap(socketSwap,contenidoReemp,tamanioContenido,pagAModif,tablaPagsProceso->pid);
-		free(contenidoReemp);
+		//free(contenidoReemp);
 	}
 
 	frame = PaginaFirstIn->idFrame;
@@ -183,6 +183,7 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp, int tamanioCo
 	protocEscrSwap->tamanio = tamanioContenido;
 	protocEscrSwap->contenido = malloc(sizeof(tamanioContenido));
 	protocEscrSwap->contenido = contenidoReemp;
+	int tamanioString = strlen(contenidoReemp)+1;
 
 	offset = sizeof(char);
 	memcpy(buffer,&(protocEscrSwap->tipoInstrucc),sizeof(char));
@@ -192,7 +193,7 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp, int tamanioCo
 	offset += sizeof(int);
 	memcpy(buffer+offset,&(protocEscrSwap->tamanio),sizeof(int));
 	offset += sizeof(int);
-	memcpy(buffer+offset,protocEscrSwap->contenido,protocEscrSwap->tamanio);
+	memcpy(buffer+offset,protocEscrSwap->contenido,tamanioString);
 
 	send(swapSocket,buffer,tamanioBuffer,0);
 
@@ -201,7 +202,6 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp, int tamanioCo
 
 	if (*confirmSwap == 1)
 	printf("Se ha reemplazado una página en memoria modificada previamente, actualizando su contenido en Swap de forma satisfactoria \n");
-
 
 	free(protocEscrSwap);
 	free(buffer);
@@ -225,27 +225,17 @@ int convertirTimeStringToInt(char* time){
 	return timeConverted;
 }
 
-void actualizarTablaPaginas(int frame,int pagina,t_tablaDePaginas* tablaPagsProceso){
+void actualizarTablaPaginas(int instruccion,int frame,int pagina,t_tablaDePaginas* tablaPagsProceso){
+
 	tablaPagsProceso->Pagina[pagina]->bitPresencia = 1;
 	tablaPagsProceso->Pagina[pagina]->horaIngreso = convertirTimeStringToInt(temporal_get_string_time());
 	tablaPagsProceso->Pagina[pagina]->idFrame = frame;
-}
 
-
-int t_cargarContenido(MEMORIAPRINCIPAL* memoriaP,char* contenido)
-{
-	int frame = buscarFrameLibre(memoriaP);
-
-	memoriaP->Memoria[frame]  = contenido;
-	memoriaP->MemoriaLibre[frame] = 1 ;
-	return frame ;
-
-
-
-
-
+	char* bitModifdePagina = &(tablaPagsProceso->Pagina[pagina]->bitModificado);
+	*bitModifdePagina = instruccion == ESCRIBIR?(*bitModifdePagina = 1):*bitModifdePagina;
 
 }
+
 
 int buscarFrameLibre(MEMORIAPRINCIPAL* memoria)
 {
@@ -259,30 +249,6 @@ int buscarFrameLibre(MEMORIAPRINCIPAL* memoria)
 
 	return -1;
 
-
-}
-
-
-int t_hayFrameLibre(MEMORIAPRINCIPAL* memoriaPrincipal , t_tablaDePaginas* tablaDePaginasDelProceso,int maximoDeMarcos)
-{
-	int i,ocupados=0 ;
-	for (i = 0 ; i<memoriaPrincipal->cantMarcos;i++)
-		ocupados+=(memoriaPrincipal->MemoriaLibre[i]);
-
-	if(ocupados==memoriaPrincipal->cantMarcos)
-		return -1;
-
-
-	 int paginasOcupadas=0;
-	for (  i = 0 ; i <tablaDePaginasDelProceso->cantTotalPaginas; i++)
-	{
-		if (tablaDePaginasDelProceso->Pagina[i]->bitPresencia )
-			paginasOcupadas++;
-
-
-	}
-
-	return (paginasOcupadas>=maximoDeMarcos)?0:1;
 
 }
 
