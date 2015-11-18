@@ -57,11 +57,14 @@ int cpu_asignada;
 int quantum;//Si el quantum es -1 la planificacion es fifo caso contrario round robin
 int retardo_io;
 time_t t_entrada_cola_ready;
-int tiempo_respuesta;
+time_t t_entrada_cola_block;
+float tiempo_espera;
 int cant_ready;
 time_t t_entrada_cola_run;
-int tiempo_ejecucion;
+float tiempo_ejecucion;
 int cant_run;
+float tiempo_respuesta;
+
 }PCB ;
 
 //#include "PCB.h"
@@ -210,7 +213,8 @@ void *shell(int mutex){
 		sem_wait(&sem_consumidor_block);
 		pcb_block = queue_pop(block_PCB);
 		printf("El proceso blokeado es........ %s",pcb_block->nombreProc );
-		sleep(pcb_block->retardo_io);
+		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
+		usleep(pcb_block->retardo_io*1000000);
 		pcb_block->t_entrada_cola_ready=time(NULL);
 
 		queue_push(fifo_PCB_ready,pcb_block);
@@ -411,6 +415,7 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 	new->cant_ready=0;
 	new->cant_run=0;
 	new->tiempo_respuesta=0;
+	new->tiempo_espera=0;
 
 	return new;
 }

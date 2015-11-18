@@ -18,14 +18,16 @@ int PID;
 int contadorProgram;
 char* path;
 int cpu_asignada;
-int quantum;
+int quantum;//Si el quantum es -1 la planificacion es fifo caso contrario round robin
 int retardo_io;
 time_t t_entrada_cola_ready;
-int tiempo_espera;
+time_t t_entrada_cola_block;
+float tiempo_espera;
 int cant_ready;
 time_t t_entrada_cola_run;
-int tiempo_ejecucion;
+float tiempo_ejecucion;
 int cant_run;
+float tiempo_respuesta;
 
 } __attribute__((packed)) PCB ;
 
@@ -476,7 +478,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	PcbRun=queue_pop(fifo_PCB);
 	PcbRun->cpu_asignada=socketCliente;
 	PcbRun->cant_ready++;
-	PcbRun->tiempo_espera=((PcbRun->tiempo_espera)+(difftime(time(NULL),PcbRun->t_entrada_cola_ready)))/PcbRun->cant_ready;
+	PcbRun->tiempo_espera=((PcbRun->tiempo_espera)+(difftime(time(NULL),PcbRun->t_entrada_cola_ready)));
 	PcbRun->t_entrada_cola_run=time(NULL);
 	queue_push(running_PCB,PcbRun);
 	sem_post(&sem_mutex1);
@@ -516,12 +518,15 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 
 	PcbFin=search_and_return(pcb_parc.pid,running_PCB);
 	PcbFin->cant_run++;
-	PcbFin->tiempo_ejecucion=((PcbFin->tiempo_ejecucion)+(difftime(time(NULL),PcbFin->t_entrada_cola_run)))/PcbFin->cant_run;
-	log_info(logger,"-----------El Tiempo de espera fue de %d segundos aproximadamente--------\n",PcbFin->tiempo_espera);
-	printf("-----------El Tiempo de espera fue de %d segundos aproximadamente--------\n",PcbFin->tiempo_espera);
-	log_info(logger,"-----------El Tiempo de ejecucion fue de %d segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
-	printf("-----------El Tiempo de ejecucion fue de %d segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
-							break;
+	PcbFin->tiempo_ejecucion=((PcbFin->tiempo_ejecucion)+(difftime(time(NULL),PcbFin->t_entrada_cola_run)));
+	log_info(logger,"-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n",PcbFin->tiempo_espera);
+	printf("-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n",PcbFin->tiempo_espera);
+	log_info(logger,"-----------El Tiempo de ejecucion fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
+	printf("-----------El Tiempo de ejecucion fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
+	log_info(logger,"-----------El Tiempo de respuesta fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_respuesta);
+	printf("-----------El Tiempo de respuesta fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_respuesta);
+
+	break;
 						}
 
 	case 4://Entrada salida
@@ -536,8 +541,8 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 		Pcb_IO->retardo_io=pcb_parc.tiempo;
 		Pcb_IO->contadorProgram= pcb_parc.contadorDePrograma;
 		Pcb_IO->cant_run++;
-		Pcb_IO->tiempo_ejecucion=((Pcb_IO->tiempo_ejecucion)+(difftime(time(NULL),Pcb_IO->t_entrada_cola_run)))/Pcb_IO->cant_run;
-
+		Pcb_IO->tiempo_ejecucion=((Pcb_IO->tiempo_ejecucion)+(difftime(time(NULL),Pcb_IO->t_entrada_cola_run)));
+		Pcb_IO->t_entrada_cola_block=time(NULL);
 		queue_push(block_PCB,Pcb_IO);
 		sem_post(&sem_consumidor_block);
 
@@ -558,9 +563,10 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 		pcbAux->contadorProgram=pcb_parc.contadorDePrograma;
 		pcbAux->t_entrada_cola_ready=time(NULL);
 		pcbAux->cant_run++;
-		pcbAux->tiempo_ejecucion=((pcbAux->tiempo_ejecucion)+(difftime(time(NULL),pcbAux->t_entrada_cola_run)))/pcbAux->cant_run;
+		pcbAux->tiempo_ejecucion=((pcbAux->tiempo_ejecucion)+(difftime(time(NULL),pcbAux->t_entrada_cola_run)));
 
 		queue_push(fifo_PCB,pcbAux);
+		sem_post(&sem_consumidor);
 
 		break;
 
