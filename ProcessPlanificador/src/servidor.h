@@ -72,7 +72,7 @@ int Lee_Socket (int fd, char *Datos, int Longitud);
 int Escribe_Socket (int fd, char *Datos, int Longitud);
 
 
-void manejo_cpu_libres(void* mensa);
+void *manejo_cpu_libres(void* mensa);
 
 
 #define MAX_CLIENTES 10

@@ -87,7 +87,7 @@ void porcentajesCPU(t_queue * porcentajes_CPU){
 
 usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU){
 
-	usoCPU* aux=(usoCPU*)malloc(sizeof(usoCPU));
+	usoCPU* aux=malloc(sizeof(usoCPU));
 
 	pthread_mutex_lock(&mutex);
 	int tamanio=queue_size(porcentajes_CPU);
