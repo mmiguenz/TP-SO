@@ -9,6 +9,9 @@
 sem_t sem_mutex1;
 sem_t sem_consumidor;
 sem_t sem_consumidor_block;
+sem_t sem_consume_cpu;
+
+t_queue * cpu_libres; //Cola de cpu libres
 
 
 typedef struct {
@@ -32,9 +35,16 @@ float tiempo_respuesta;
 } __attribute__((packed)) PCB ;
 
 
+typedef struct {
+	t_log* logger;
+	t_queue * fifo_PCB;
+	t_queue * running_PCB;
 
+} structura_hilo;
 
-
+typedef struct{
+	int cpu_libre;
+}cpus_libres;
 
 PCB *search_and_return(int pid,t_queue * running_PCB);
 
@@ -49,15 +59,25 @@ PCB *search_and_return(int pid,t_queue * running_PCB);
 void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB)
 {
 	sem_init(&sem_consumidor_block,1,0);
+	sem_init(&sem_consume_cpu,1,0);
+	pthread_t hilo_cpu_libres;//Hilo que creo para que no se mehaga bloekante todo
+
 	int socketServidor;				/* Descriptor del socket servidor */
 	int socketCliente[MAX_CLIENTES];/* Descriptores de sockets con clientes */
 	int numeroClientes = 0;			/* Número clientes conectados */
 	fd_set descriptoresLectura;	/* Descriptores de interes para select() */
 	int maximo;							/* Número de descriptor más grande */
 	int i;								/* Para bubles */
-
+	cpu_libres=queue_create();
 	/* Se abre el socket servidor, avisando por pantalla y saliendo si hay
 	 * algún problema */
+	structura_hilo *paramHilo;
+	paramHilo=(structura_hilo *)malloc(sizeof(structura_hilo));
+	paramHilo->logger=log_create("log.txt", "PLANIFICADOR",false, LOG_LEVEL_TRACE);
+	paramHilo->fifo_PCB=fifo_PCB;
+	paramHilo->running_PCB=running_PCB;
+
+	pthread_create(&hilo_cpu_libres, NULL, (void*)manejo_cpu_libres, (void *) paramHilo);
 
 	socketServidor = Abre_Socket_Inet (puerto_escucha_planif);//"cpp_java");
 	if (socketServidor == -1)
@@ -150,6 +170,8 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 
 	}}
 
+	pthread_join(hilo_cpu_libres, NULL);
+
 
 }
 
@@ -178,6 +200,8 @@ void nuevoCliente (int servidor, int *clientes, int *nClientes)
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
 	printf ("Aceptado cpu %d\n", *nClientes);
 	return;
+
+
 }
 
 /*
@@ -396,7 +420,7 @@ return 0;
 }
 
 
-procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB){
+void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB){
 
 	 PCB_PARCIAL pcb_parc;
 					 pcb_parc.contadorDePrograma=0;
@@ -410,96 +434,17 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 
 	case 0 : {
 
-	log_trace(logger,"CPU %d esta libre\n", header.payload_size);
-
-	printf ("CPU %d esta libre\n", header.payload_size);
 
 
-	PCB* PcbAux;
-	PcbAux=malloc(sizeof(PCB*));
+	log_trace(logger,"CPU %d esta libre\n", socketCliente);
 
-	sem_wait(&sem_mutex1);
-	sem_wait(&sem_consumidor);
-	PcbAux=queue_peek(fifo_PCB);
-	PcbAux->cpu_asignada=socketCliente;
-	sem_post(&sem_consumidor);
-	sem_post(&sem_mutex1);
-	char* mensaje;
-	mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(PcbAux->path)+strlen(PcbAux->nombreProc)+2+sizeof(t_msgHeader));
+	printf ("CPU %d esta libre\n", socketCliente);
+	cpus_libres *cpus=malloc(sizeof(cpus_libres));
+	cpus->cpu_libre=socketCliente;
 
-	log_trace(logger,"\n PCB a mandar \n\n");
-	printf("\n PCB a mandar \n\n");
-	log_trace(logger,"EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
-	printf("EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
-	log_trace(logger,"EL Path es........: %s \n",PcbAux->path);
-	printf("EL Path es........: %s \n",PcbAux->path);
-	log_trace(logger,"EL PID es........: %d \n ---------------------------\n",PcbAux->PID);
-	printf("EL PID es........: %d \n",PcbAux->PID);
-	printf("----------------------------------- \n");
-	int offset=0;
-	memcpy(mensaje +offset  , &(PcbAux->PID), sizeof(int));
-	offset+=sizeof(int);
-	memcpy(mensaje +offset  , &(PcbAux->contadorProgram), sizeof(int));
-	offset+=sizeof(int);
-	memcpy(mensaje +offset  , &(PcbAux->cpu_asignada), sizeof(int));
-	offset+=sizeof(int);
-	memcpy(mensaje +offset  , PcbAux->path, strlen(PcbAux->path)+1);
-	offset+=strlen(PcbAux->path)+1;
-	memcpy(mensaje +offset  , PcbAux->nombreProc, strlen(PcbAux->nombreProc)+1);
-	offset+=strlen(PcbAux->nombreProc)+1;
+	queue_push(cpu_libres,cpus);
 
-
-	memcpy(mensaje +offset  , &(PcbAux->quantum), sizeof(int));
-	offset+=sizeof(int);
-
-	memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-	header.msgtype = 1;//MSG_PCB;
-	header.payload_size = offset;
-	send(socketCliente,&header,sizeof(header),0);
-	send(socketCliente,mensaje,header.payload_size,0);
-
-	free(mensaje);
-
-	recv(socketCliente,&header,sizeof(header),0);
-
-	if(header.msgtype == 2)
-	{
-	printf("El proceso inicio correctamente \n");
-	log_trace(logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente);
-
-	PCB* PcbRun=malloc(sizeof(PCB));
-	PcbRun->path=malloc(strlen(PcbAux->path)+1);
-	PcbRun->nombreProc=malloc(strlen(PcbAux->nombreProc)+1);
-
-	//free(PcbAux);
-
-	sem_wait(&sem_mutex1);
-	sem_wait(&sem_consumidor);
-	PcbRun=queue_pop(fifo_PCB);
-	PcbRun->cpu_asignada=socketCliente;
-	PcbRun->cant_ready++;
-	PcbRun->tiempo_espera=((PcbRun->tiempo_espera)+(difftime(time(NULL),PcbRun->t_entrada_cola_ready)));
-	PcbRun->t_entrada_cola_run=time(NULL);
-	queue_push(running_PCB,PcbRun);
-	sem_post(&sem_mutex1);
-	}
-	else{
-
-		printf("El proceso %d fallo \n",header.payload_size);
-		log_warning(logger, "Se ha finalizado el proceso con el CPU: %d debido a un fallo", socketCliente);
-		recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
-
-			sem_wait(&sem_consumidor);
-			queue_pop(fifo_PCB);
-
-
-
-								break;
-
-
-	}
-	//free(PcbRun);
-
+	sem_post(&sem_consume_cpu);
 
 
 
@@ -573,7 +518,7 @@ procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log*
 	}
 	}
 
-return 0;
+
 }
 
 
@@ -598,3 +543,109 @@ PCB *search_and_return(int pid,t_queue * running_PCB){
 
 	}
 
+void manejo_cpu_libres(void* mensa){
+
+	t_msgHeader header;
+	PCB* PcbAux;
+	PCB_PARCIAL pcb_parc;
+						 pcb_parc.contadorDePrograma=0;
+						 pcb_parc.pid=0;
+						 pcb_parc.tiempo=0;
+
+	structura_hilo *param;
+
+	param=(structura_hilo*)mensa;
+
+		int socketCliente;
+		cpus_libres *cpus=malloc(sizeof(cpus_libres));
+
+		while(1){
+
+		sem_wait(&sem_consume_cpu);
+		cpus=queue_pop(cpu_libres);
+		socketCliente=cpus->cpu_libre;
+		printf("El cpu libre es %d", socketCliente);
+
+		PcbAux=malloc(sizeof(PCB*));
+
+		sem_wait(&sem_mutex1);
+		sem_wait(&sem_consumidor);
+		PcbAux=queue_peek(param->fifo_PCB);
+		PcbAux->cpu_asignada=socketCliente;
+		sem_post(&sem_consumidor);
+		sem_post(&sem_mutex1);
+		char* mensaje;
+		mensaje= malloc(sizeof(int)+sizeof(int)+sizeof(int)+sizeof(int)+strlen(PcbAux->path)+strlen(PcbAux->nombreProc)+2+sizeof(t_msgHeader));
+
+		log_trace(param->logger,"\n PCB a mandar \n\n");
+		printf("\n PCB a mandar \n\n");
+		log_trace(param->logger,"EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
+		printf("EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
+		log_trace(param->logger,"EL Path es........: %s \n",PcbAux->path);
+		printf("EL Path es........: %s \n",PcbAux->path);
+		log_trace(param->logger,"EL PID es........: %d \n ---------------------------\n",PcbAux->PID);
+		printf("EL PID es........: %d \n",PcbAux->PID);
+		printf("----------------------------------- \n");
+		int offset=0;
+		memcpy(mensaje +offset  , &(PcbAux->PID), sizeof(int));
+		offset+=sizeof(int);
+		memcpy(mensaje +offset  , &(PcbAux->contadorProgram), sizeof(int));
+		offset+=sizeof(int);
+		memcpy(mensaje +offset  , &(PcbAux->cpu_asignada), sizeof(int));
+		offset+=sizeof(int);
+		memcpy(mensaje +offset  , PcbAux->path, strlen(PcbAux->path)+1);
+		offset+=strlen(PcbAux->path)+1;
+		memcpy(mensaje +offset  , PcbAux->nombreProc, strlen(PcbAux->nombreProc)+1);
+		offset+=strlen(PcbAux->nombreProc)+1;
+
+
+		memcpy(mensaje +offset  , &(PcbAux->quantum), sizeof(int));
+		offset+=sizeof(int);
+
+		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+		header.msgtype = 1;//MSG_PCB;
+		header.payload_size = offset;
+		send(socketCliente,&header,sizeof(header),0);
+		send(socketCliente,mensaje,header.payload_size,0);
+
+		free(mensaje);
+
+		recv(socketCliente,&header,sizeof(header),0);
+
+		if(header.msgtype == 2)
+		{
+		printf("El proceso inicio correctamente \n");
+		log_trace(param->logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente);
+
+		PCB* PcbRun=malloc(sizeof(PCB));
+		PcbRun->path=malloc(strlen(PcbAux->path)+1);
+		PcbRun->nombreProc=malloc(strlen(PcbAux->nombreProc)+1);
+
+		//free(PcbAux);
+
+		sem_wait(&sem_mutex1);
+		sem_wait(&sem_consumidor);
+		PcbRun=queue_pop(param->fifo_PCB);
+		PcbRun->cpu_asignada=socketCliente;
+		PcbRun->cant_ready++;
+		PcbRun->tiempo_espera=((PcbRun->tiempo_espera)+(difftime(time(NULL),PcbRun->t_entrada_cola_ready)));
+		PcbRun->t_entrada_cola_run=time(NULL);
+		queue_push(param->running_PCB,PcbRun);
+		sem_post(&sem_mutex1);
+		}
+		else{
+
+			printf("El proceso %d fallo \n",header.payload_size);
+			log_warning(param->logger, "Se ha finalizado el proceso con el CPU: %d debido a un fallo", socketCliente);
+			recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
+
+				sem_wait(&sem_consumidor);
+				queue_pop(param->fifo_PCB);
+
+
+
+
+
+}
+}
+}

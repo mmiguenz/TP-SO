@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <commons/log.h>
 #include <semaphore.h>
+#include <pthread.h>
 #include "PCB.h"
 
 typedef struct  {
@@ -43,7 +44,7 @@ void * search_and_destroy(int pid,t_queue * running_PCB);
 
 void* dormir(void* param_hilo);
 
-int procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB);
+void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB);
 
 
 /**
@@ -71,7 +72,7 @@ int Lee_Socket (int fd, char *Datos, int Longitud);
 int Escribe_Socket (int fd, char *Datos, int Longitud);
 
 
-
+void manejo_cpu_libres(void* mensa);
 
 
 #define MAX_CLIENTES 10
