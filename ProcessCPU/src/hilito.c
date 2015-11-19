@@ -97,7 +97,7 @@ usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU){
 		tamanio--;
 		if(aux->cpu==cpu)
 		{
-			printf("Encontre  al cpu!!!\n");
+
 			tamanio=0;
 		}
 		else{
@@ -109,18 +109,19 @@ usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU){
 }
 
 int porcentajeDeUso(int diff, int instrucciones, int retardo){
+
 	int porcentaje;
-	int pulsos = 60;
+
 	//--en 60 pulso deberia hacer 60 instruccicones
 	//--diff representa los pulsos transcurridos desde que inicio en segundos
 
 	//--descontamos el retardo pasado por el arch de configuracion
 	//--entonces las instruccionesTotales que deberia hacer son
-	int instruccionesTotal = 60/retardo;
+
 
 	//--regla de 3simple los pulsos que transcurrieron desde que empezo
 	//por las instruccion que deberia haber hecho en 60s divido 60
-	int cantInstOptima = (diff*instruccionesTotal)/pulsos;
+	int cantInstOptima = (diff*retardo);
 	if(cantInstOptima == 0){
 		porcentaje = 0;
 	}else{
@@ -226,7 +227,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			send(planificador, &header, sizeof( t_msgHeader), 0);
 
 			PcbAux->contadorProgram ++;
-			sleep(retardo);
+
+			usleep((retardo*1000000));
 
 		}else{
 			printf("No hay lugar\n");
@@ -248,7 +250,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 			punta=15001;
 			strcpy(comando,"fallo");
-						sleep(retardo);
+
+			usleep((retardo*1000000));
 		}
 		break;
 	}
@@ -278,7 +281,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			log_info(logger, "mProc %s - Pagina %d leida: %s", PcbAux->nombreProc, paginas, contenidoLeido);
 
 			PcbAux->contadorProgram++;
-			sleep(retardo);
+
+			usleep((retardo*1000000));
 			free(contenidoLeido);
 
 		}else{
@@ -301,7 +305,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 
 			punta=15001;
-			sleep(retardo);
+
+			usleep((retardo*1000000));
 
 		}
 		break;
@@ -336,7 +341,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			log_info(logger, "mProc %s - Pagina %d escrita:%s",PcbAux->nombreProc, paginas, texto);
 
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
-
+			usleep((retardo*1000000));
 		}else{
 			printf("La escritura fallo \n");
 			log_info(logger, "El pid es %d", PcbAux->PID);
@@ -355,6 +360,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			parcial.contadorDePrograma = PcbAux->contadorProgram;
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 			punta=1501;
+			usleep((retardo*1000000));
 		}
 		break;
 	}
@@ -404,7 +410,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		pthread_mutex_lock(&mutex);
 		queue_push(porcentajes_CPU, nodo);
 		pthread_mutex_unlock(&mutex);
-		free(nodo);
+
 		//-------
 
 		punta=1501;
@@ -461,7 +467,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			free(nodo);*/
 			//-------
 
-			sleep(retardo);
+
+			usleep((retardo*1000000));
 		}
 		break;
 	}
@@ -529,7 +536,8 @@ void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux
 	parcial.tiempo = 0;
 	parcial.contadorDePrograma = PcbAux->contadorProgram;
 	send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
-	sleep(retardo);
+
+	usleep((retardo*1000000));
 	return;
 }
 
