@@ -209,7 +209,7 @@ void *shell(int mutex){
 	 while(1){
 		pcb_block = malloc(sizeof(PCB*));
 		pcb_block->nombreProc = malloc(50);
-		pcb_block->path = malloc(200);
+		//pcb_block->path = malloc(200);
 		sem_wait(&sem_consumidor_block);
 		pcb_block = queue_pop(block_PCB);
 		//printf("El proceso blokeado es........ %s\n",pcb_block->nombreProc );

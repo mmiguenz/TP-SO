@@ -166,7 +166,7 @@ char* enviarSolicitudLectura(int pid ,int  instruccion, int  paginas ,int  sMemo
 
 	 	 free(bufferLectura);
 
-	 	contenido[tamanioContenido]='\0';
+	 	contenido[tamanioContenido-1]='\0';
 	 	 return  contenido;
 	 }
 	 else{

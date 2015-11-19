@@ -87,7 +87,7 @@ void porcentajesCPU(t_queue * porcentajes_CPU){
 
 usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU){
 
-	usoCPU* aux=malloc(sizeof(usoCPU));
+	usoCPU* aux=(usoCPU*)malloc(sizeof(usoCPU));
 
 	pthread_mutex_lock(&mutex);
 	int tamanio=queue_size(porcentajes_CPU);
@@ -535,7 +535,7 @@ void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux
 void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
 
 	int punta=ubicarPunta(cadena, PcbAux);
-	char comando[15];
+	char comando[15]="";
 	char pagina[3];
 	char texto[20];
 	int i=0;
@@ -575,7 +575,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	int diff =  difftime(final, comienzo);
 	int porcentaje= porcentajeDeUso(diff, quantum, retardo);
 	//printf("El porcentaje de uso es %d\n", porcentaje);
-
+/*
 	//actualizamos el porcentaje de cpu en la cola
 	usoCPU* nodo =malloc(sizeof(usoCPU*));
 	nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
@@ -585,7 +585,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	pthread_mutex_unlock(&mutex);
 	free(nodo);
 	//-------
-
+*/
 	//-- si el quamtum termino en otro sentencia le avisamos a PLANIFICADOR que termino por quantum
 	if(strcmp(comando, "finalizar") && strcmp(comando, "entrada-salida")&& strcmp(comando, "fallo")){
 		t_msgHeader header;
@@ -729,6 +729,13 @@ void* conectar(void* mensa){
 		//recibimos el msj del planificador pcb
 		char* buffer;
 		PCB *PcbAux =malloc(sizeof(PCB));
+		PcbAux->PID=0;
+		PcbAux->contadorProgram=0;
+		PcbAux->cpu_asignada=0;
+		PcbAux->nombreProc=malloc(50);
+		PcbAux->path=malloc(200);
+		PcbAux->quantum=0;
+
 		buffer=malloc(header.payload_size+5);
 		recv(planificador, buffer, header.payload_size, 0);
 
@@ -783,7 +790,7 @@ void* conectar(void* mensa){
 		printf("El nombre  del proceso es:       %s\n", PcbAux->nombreProc);
 		printf("El path es:                      %s\n", PcbAux->path);
 		printf("El quantum es:                   %d\n", PcbAux->quantum);
-
+/*
 		log_info(logger, "----------------PCB-------------------------------------------------------------------------------------------------------------------------------------------------------------");
 		log_info(logger, "Este es el PID:                  %d\n", PcbAux->PID);
 		log_info(logger, "Este es el contador de programa: %d\n",PcbAux->contadorProgram);
@@ -792,7 +799,7 @@ void* conectar(void* mensa){
 		log_info(logger, "El path es:                      %s\n", PcbAux->path);
 		log_info(logger, "El quantum es:                   %d\n", PcbAux->quantum);
 		log_info(logger, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-
+*/
 
 		//contadorProgram; si es -1 no abrimos, ejecutamos solo FINALIZAR
 		if(PcbAux->contadorProgram!= -1){
