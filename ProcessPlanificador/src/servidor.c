@@ -479,10 +479,11 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 		recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
 		PCB* Pcb_IO=malloc(sizeof(PCB*));
 		 Pcb_IO->nombreProc=malloc(50);
-		// Pcb_IO->path=malloc(200);
+		Pcb_IO->path=malloc(200);
+
 		Pcb_IO=search_and_return(pcb_parc.pid,running_PCB);
 		printf("El proceso a blokear es........ %s",Pcb_IO->nombreProc );
-		log_trace(logger,"El proceso a blokear es........ %s\n",Pcb_IO->nombreProc );
+		//log_trace(logger,"El proceso a blokear es........ %s\n",Pcb_IO->nombreProc );
 		Pcb_IO->retardo_io=pcb_parc.tiempo;
 		Pcb_IO->contadorProgram= pcb_parc.contadorDePrograma;
 		Pcb_IO->cant_run++;
