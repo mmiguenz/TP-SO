@@ -377,11 +377,12 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		//--calculamos porcentaje de uso
 		final = time( NULL );
 		printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
+		PcbAux->contadorProgram++;
 		int diff =  difftime(final, comienzo);
 		int porcentaje= porcentajeDeUso(diff, cantInst, retardo);
 		printf("El porcentaje de uso es %d\n", porcentaje);
 
-		PcbAux->contadorProgram++;
+
 
 		t_msgHeader header;
 		memset(&header, 0, sizeof(t_msgHeader));
@@ -398,8 +399,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 		printf("mProc %s en entrada-salida de tiempo %d\n", PcbAux->nombreProc,tiempo);
 		printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
-		log_info(logger, "El pid es %d", PcbAux->PID);
-		log_info(logger, "mProc %s en entrada-salida de tiempo %d",PcbAux->nombreProc, tiempo);
+		//log_info(logger, "El pid es %d", PcbAux->PID);
+		//log_info(logger, "mProc %s en entrada-salida de tiempo %d",PcbAux->nombreProc, tiempo);
 
 
 
