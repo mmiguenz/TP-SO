@@ -189,7 +189,7 @@ int identificar_instruccion(char comando[15])
 
 
 
-int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20],time_t comienzo)
+int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20],time_t comienzo,int cantInst)
 {
 	char instruccion;
 	time_t final;
@@ -227,7 +227,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			send(planificador, &header, sizeof( t_msgHeader), 0);
 
 			PcbAux->contadorProgram ++;
-
+			cantInst ++;
 			usleep((retardo*1000000));
 
 		}else{
@@ -281,7 +281,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			log_info(logger, "mProc %s - Pagina %d leida: %s", PcbAux->nombreProc, paginas, contenidoLeido);
 
 			PcbAux->contadorProgram++;
-
+			cantInst++;
 			usleep((retardo*1000000));
 			free(contenidoLeido);
 
@@ -342,6 +342,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 			usleep((retardo*1000000));
+			cantInst++;
 		}else{
 			printf("La escritura fallo \n");
 			log_info(logger, "El pid es %d", PcbAux->PID);
@@ -378,7 +379,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 		PcbAux->contadorProgram++;
 		int diff =  difftime(final, comienzo);
-		int porcentaje= porcentajeDeUso(diff, PcbAux->contadorProgram, retardo);
+		int porcentaje= porcentajeDeUso(diff, cantInst, retardo);
 		printf("El porcentaje de uso es %d\n", porcentaje);
 
 
@@ -437,11 +438,12 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 
-
+			cantInst++;
+			printf ("la cantint es %d", cantInst);
 			final = time( NULL );
 			//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 			int diff =  difftime(final, comienzo);
-			int porcentaje= porcentajeDeUso(diff, PcbAux->contadorProgram, retardo);
+			int porcentaje= porcentajeDeUso(diff, cantInst, retardo);
 			printf("El porcentaje de uso es %d\n", porcentaje);
 
 			t_msgHeader header;
@@ -552,7 +554,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	comienzo = time( NULL );
 	int flag=0;
 
-
+int cantInst =0;
 	if (punta != 0){
 		t_msgHeader header;
 		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
@@ -570,7 +572,7 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 		aux= recolectar_instruccion(cadena,comando, punta);
 		punta=aux;
 
-		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto,comienzo);
+		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto,comienzo, cantInst);
 		punta=aux;
 		if(punta>1500){
 			flag=-1;
@@ -580,10 +582,10 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	}
 
 	final = time( NULL );
-	//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
+	printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 	int diff =  difftime(final, comienzo);
 	int porcentaje= porcentajeDeUso(diff, quantum, retardo);
-	//printf("El porcentaje de uso es %d\n", porcentaje);
+	printf("El porcentaje de uso es %d\n", porcentaje);
 /*
 	//actualizamos el porcentaje de cpu en la cola
 	usoCPU* nodo =malloc(sizeof(usoCPU*));
@@ -624,6 +626,7 @@ void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logg
 	char comando[15];
 	char pagina[3];
 	char texto[20];
+	int cantInst =0;
 
 	time_t comienzo;
 	comienzo = time( NULL );
@@ -637,7 +640,7 @@ void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logg
 
 
 	}
-
+	printf ("la cantint es %d", cantInst);
 	//--mientras no punta sea menor al tamaño del mProc
 	while(punta<(tamBuff-1))
 	{
@@ -645,7 +648,7 @@ void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logg
 		aux= recolectar_instruccion(cadena,comando, punta);
 		punta=aux;
 
-		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto, comienzo);
+		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto, comienzo, cantInst);
 		punta=aux;
 	}
 	return;
