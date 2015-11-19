@@ -75,7 +75,7 @@ void procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,P
 
 int recolectar_instruccion(char* cadena,char comando[15],int punta);
 
-int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20],time_t comienzo);
+int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20],time_t comienzo, int cantInst);
 
 int recolectar_pagina(char* cadena, int punta, char pagina[3]);
 
