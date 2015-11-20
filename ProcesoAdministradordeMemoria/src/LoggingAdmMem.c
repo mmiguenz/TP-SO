@@ -93,7 +93,7 @@ void loguearAccesoTLB(t_log*logAdmMem,t_tempLogueo* estructDatosALoguear){
 	}
 }
 
-void loguearActualizacionTLB(t_log* logAdmMem, t_tempLogueo* datosLogTLB,int pid,int pagina){
+void loguearActualizacionTLB(t_log* logAdmMem, t_tempLogueo* datosLogTLB,int frame,int pid,int pagina){
 	datosLogTLB->tipoEvento = ACCESO_TLB;
 	if(datosLogTLB->regSaliente == false){
 		datosLogTLB->tipoEvento = ACCESO_TLB;
@@ -101,7 +101,7 @@ void loguearActualizacionTLB(t_log* logAdmMem, t_tempLogueo* datosLogTLB,int pid
 		loguearEvento(logAdmMem,datosLogTLB);//Logging por un registro agregado a TLB
 	}
 	else{
-		t_tempLogueo* datosRegEntranteTLB = cargaDatosAccesoTLB(pid,pagina,datosLogTLB->frame,datosLogTLB->entradaTLB);
+		t_tempLogueo* datosRegEntranteTLB = cargaDatosAccesoTLB(pid,pagina,frame,datosLogTLB->entradaTLB);
 		datosRegEntranteTLB->tipoEvento = ACCESO_TLB;
 		datosRegEntranteTLB->hit = false;
 		datosRegEntranteTLB->regSaliente = false;

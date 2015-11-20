@@ -38,7 +38,7 @@ void loguearCreacionMProc(t_log* logAdmMem,t_tempLogueo* estructDatosALoguear);
 void loguearSolicitudLect(t_log* logAdmMem,t_tempLogueo* estructDatosALoguear);
 void loguearSolicitudEscr(t_log* logAdmMem,t_tempLogueo* estructDatosALoguear);
 void loguearAccesoTLB(t_log*logAdmMem,t_tempLogueo* estructDatosALoguear);
-void loguearActualizacionTLB(t_log*logAdmMem,t_tempLogueo* datosLogTLB,int pid,int pagina);
+void loguearActualizacionTLB(t_log*logAdmMem,t_tempLogueo* datosLogTLB,int frame,int pid,int pagina);
 void loguearAccesoMemoria(t_log*logAdmMem,t_tempLogueo* estructDatosALoguear);
 void loguearActualizacionMemoria(t_log* logAdmMem,int pagina,int paginaReemp, int pid,int frame);
 void loguearSenial(t_log*logAdmMem);
