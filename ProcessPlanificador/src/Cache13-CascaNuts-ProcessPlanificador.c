@@ -152,7 +152,7 @@ int main(void)
 
 
 				pthread_join(hilo_shell, NULL);
-				pthread_join(&hilo_io, NULL);
+				pthread_join(hilo_io, NULL);
     return 0;
 }
 
@@ -207,12 +207,13 @@ void *shell(int mutex){
 
 
 	 while(1){
-		pcb_block = malloc(sizeof(PCB*));
+
+		sem_wait(&sem_consumidor_block);
+		pcb_block = malloc(sizeof(PCB));
 		pcb_block->nombreProc = malloc(50);
 		pcb_block->path = malloc(200);
-		sem_wait(&sem_consumidor_block);
 		pcb_block = queue_pop(block_PCB);
-		//printf("El proceso blokeado es........ %s\n",pcb_block->nombreProc );
+		//pritf("El proceso blokeado es........ %s\n",pcb_block->nombreProc );
 		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
 		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
 		printf("-------------------------------------------------\n");
@@ -426,7 +427,7 @@ PCB *pcb_create(char *name, int estado, char* ruta){
 	new->cant_run=0;
 	new->tiempo_respuesta=0;
 	new->tiempo_espera=0;
-
+	new->tiempo_ejecucion=0;
 	return new;
 }
 

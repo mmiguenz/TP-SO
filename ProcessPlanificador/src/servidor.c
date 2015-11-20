@@ -77,7 +77,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 	paramHilo->fifo_PCB=fifo_PCB;
 	paramHilo->running_PCB=running_PCB;
 
-	pthread_create(&hilo_cpu_libres, NULL, (void*)manejo_cpu_libres, (void *) paramHilo);
+	pthread_create(&hilo_cpu_libres, NULL, manejo_cpu_libres, (void *) paramHilo);
 
 	socketServidor = Abre_Socket_Inet (puerto_escucha_planif);//"cpp_java");
 	if (socketServidor == -1)
@@ -431,7 +431,6 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 
 
 	printf("-------------------EL MSJ type es %d \n",header.msgtype);
-	PCB* Pcb_IO;//=malloc(sizeof(PCB*));
 	switch(header.msgtype){
 
 	case 0 : {
@@ -455,7 +454,7 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 
 	case 3 : {
 		PCB* PcbFin;
-		PcbFin=malloc(sizeof(PCB*));
+		PcbFin=malloc(sizeof(PCB));
 		PcbFin->nombreProc=malloc(50);
 		PcbFin->path=malloc(200);
 
@@ -464,13 +463,16 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 	recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
 
 	PcbFin=search_and_return(pcb_parc.pid,running_PCB);
-	PcbFin->cant_run++;
-	PcbFin->tiempo_ejecucion=((PcbFin->tiempo_ejecucion)+(difftime(time(NULL),PcbFin->t_entrada_cola_run)));
-	//log_info(logger,"-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n\n",PcbFin->tiempo_espera);
+	//PcbFin->cant_run++;
+
+	int diferencia=difftime(time(NULL),PcbFin->t_entrada_cola_run);
+
+	PcbFin->tiempo_ejecucion+=diferencia;
+	log_info(logger,"-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n\n",PcbFin->tiempo_espera);
 	printf("-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n\n",PcbFin->tiempo_espera);
-	//log_info(logger,"-----------El Tiempo de ejecucion fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
+	log_info(logger,"-----------El Tiempo de ejecucion fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
 	printf("-----------El Tiempo de ejecucion fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
-	//log_info(logger,"-----------El Tiempo de respuesta fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_respuesta);
+	log_info(logger,"-----------El Tiempo de respuesta fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_respuesta);
 	printf("-----------El Tiempo de respuesta fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_respuesta);
 
 	break;
@@ -479,9 +481,10 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 	case 4://Entrada salida
 	{
 		recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
+		PCB* Pcb_IO=malloc(sizeof(PCB));
 
-		// Pcb_IO->nombreProc=malloc(50);
-		//Pcb_IO->path=malloc(200);
+		 Pcb_IO->nombreProc=malloc(50);
+		Pcb_IO->path=malloc(200);
 
 		Pcb_IO=search_and_return(pcb_parc.pid,running_PCB);
 		printf("El proceso a blokear es........ %s",Pcb_IO->nombreProc );
@@ -546,7 +549,7 @@ PCB *search_and_return(int pid,t_queue * running_PCB){
 
 	}
 
-void manejo_cpu_libres(void* mensa){
+void* manejo_cpu_libres(void* mensa){
 
 	t_msgHeader header;
 	PCB* PcbAux;
@@ -638,7 +641,7 @@ void manejo_cpu_libres(void* mensa){
 		}
 		else{
 
-			printf("El proceso %d fallo \n",header.payload_size);
+			printf("El poceso %d fallo \n",header.payload_size);
 			log_warning(param->logger, "Se ha finalizado el proceso con el CPU: %d debido a un fallo", socketCliente);
 			recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
 
