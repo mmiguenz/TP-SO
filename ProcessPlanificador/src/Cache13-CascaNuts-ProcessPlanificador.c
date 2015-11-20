@@ -213,7 +213,7 @@ void *shell(int mutex){
 		pcb_block->nombreProc = malloc(50);
 		pcb_block->path = malloc(200);
 		pcb_block = queue_pop(block_PCB);
-		//printf("El proceso blokeado es........ %s\n",pcb_block->nombreProc );
+		//pritf("El proceso blokeado es........ %s\n",pcb_block->nombreProc );
 		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
 		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
 		printf("-------------------------------------------------\n");

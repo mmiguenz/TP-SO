@@ -98,7 +98,7 @@ usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU){
 		if(aux->cpu==cpu)
 		{
 
-			tamanio=0;
+			tamanio=1;
 		}
 		else{
 			queue_push(porcentajes_CPU,aux);

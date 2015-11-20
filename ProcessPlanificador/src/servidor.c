@@ -641,7 +641,7 @@ void* manejo_cpu_libres(void* mensa){
 		}
 		else{
 
-			printf("El proceso %d fallo \n",header.payload_size);
+			printf("El poceso %d fallo \n",header.payload_size);
 			log_warning(param->logger, "Se ha finalizado el proceso con el CPU: %d debido a un fallo", socketCliente);
 			recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
 
