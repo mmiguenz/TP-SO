@@ -47,7 +47,7 @@ t_queue * porcentajes_CPU;
 
 pthread_mutex_t mutex;
 int primLectBuffer = 1;
-
+int retardo;
 //--param de los hilos
 typedef struct {
 	int puerto_escucha_planificador;
@@ -59,6 +59,7 @@ typedef struct {
 	t_queue * porcentajes_CPU;
 }struct1;
 
+int instrucciones[50];
 
 void porcentajesCPU(t_queue * porcentajes_CPU){
 	int planificador = conectar_cliente(8082, "127.0.0.1");
@@ -220,11 +221,11 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			log_info(logger, "El pid es %d", PcbAux->PID);
 
 			//--enviamos msj solo header a PLANIFICADOR
-			t_msgHeader header;
-			memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-			header.msgtype = 2;
-			header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
-			send(planificador, &header, sizeof( t_msgHeader), 0);
+			//t_msgHeader header;
+			//memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
+			//header.msgtype = 2;
+			//header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
+			//send(planificador, &header, sizeof( t_msgHeader), 0);
 
 			PcbAux->contadorProgram ++;
 			cantInst ++;
@@ -238,7 +239,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader));
-			header.msgtype = 3;
+			header.msgtype = 6;
 			header.payload_size =PcbAux->PID;
 			send(planificador, &header, sizeof( t_msgHeader), 0);
 
@@ -543,7 +544,7 @@ void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux
 	return;
 }
 
-void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
+void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo, int cpu){
 
 	int punta=ubicarPunta(cadena, PcbAux);
 	char comando[15]="";
@@ -573,6 +574,7 @@ int cantInst =0;
 		punta=aux;
 
 		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto,comienzo, cantInst);
+		instrucciones[cpu]++;
 		punta=aux;
 		if(punta>1500){
 			flag=-1;
@@ -619,7 +621,7 @@ int cantInst =0;
 }
 
 
-void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
+void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo, int cpu){
 	//--inicializamos variables y ubicamos la punta pra comenzar a leer (contador de prog)
 	int punta=ubicarPunta(cadena, PcbAux);
 	int tamBuff=strlen(cadena);
@@ -650,6 +652,7 @@ void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logg
 
 		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto, comienzo, cantInst);
 		punta=aux;
+		instrucciones[cpu]++;
 	}
 	return;
 }
@@ -691,14 +694,15 @@ void* conectar(void* mensa){
 	int puertoMemoria = param-> puerto_escucha_memoria;
 	char* ipMemoria = param->ip_conec_memoria;
 	t_log* logger = param->logger;
-	int retardo = param->retardo;
-
+	retardo = param->retardo;
+	int cpu;
+	pthread_t hilo_porcentajes;
 	//printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
 
 	//--nos conectamos con planificador y memoria
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 	int memoria = conectar_cliente(puertoMemoria, ipMemoria);
-
+	inicializarInstrucciones();
 	//--verificamos que nos hayamos conectado correctamente a memoria, loggueamos
 	if (memoria > 0) {
 		//log_info(logger, "El hilo %u se conecto a memoria correctamente", (unsigned int) pthread_self());
@@ -714,10 +718,24 @@ void* conectar(void* mensa){
 	queue_push(porcentajes_CPU,new);//Voy metiendo los porcentajes en la cola
 	pthread_mutex_unlock(&mutex);
 
-	printf("El planificador es %d\n", planificador);
+
 
 	char* aux = recibirMensaje(planificador);
+
+	t_msgHeader header2;
+			memset(&header2, 0, sizeof(t_msgHeader));
+			header2.msgtype = 7; //significa kien soy
+			header2.payload_size = planificador;
+			send(planificador, &header2, sizeof( t_msgHeader), 0);
+
+			recv(planificador,&cpu,sizeof(int),0);
+			printf("Soy el CPU %d \n\n",cpu);
+			instrucciones[cpu]++;
+
+
 	free(aux);
+	pthread_create(&hilo_porcentajes, NULL, (void*)calcularPorcentajes, NULL);
+
 
 	while(1){
 		//avisamos al planificador que estamos listo para recibir un mProc
@@ -824,11 +842,11 @@ void* conectar(void* mensa){
 			if(PcbAux->quantum == 0){
 				//fifo
 				printf("El quantum es %d\n", PcbAux->quantum);
-				procesarCadena(archivoProc, memoria, planificador,logger, PcbAux, retardo);
+				procesarCadena(archivoProc, memoria, planificador,logger, PcbAux, retardo, cpu);
 
 			}else{
 				printf("El quantum es %d\n", PcbAux->quantum);
-				procesarCadenaConQuantum(PcbAux->quantum, archivoProc, memoria, planificador, logger, PcbAux, retardo);
+				procesarCadenaConQuantum(PcbAux->quantum, archivoProc, memoria, planificador, logger, PcbAux, retardo,cpu);
 			}
 		}else{
 			sentenciaFinalizar(memoria, planificador, logger, PcbAux, retardo);
@@ -839,16 +857,41 @@ void* conectar(void* mensa){
 
 	free(new);
 	//free(param);
+	pthread_join(hilo_porcentajes, NULL);
 	return EXIT_SUCCESS;
 }
 
 
 
+void inicializarInstrucciones(){
+	int i =0;
+	while(i!=50){
+		instrucciones[i]=-1;
+		i++;
+	}
+}
 
 
 
+void* calcularPorcentajes(){
 
+	float porcentajes[50];
 
+	int i=0;
+	sleep(60);
+	while(i!=50)
+	{
+		if (instrucciones[i]!=-1){
+			porcentajes[i]=(instrucciones[i]*100)/(60*retardo);
+			printf("La cantidad de instrucciones es %d \n",instrucciones[i] );
+			printf("El retardo es %d \n",retardo);
+			//instrucciones[i]=0;
+			printf("\n-----------El porcentaje de uso del CPU %d es %f.2-------\n---------------------------------------------\n",i,porcentajes[i]);
+
+		}
+		i++;
+	}
+}
 
 
 

@@ -200,7 +200,7 @@ void nuevoCliente (int servidor, int *clientes, int *nClientes)
 	Escribe_Socket (clientes[(*nClientes)-1], "Te conectaste al planificador", strlen("Te conectaste al planificador"));
 
 	/* Escribe en pantalla que ha aceptado al cliente y vuelve */
-	printf ("Aceptado cpu %d\n", *nClientes);
+	//printf ("Aceptado cpu %d\n", *nClientes);
 	return;
 
 
@@ -458,9 +458,9 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 		PcbFin->nombreProc=malloc(50);
 		PcbFin->path=malloc(200);
 
-	printf("El proceso %d finalizo correctamente \n",header.payload_size);
 	log_trace(logger, "Se ha finalizado el proceso con el CPU: %d", socketCliente);
 	recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
+	printf("El proceso %d finalizo correctamente \n",pcb_parc.pid);
 
 	PcbFin=search_and_return(pcb_parc.pid,running_PCB);
 	//PcbFin->cant_run++;
@@ -521,6 +521,28 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 
 		break;
 
+	}
+	case 6:{
+		PCB* PcbErr;
+				PcbErr=malloc(sizeof(PCB));
+				PcbErr->nombreProc=malloc(50);
+				PcbErr->path=malloc(200);
+
+			printf("El proceso %d fallo \n",header.payload_size);
+			log_trace(logger, "Se ha finalizado el proceso con el CPU: %d con errores", socketCliente);
+			recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
+
+			PcbErr=search_and_return(pcb_parc.pid,running_PCB);
+			//PcbFin->cant_run++;
+
+
+
+		break;
+	}
+
+	case 7:{
+
+		send(socketCliente,&socketCliente,sizeof(int),0);
 	}
 	}
 
@@ -616,10 +638,8 @@ void* manejo_cpu_libres(void* mensa){
 
 		free(mensaje);
 
-		recv(socketCliente,&header,sizeof(header),0);
+		//recv(socketCliente,&header,sizeof(header),0);
 
-		if(header.msgtype == 2)
-		{
 		printf("El proceso inicio correctamente \n");
 		log_trace(param->logger, "Se ha iniciado el proceso con el CPU: %d", socketCliente);
 
@@ -638,20 +658,6 @@ void* manejo_cpu_libres(void* mensa){
 		PcbRun->t_entrada_cola_run=time(NULL);
 		queue_push(param->running_PCB,PcbRun);
 		sem_post(&sem_mutex1);
-		}
-		else{
 
-			printf("El poceso %d fallo \n",header.payload_size);
-			log_warning(param->logger, "Se ha finalizado el proceso con el CPU: %d debido a un fallo", socketCliente);
-			recv(socketCliente, &pcb_parc,sizeof (PCB_PARCIAL),0);
-
-				sem_wait(&sem_consumidor);
-				queue_pop(param->fifo_PCB);
-
-
-
-
-
-}
 }
 }

@@ -71,7 +71,7 @@ int porcentajeDeUso(int diff, int instrucciones, int retardo);
 
 int ubicarPunta(char cadena [1500], PCB* PcbAux);
 
-void procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux, int retardo);
+void procesarCadena(char* cadena, int memoria, int planificador, t_log* logger,PCB* PcbAux, int retardo, int cpu);
 
 int recolectar_instruccion(char* cadena,char comando[15],int punta);
 
@@ -83,9 +83,13 @@ int identificar_instruccion(char comando[15]);
 
 int recolectar_paginaEscribir(char cadena[1500], int punta, char pagina[3]);
 
+void inicializarInstrucciones();
+
+void *calcularPorcentajes();
+
 int recolectar_Texto(char cadena[1500], int punta, char texto[15]);
 
-void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo);
+void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo, int cpu);
 
 void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo);
 
