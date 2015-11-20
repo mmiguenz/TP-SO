@@ -24,10 +24,10 @@
 #include <commons/collections/list.h>
 #include "servidor.h"
 #include "protocolos.h"
-#include "swapConfig.h"
 #include "particionSwap.h"
 #include <stdlib.h>
 #include "logueoSwap.h"
+#include "swapConfig.h"
 
 
 typedef struct

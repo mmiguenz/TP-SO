@@ -248,7 +248,7 @@ void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 			 if (configAdmMem->tlb_habilitada && tlbHit != true){
 				 //---------------------------------Logging Acceso TLB(miss)-----------------------------------------------//
 				 t_tempLogueo* datosLogTLBmiss = agregar_reemplazarRegistroTLB(tlb,protInic->pid,protInic->paginas,frame);
-				 loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,protInic->pid,protInic->paginas);
+				 loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,frame,protInic->pid,protInic->paginas);
 				 //--------------------------------------------------------------------------------------------------------//
 			 }
 
@@ -375,7 +375,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				 if (configAdmMem->tlb_habilitada && tlbHit != true){
 					 //---------------------------------Logging Acceso TLB(miss)-----------------------------------------------//
 					 t_tempLogueo* datosLogTLBmiss = agregar_reemplazarRegistroTLB(tlb,pedido->pid,pedido->pagina,frame);
-					 loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,pedido->pid,pedido->pagina);
+					 loguearActualizacionTLB(logAdmMem,datosLogTLBmiss,frame,pedido->pid,pedido->pagina);
 					 //--------------------------------------------------------------------------------------------------------//
 				 }
 
@@ -410,8 +410,8 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 	 memcpy(&pedido->pid, &pedidoCpu->pid,sizeof(int));
 
 
-	 if (configAdmMem->tlb_habilitada)
-		 t_tlb_limpiar(tlb, pedido->pid);
+	 //if (configAdmMem->tlb_habilitada)
+		// t_tlb_limpiar(tlb, pedido->pid);
 
 
 	 finalizarProceso(&memoriaPrincipal, dictionary_get(tablasPags, string_itoa(pedido->pid)));

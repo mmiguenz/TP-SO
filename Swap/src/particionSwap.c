@@ -7,11 +7,11 @@
  */
 #include  <stdio.h>
 #include "particionSwap.h"
-#include "swapConfig.h"
 #include <commons/string.h>
 #include "protocolos.h"
 #include "logueoSwap.h"
-
+#include "swapConfig.h"
+#include "Swap.h"
 
 
 
@@ -360,4 +360,23 @@ t_hueco* unificar(t_hueco* unHueco,t_hueco* otroHueco)
 
 
 	return huecoUnificado;
+}
+
+
+void t_particion_limpiar(t_particion* particion,int comienzo,int cantidad)
+{
+	int i ;
+	t_protoc_escrituraProceso* pedido = malloc(sizeof(t_protoc_escrituraProceso));
+	pedido->tamanio = particion->pagina_tamanio;
+	pedido->contenido=malloc(particion->pagina_tamanio);
+	memset(pedido->contenido,'\0',pedido->tamanio);
+
+	for(i=0; i<cantidad;i++)
+	{
+	pedido->pagina = comienzo+i;
+		t_particion_escribirPagina(particion,pedido->pagina,pedido);
+	}
+
+	free(pedido->contenido);
+	free(pedido);
 }

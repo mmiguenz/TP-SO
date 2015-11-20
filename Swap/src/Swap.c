@@ -31,6 +31,7 @@ t_swapConfig* config;
 t_list* espacioUtilizado_lista;
 t_log* logSwap;
 
+
 int main (){
 
 	struct addrinfo* swapInfo;
@@ -155,7 +156,7 @@ void iniciarProceso(int memSocket)
 	{
 		respuestaMemoria = 0;
 
-		 t_SwapLog* swapLog  = t_swapLog_crear(0,0,0,NULL);
+		 t_SwapLog* swapLog  = t_swapLog_crear(pedido->pid,0,0,NULL);
 		 t_loguear(logSwap,RECHAZADO,swapLog);
 		 t_swapLog_eliminar(swapLog);
 
@@ -270,6 +271,7 @@ void finalizarProceso(int memSocket)
 
 	t_hueco_agregar(particion,proceso->paginaComienzo,proceso->cantidad);
 
+	t_particion_limpiar(particion,proceso->paginaComienzo,proceso->cantidad);
 
 
 
