@@ -174,7 +174,7 @@ int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memo
 void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp, int tamanioContenido,int pagAModif,int pid){
 	t_protoc_escrituraProceso* protocEscrSwap = malloc(sizeof(t_protoc_escrituraProceso));
 	int offset;
-	int tamanioBuffer = ((sizeof(int)*3)+tamanioContenido+1);
+	int tamanioBuffer = (sizeof(int)+sizeof(int)+sizeof(int)+tamanioContenido+1);
 	void* buffer = malloc(tamanioBuffer);
 
 	protocEscrSwap->tipoInstrucc = ESCRIBIR;

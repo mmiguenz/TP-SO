@@ -24,6 +24,7 @@
 #include <regex.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
+#include <signal.h>
 #include <commons/config.h>
 #include <commons/collections/queue.h>
 #include <commons/collections/dictionary.h>
@@ -45,15 +46,17 @@ void finalizacionProceso(int socketCpu,int socketSwap);
 char notificarFinalizarSwap(int socket, t_protoc_Finaliza* pedido);
 void notificarFinalizarCpu( int socket);
 void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
+void tlbFlush();
 
-	 t_config* config;
-	 t_log* logAdmMem;
-	 t_paramConfigAdmMem* configAdmMem;
-	 MEMORIAPRINCIPAL memoriaPrincipal;
-	 t_dictionary* tablasPags;
-	 TLB* tlb;
-	 t_queue* tlb2;
-	 int socketSwap;
+t_config* config;
+t_log* logAdmMem;
+t_paramConfigAdmMem* configAdmMem;
+MEMORIAPRINCIPAL memoriaPrincipal;
+t_dictionary* tablasPags;
+TLB* tlb;
+pthread_t hilo_tlbFlush;
+pthread_attr_t attr;
+int socketSwap;
 
  int main(void){
 
@@ -74,6 +77,12 @@ void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 
 	 	 	 	 tablasPags = malloc(sizeof(t_dictionary*));
 	 	 	 	 tablasPags = dictionary_create();
+
+	 	 	 	 /* Creación de los hilos para los flush de TLB y memoria */
+	 	 	 	 pthread_attr_init(&attr);
+
+	 	 	 	 pthread_create(&hilo_tlbFlush,&attr,(void*)tlbFlush,NULL);
+
 
 	 	 	 	 /*Conexión del administrador de memoria como cliente al Swap y como Servidor con CPU*/
 
@@ -524,3 +533,24 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 
 	dictionary_remove(tablasPags,string_itoa(pid));
  }
+
+
+void tlbFlush(){
+
+void tlbFlushHandler(int signum) {
+
+	tlb_Flush(tlb);
+	printf("Se han limpiado todos los registros de la TLB. \n");
+	signal(SIGUSR1,tlbFlushHandler);
+
+}
+
+if (signal(SIGUSR1,tlbFlushHandler) == SIG_ERR){
+	perror("Error en signal()");
+	exit(1);
+}
+
+
+}
+
+

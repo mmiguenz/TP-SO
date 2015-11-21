@@ -58,26 +58,20 @@ t_regTLB** inicializarTLB(int entradasTLB){
 }
 
 
-void t_tlb_limpiar(TLB* tlb, int pid )
+void tlb_Flush(TLB* tlb)
 {
 	int i ;
 
 	for (i = 0; i< tlb->nroEntradasTLB ; i++)
 	{
-		t_regTLB*  cacheTlb = tlb->CacheTLB[i];
+		t_regTLB* cacheTlb = tlb->CacheTLB[i];
 
-		if (cacheTlb->pid == pid)
-		{
-			cacheTlb->pid = -1;
-			cacheTlb->frame = -1;
-			cacheTlb->pagina = -1;
+		cacheTlb->pid = -1;
+		cacheTlb->frame = -1;
+		cacheTlb->pagina = -1;
 
 		}
 
-
-		/* falta implemenar sacar de la cola de orden de ingreso */
-
-	}
 
 }
 
