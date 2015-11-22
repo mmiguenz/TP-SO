@@ -52,7 +52,10 @@ void conectar_servidor(char* puerto_escucha_memoria, int swap)
 		if (maximo < socketServidor)
 			maximo = socketServidor;
 
-		select (maximo + 1, &descriptoresLectura, NULL, NULL, NULL);
+		int errorController= select (maximo + 1, &descriptoresLectura, NULL, NULL, NULL);
+
+		if (errorController<0)
+			continue;
 
 		for (i=0; i<numeroClientes; i++)
 		{

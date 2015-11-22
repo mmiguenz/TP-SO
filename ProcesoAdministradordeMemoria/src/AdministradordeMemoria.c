@@ -59,8 +59,6 @@ TLB* tlb;
 pthread_t hilo_tlbFlush;
 pthread_t hilo_memFlush;
 pthread_attr_t attr;
-sem_t sem_mutexHiloTLBFlush;
-sem_t sem_mutexHiloMemFlush;
 pthread_mutex_t mutex;
 int socketSwap;
 
@@ -86,8 +84,6 @@ int socketSwap;
 
 	 	 	 	 /* Creación de los hilos para los flush de TLB y memoria */
 
-	 	 	 	 //sem_init(&sem_mutexHiloTLBFlush, 1, 1);
-	 	 	 	 //sem_init(&sem_mutexHiloMemFlush, 1, 1);
 	 	 	 	 pthread_mutex_init(&mutex,NULL);
 
 	 	 	 	 pthread_attr_init(&attr);
@@ -108,11 +104,10 @@ int socketSwap;
 
 
  void procesarPedido(int socketCPU, int socketSwap, char tipoInstruccion){
-//sem_wait(&sem_mutexHiloTLBFlush);
-//sem_wait(&sem_mutexHiloMemFlush);
+
+	 pthread_mutex_lock(&mutex);
 
 	 switch(tipoInstruccion){
-	 pthread_mutex_lock(&mutex);
 	 	 case INICIAR:{
 		 	 inicializacionProceso(socketCPU,socketSwap);
 	 	 }
@@ -134,8 +129,8 @@ int socketSwap;
 	 	 break;
 	 }
 	 pthread_mutex_unlock(&mutex);
-//sem_post(&sem_mutexHiloTLBFlush);
-//sem_post(&sem_mutexHiloMemFlush);
+
+
 }
 
  void inicializacionProceso(int socketCPU, int socketSwap){
@@ -579,7 +574,6 @@ void memoriaFlushHandler(int signum) {
 		tlb_Flush(tlb);
 		mem_Flush(&memoriaPrincipal,tablasPags);
 		pthread_mutex_unlock(&mutex);
-		sem_post(&sem_mutexHiloMemFlush);
 		printf("Se han limpiado todos los registros de la Memoria. \n");
 		signal(SIGUSR2,memoriaFlushHandler);
 	}
