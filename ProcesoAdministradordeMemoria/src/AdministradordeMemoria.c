@@ -577,6 +577,7 @@ void memFlush() {
 void memoriaFlushHandler(int signum) {
 		pthread_mutex_lock(&mutex);
 		tlb_Flush(tlb);
+		mem_Flush(&memoriaPrincipal,tablasPags);
 		pthread_mutex_unlock(&mutex);
 		sem_post(&sem_mutexHiloMemFlush);
 		printf("Se han limpiado todos los registros de la Memoria. \n");

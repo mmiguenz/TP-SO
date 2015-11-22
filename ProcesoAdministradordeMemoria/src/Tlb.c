@@ -72,7 +72,7 @@ void tlb_Flush(TLB* tlb)
 
 		}
 
-
+return;
 }
 
 int buscarPaginaTLB(TLB* tlb,int pid, int pagina, int* entradaTLB){

@@ -285,5 +285,5 @@ void mem_Flush(MEMORIAPRINCIPAL* memoria, t_dictionary* tablasDePaginas){
 	dictionary_iterator(tablasDePaginas,(void*)blanquearTablaPagina);
 	}
 
-
+return;
 }
