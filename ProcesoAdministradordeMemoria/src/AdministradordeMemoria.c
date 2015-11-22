@@ -25,6 +25,7 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <signal.h>
+#include <semaphore.h>
 #include <commons/config.h>
 #include <commons/collections/queue.h>
 #include <commons/collections/dictionary.h>
@@ -47,6 +48,7 @@ char notificarFinalizarSwap(int socket, t_protoc_Finaliza* pedido);
 void notificarFinalizarCpu( int socket);
 void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 void tlbFlush();
+void memFlush();
 
 t_config* config;
 t_log* logAdmMem;
@@ -55,7 +57,11 @@ MEMORIAPRINCIPAL memoriaPrincipal;
 t_dictionary* tablasPags;
 TLB* tlb;
 pthread_t hilo_tlbFlush;
+pthread_t hilo_memFlush;
 pthread_attr_t attr;
+sem_t sem_mutexHiloTLBFlush;
+sem_t sem_mutexHiloMemFlush;
+pthread_mutex_t mutex;
 int socketSwap;
 
  int main(void){
@@ -79,9 +85,15 @@ int socketSwap;
 	 	 	 	 tablasPags = dictionary_create();
 
 	 	 	 	 /* Creación de los hilos para los flush de TLB y memoria */
+
+	 	 	 	 //sem_init(&sem_mutexHiloTLBFlush, 1, 1);
+	 	 	 	 //sem_init(&sem_mutexHiloMemFlush, 1, 1);
+	 	 	 	 pthread_mutex_init(&mutex,NULL);
+
 	 	 	 	 pthread_attr_init(&attr);
 
 	 	 	 	 pthread_create(&hilo_tlbFlush,&attr,(void*)tlbFlush,NULL);
+	 	 	 	 pthread_create(&hilo_memFlush,&attr,(void*)memFlush,NULL);
 
 
 	 	 	 	 /*Conexión del administrador de memoria como cliente al Swap y como Servidor con CPU*/
@@ -94,11 +106,13 @@ int socketSwap;
 	 	 	 	 return EXIT_SUCCESS;
  }
 
- void procesarPedido(int socketCPU, int socketSwap, char tipoInstruccion){
 
+ void procesarPedido(int socketCPU, int socketSwap, char tipoInstruccion){
+//sem_wait(&sem_mutexHiloTLBFlush);
+//sem_wait(&sem_mutexHiloMemFlush);
 
 	 switch(tipoInstruccion){
-
+	 pthread_mutex_lock(&mutex);
 	 	 case INICIAR:{
 		 	 inicializacionProceso(socketCPU,socketSwap);
 	 	 }
@@ -119,6 +133,9 @@ int socketSwap;
 	 	 }
 	 	 break;
 	 }
+	 pthread_mutex_unlock(&mutex);
+//sem_post(&sem_mutexHiloTLBFlush);
+//sem_post(&sem_mutexHiloMemFlush);
 }
 
  void inicializacionProceso(int socketCPU, int socketSwap){
@@ -539,7 +556,9 @@ void tlbFlush(){
 
 void tlbFlushHandler(int signum) {
 
+	pthread_mutex_lock(&mutex);
 	tlb_Flush(tlb);
+	pthread_mutex_unlock(&mutex);
 	printf("Se han limpiado todos los registros de la TLB. \n");
 	signal(SIGUSR1,tlbFlushHandler);
 
@@ -550,7 +569,23 @@ if (signal(SIGUSR1,tlbFlushHandler) == SIG_ERR){
 	exit(1);
 }
 
-
 }
 
+void memFlush() {
 
+
+void memoriaFlushHandler(int signum) {
+		pthread_mutex_lock(&mutex);
+		tlb_Flush(tlb);
+		pthread_mutex_unlock(&mutex);
+		sem_post(&sem_mutexHiloMemFlush);
+		printf("Se han limpiado todos los registros de la Memoria. \n");
+		signal(SIGUSR2,memoriaFlushHandler);
+	}
+
+if (signal(SIGUSR2,memoriaFlushHandler) == SIG_ERR){
+	perror("Error en signal()");
+	exit(1);
+}
+
+}

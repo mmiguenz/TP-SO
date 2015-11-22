@@ -56,6 +56,7 @@ typedef struct{
 	void t_memoria_crear(MEMORIAPRINCIPAL* ,t_paramConfigAdmMem* config);
 	int buscarFrameLibre(MEMORIAPRINCIPAL* memoria);
 	int marcosUtilizadosProceso(t_tablaDePaginas* tablaPagsProceso);
+	void mem_Flush(MEMORIAPRINCIPAL* memoria,t_dictionary* tablaDePaginas);
 
 
 #endif /* MEMORIA_H_ */
