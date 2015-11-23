@@ -49,6 +49,8 @@ void notificarFinalizarCpu( int socket);
 void eliminarTablaDePaginasDelProceso(t_dictionary*  tablasPags, int pid);
 void tlbFlush();
 void memFlush();
+void tlbFlushHandler(int signum);
+void memoriaFlushHandler(int signum);
 
 t_config* config;
 t_log* logAdmMem;
@@ -84,15 +86,14 @@ int socketSwap;
 
 	 	 	 	 /* Creación de los hilos para los flush de TLB y memoria */
 
+	 	 	 	signal(SIGUSR2,memoriaFlushHandler);
+	 	 	 	signal(SIGUSR1,tlbFlushHandler);
+
+
 	 	 	 	 pthread_mutexattr_t Attr;
 	 	 	 	 pthread_mutexattr_init(&Attr);
 	 	 	 	 pthread_mutexattr_settype(&Attr, PTHREAD_MUTEX_RECURSIVE);
 	 	 	 	 pthread_mutex_init(&mutex, &Attr);
-
-	 	 	 	 pthread_create(&hilo_tlbFlush,&attr,(void*)tlbFlush,NULL);
-	 	 	 	 pthread_create(&hilo_memFlush,&attr,(void*)memFlush,NULL);
-	 	 	 	 pthread_join(hilo_tlbFlush,NULL);
-	 	 	 	 pthread_join(hilo_memFlush,NULL);
 
 
 
@@ -551,40 +552,45 @@ void escrituraMemoria(int socketCPU, int socketSwap){
  }
 
 
-void tlbFlush(){
 
-void tlbFlushHandler(int signum) {
+void tlbFlush(){
 
 	pthread_mutex_lock(&mutex);
 	tlb_Flush(tlb);
 	pthread_mutex_unlock(&mutex);
 	printf("Se han limpiado todos los registros de la TLB. \n");
+	pthread_exit(EXIT_SUCCESS);
+
+}
+
+void tlbFlushHandler(int signum) {
+
+	pthread_create(&hilo_tlbFlush,&attr,(void*)tlbFlush,NULL);
 	signal(SIGUSR1,tlbFlushHandler);
+	return;
 
 }
 
-if (signal(SIGUSR1,tlbFlushHandler) == SIG_ERR){
-	perror("Error en signal()");
-	exit(1);
-}
-
-}
 
 void memFlush() {
 
+			pthread_mutex_lock(&mutex);
+			tlb_Flush(tlb);
+			mem_Flush(&memoriaPrincipal,tablasPags);
+			pthread_mutex_unlock(&mutex);
+			printf("Se han limpiado todos los registros de la Memoria. \n");
+			pthread_exit(EXIT_SUCCESS);
+}
+
+
+
+
 
 void memoriaFlushHandler(int signum) {
-		pthread_mutex_lock(&mutex);
-		tlb_Flush(tlb);
-		mem_Flush(&memoriaPrincipal,tablasPags);
-		pthread_mutex_unlock(&mutex);
-		printf("Se han limpiado todos los registros de la Memoria. \n");
-		signal(SIGUSR2,memoriaFlushHandler);
+
+	pthread_create(&hilo_memFlush,&attr,(void*)memFlush,NULL);
+	signal(SIGUSR2,memoriaFlushHandler);
+
+	return;
+
 	}
-
-if (signal(SIGUSR2,memoriaFlushHandler) == SIG_ERR){
-	perror("Error en signal()");
-	exit(1);
-}
-
-}
