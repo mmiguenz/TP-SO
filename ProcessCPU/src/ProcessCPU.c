@@ -79,6 +79,11 @@ int main(void) {
 	int err;
 	long t;
 
+
+ 	pthread_t hilo_porcentajes;
+ 	pthread_create(&hilo_porcentajes, NULL, (void*)calcularPorcentajes, NULL);
+
+
 	//--hilo para los porcentajes
 	//pthread_create(&threadPorcentajes, NULL,(void*)porcentajesCPU,&porcentajes_CPU);
 
@@ -98,6 +103,8 @@ int main(void) {
 	}
 	//pthread_join(threadPorcentajes, NULL);
 	//--liberamos memoria
+	pthread_join(hilo_porcentajes, NULL);
+
 	queue_destroy(porcentajes_CPU);
 	pthread_mutex_destroy(&mutex);
 	pthread_exit(NULL);

@@ -141,6 +141,11 @@ int main(void)
 
 /********************Soy una barra llena de asteriscos*********************************************/
 
+
+
+
+
+
 				pthread_create(&hilo_shell, NULL, shell, (void *) &mutex);
 
 				pthread_create(&hilo_io, NULL, manejo_IO, (void *) NULL);
@@ -153,6 +158,7 @@ int main(void)
 
 				pthread_join(hilo_shell, NULL);
 				pthread_join(hilo_io, NULL);
+
     return 0;
 }
 

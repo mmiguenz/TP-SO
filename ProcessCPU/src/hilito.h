@@ -31,7 +31,7 @@
 #include <semaphore.h>
 #include <commons/collections/queue.h>
 
-
+float porcentajes[50];
 pthread_mutex_t mutex;
 t_queue * porcentajes_CPU;
 

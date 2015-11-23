@@ -42,8 +42,6 @@
 #include <time.h>
 #include <commons/collections/queue.h>
 
-//--variable global cola de porcentajes
-t_queue * porcentajes_CPU;
 
 pthread_mutex_t mutex;
 int primLectBuffer = 1;
@@ -61,78 +59,6 @@ typedef struct {
 
 int instrucciones[50];
 
-void porcentajesCPU(t_queue * porcentajes_CPU){
-	int planificador = conectar_cliente(8082, "127.0.0.1");
-
-	while(1){
-		char* mensaje;
-		mensaje = malloc(100);
-		recv(planificador, mensaje, 100, MSG_WAITALL);
-
-		printf("el msj es %s\n",mensaje);
-		free(mensaje);
-		pthread_mutex_lock(&mutex);
-		usoCPU *auxusoCPU=malloc(sizeof(usoCPU));
-		int tamanio=queue_size(porcentajes_CPU);
-		printf("el tamanio de la cola es %d\n",tamanio);
-
-		while(tamanio!=0){
-			auxusoCPU=queue_pop(porcentajes_CPU);
-			printf("La cpu %d tiene un porcentaje de:%d\n",  auxusoCPU->cpu, auxusoCPU->porcentaje);
-			queue_push(porcentajes_CPU,auxusoCPU);
-			tamanio--;
-		}
-		 pthread_mutex_unlock(&mutex);
-	}
-}
-
-usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU){
-
-	usoCPU* aux=malloc(sizeof(usoCPU));
-
-	pthread_mutex_lock(&mutex);
-	int tamanio=queue_size(porcentajes_CPU);
-
-	while(tamanio!=0){
-		aux=queue_pop(porcentajes_CPU);
-		tamanio--;
-		if(aux->cpu==cpu)
-		{
-
-			tamanio=1;
-		}
-		else{
-			queue_push(porcentajes_CPU,aux);
-		}
-	}
-	pthread_mutex_unlock(&mutex);
-	return aux;
-}
-
-int porcentajeDeUso(int diff, int instrucciones, int retardo){
-
-	int porcentaje;
-
-	//--en 60 pulso deberia hacer 60 instruccicones
-	//--diff representa los pulsos transcurridos desde que inicio en segundos
-
-	//--descontamos el retardo pasado por el arch de configuracion
-	//--entonces las instruccionesTotales que deberia hacer son
-
-
-	//--regla de 3simple los pulsos que transcurrieron desde que empezo
-	//por las instruccion que deberia haber hecho en 60s divido 60
-	int cantInstOptima = (diff*retardo);
-	if(cantInstOptima == 0){
-		porcentaje = 0;
-	}else{
-	//ese valor de instrucciones representa el 100% calculamos el % para las cant que hizo
-
-	porcentaje = (instrucciones*100)/cantInstOptima;
-	}
-
-	return porcentaje;
-}
 
 int recolectar_Texto(char cadena[1500], int punta, char texto[20])
 {
@@ -379,9 +305,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		final = time( NULL );
 		printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 		PcbAux->contadorProgram++;
-		int diff =  difftime(final, comienzo);
-		int porcentaje= porcentajeDeUso(diff, cantInst, retardo);
-		printf("El porcentaje de uso es %d\n", porcentaje);
+
 
 
 
@@ -405,15 +329,6 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 
 
-		//actualizamos el porcentaje de cpu en la cola
-		usoCPU* nodo =malloc(sizeof(usoCPU*));
-		nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
-		nodo->porcentaje=porcentaje;
-		pthread_mutex_lock(&mutex);
-		queue_push(porcentajes_CPU, nodo);
-		pthread_mutex_unlock(&mutex);
-
-		//-------
 
 		punta=1501;
 		break;
@@ -443,9 +358,6 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			printf ("la cantint es %d", cantInst);
 			final = time( NULL );
 			//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
-			int diff =  difftime(final, comienzo);
-			int porcentaje= porcentajeDeUso(diff, cantInst, retardo);
-			printf("El porcentaje de uso es %d\n", porcentaje);
 
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader));
@@ -583,22 +495,8 @@ int cantInst =0;
 		i++;
 	}
 
-	final = time( NULL );
-	printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
-	int diff =  difftime(final, comienzo);
-	int porcentaje= porcentajeDeUso(diff, quantum, retardo);
-	printf("El porcentaje de uso es %d\n", porcentaje);
-/*
-	//actualizamos el porcentaje de cpu en la cola
-	usoCPU* nodo =malloc(sizeof(usoCPU*));
-	nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
-	nodo->porcentaje=porcentaje;
-	pthread_mutex_lock(&mutex);
-	queue_push(porcentajes_CPU, nodo);
-	pthread_mutex_unlock(&mutex);
-	free(nodo);
-	//-------
-*/
+
+
 	//-- si el quamtum termino en otro sentencia le avisamos a PLANIFICADOR que termino por quantum
 	if(strcmp(comando, "finalizar") && strcmp(comando, "entrada-salida")&& strcmp(comando, "fallo")){
 		t_msgHeader header;
@@ -696,8 +594,7 @@ void* conectar(void* mensa){
 	t_log* logger = param->logger;
 	retardo = param->retardo;
 	int cpu;
-	pthread_t hilo_porcentajes;
-	//printf("El ID de hilito es:%u\n", (unsigned int)pthread_self());
+
 
 	//--nos conectamos con planificador y memoria
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
@@ -710,13 +607,6 @@ void* conectar(void* mensa){
 		log_info(logger, "error al conectarse con memoria");
 	}
 
-	//--creamos un nodo para esta cpu especifica con el porcentaje de uso
-	usoCPU *new = malloc( sizeof(usoCPU) );
-	new->cpu=planificador;
-	new->porcentaje=0;
-	pthread_mutex_lock(&mutex);
-	queue_push(porcentajes_CPU,new);//Voy metiendo los porcentajes en la cola
-	pthread_mutex_unlock(&mutex);
 
 
 
@@ -734,8 +624,6 @@ void* conectar(void* mensa){
 
 
 	free(aux);
-	pthread_create(&hilo_porcentajes, NULL, (void*)calcularPorcentajes, NULL);
-
 
 	while(1){
 		//avisamos al planificador que estamos listo para recibir un mProc
@@ -782,36 +670,6 @@ void* conectar(void* mensa){
 		offset+=strlen(PcbAux->nombreProc)+1;
 		memcpy(&PcbAux->quantum,buffer +offset  ,  sizeof(int));
 
-		//--calculamos cuanto tardo el planificador en mandarnos un mProc
-		final = time( NULL );
-		int diff =  difftime(final, comienzo);
-
-		//--si tardo mas de 60s el porcentaje de uso es 0%
-		if(diff >= 60){
-			//actualizamos el porcentaje de cpu en la cola
-			usoCPU* nodo =malloc(sizeof(usoCPU*));
-			nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
-			nodo->porcentaje=0;
-			pthread_mutex_lock(&mutex);
-			queue_push(porcentajes_CPU, nodo);
-			pthread_mutex_unlock(&mutex);
-			free(nodo);
-			//-------
-		}
-		/*else{
-			int instruccion =1;
-			int porcentaje = porcentajeDeUso(diff, instruccion,1);
-			//actualizamos el porcentaje de cpu en la cola
-			usoCPU* nodo =malloc(sizeof(usoCPU*));
-			nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
-			nodo->porcentaje=porcentaje;
-			pthread_mutex_lock(&mutex);
-			queue_push(porcentajes_CPU, nodo);
-			pthread_mutex_unlock(&mutex);
-			free(nodo);
-			//-------
-
-		}*/
 
 		printf("El mensaje del planificador PCB es:\n");
 		printf("Este es el PID:                  %d\n", PcbAux->PID);
@@ -855,9 +713,7 @@ void* conectar(void* mensa){
 		free(buffer);
 	}
 
-	free(new);
-	//free(param);
-	pthread_join(hilo_porcentajes, NULL);
+
 	return EXIT_SUCCESS;
 }
 
@@ -875,7 +731,7 @@ void inicializarInstrucciones(){
 
 void* calcularPorcentajes(){
 
-	float porcentajes[50];
+
 
 	int i=0;
 	sleep(60);
@@ -891,6 +747,8 @@ void* calcularPorcentajes(){
 		}
 		i++;
 	}
+
+	return 0;
 }
 
 
