@@ -1,13 +1,3 @@
-/*
- ============================================================================
- Name        : ProcesoAdministradordeMemoria.c
- Author      : Gisell Lara
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-
 #include "AdministradordeMemoria.h"
 
 #include <stdio.h>
