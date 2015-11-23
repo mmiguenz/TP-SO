@@ -84,12 +84,16 @@ int socketSwap;
 
 	 	 	 	 /* Creación de los hilos para los flush de TLB y memoria */
 
-	 	 	 	 pthread_mutex_init(&mutex,NULL);
-
-	 	 	 	 pthread_attr_init(&attr);
+	 	 	 	 pthread_mutexattr_t Attr;
+	 	 	 	 pthread_mutexattr_init(&Attr);
+	 	 	 	 pthread_mutexattr_settype(&Attr, PTHREAD_MUTEX_RECURSIVE);
+	 	 	 	 pthread_mutex_init(&mutex, &Attr);
 
 	 	 	 	 pthread_create(&hilo_tlbFlush,&attr,(void*)tlbFlush,NULL);
 	 	 	 	 pthread_create(&hilo_memFlush,&attr,(void*)memFlush,NULL);
+	 	 	 	 pthread_join(hilo_tlbFlush,NULL);
+	 	 	 	 pthread_join(hilo_memFlush,NULL);
+
 
 
 	 	 	 	 /*Conexión del administrador de memoria como cliente al Swap y como Servidor con CPU*/
