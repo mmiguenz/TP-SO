@@ -24,7 +24,9 @@ typedef struct{
 		int idFrame;
 		char bitPresencia;
 		char bitModificado;
+		char bitUtilizado;
 		int horaIngreso;
+		int horaUtilizacion;
 	}t_regPagina;
 
 	typedef struct{
@@ -57,6 +59,7 @@ typedef struct{
 	int buscarFrameLibre(MEMORIAPRINCIPAL* memoria);
 	int marcosUtilizadosProceso(t_tablaDePaginas* tablaPagsProceso);
 	void mem_Flush(MEMORIAPRINCIPAL* memoria,t_dictionary* tablaDePaginas);
+	void actualizarUtilizyModifPag(int instruccion, t_tablaDePaginas* tablaPagsProceso, int pagina);
 
 
 #endif /* MEMORIA_H_ */

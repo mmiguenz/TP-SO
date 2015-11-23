@@ -230,10 +230,16 @@ void actualizarTablaPaginas(int instruccion,int frame,int pagina,t_tablaDePagina
 	tablaPagsProceso->Pagina[pagina]->bitPresencia = 1;
 	tablaPagsProceso->Pagina[pagina]->horaIngreso = convertirTimeStringToInt(temporal_get_string_time());
 	tablaPagsProceso->Pagina[pagina]->idFrame = frame;
+	actualizarUtilizyModifPag(instruccion,tablaPagsProceso,pagina);
+}
 
-	char* bitModifdePagina = &(tablaPagsProceso->Pagina[pagina]->bitModificado);
-	*bitModifdePagina = instruccion == ESCRIBIR?(*bitModifdePagina = 1):*bitModifdePagina;
+void actualizarUtilizyModifPag(int instruccion, t_tablaDePaginas* tablaPagsProceso, int pagina){
 
+tablaPagsProceso->Pagina[pagina]->bitUtilizado = 1;
+tablaPagsProceso->Pagina[pagina]->horaUtilizacion = convertirTimeStringToInt(temporal_get_string_time());
+
+char* bitModifdePagina = &(tablaPagsProceso->Pagina[pagina]->bitModificado);
+*bitModifdePagina = instruccion == ESCRIBIR?(*bitModifdePagina = 1):*bitModifdePagina;
 }
 
 
