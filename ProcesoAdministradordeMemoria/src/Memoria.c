@@ -21,13 +21,18 @@
 enum {FIFO,LRU,CLOCKMODIF};
 
 
-void t_memoria_crear(MEMORIAPRINCIPAL* memoriaP , t_paramConfigAdmMem* config)
+MEMORIAPRINCIPAL* t_memoria_crear(t_paramConfigAdmMem* config)
 {
+	MEMORIAPRINCIPAL* memoria =malloc(sizeof(MEMORIAPRINCIPAL));
 
-	memoriaP->cantMarcos = config->cantidad_marcos;
-	memoriaP->tamanioMarco = config->tamanio_marco;
-	memoriaP->Memoria=inicializarMemoriaPrincipal(memoriaP,config->cantidad_marcos,config->tamanio_marco);
-	memoriaP->MemoriaLibre=inicializarMemoriaLibre(config->cantidad_marcos);
+
+		memoria->cantMarcos = config->cantidad_marcos;
+		memoria->tamanioMarco = config->tamanio_marco;
+		memoria->Memoria=inicializarMemoriaPrincipal(memoria,config->cantidad_marcos,config->tamanio_marco);
+		memoria->MemoriaLibre=inicializarMemoriaLibre(config->cantidad_marcos);
+
+
+		return memoria;
 
 }
 
@@ -56,7 +61,6 @@ void inicializarMarco(MEMORIAPRINCIPAL* memoriaP, char* marco)
 {
 	char* tmp = malloc(sizeof(char) * memoriaP->tamanioMarco);
 						memset(tmp,'\0',memoriaP->tamanioMarco);
-						memcpy(tmp, "a", 2);
 						marco =tmp;
 
 }

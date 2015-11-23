@@ -43,11 +43,13 @@ void tlbFlush();
 void memFlush();
 void tlbFlushHandler(int signum);
 void memoriaFlushHandler(int signum);
+void dumpMemoriaHandler(int signum);
+void memoryDump();
 
 t_config* config;
 t_log* logAdmMem;
 t_paramConfigAdmMem* configAdmMem;
-MEMORIAPRINCIPAL memoriaPrincipal;
+MEMORIAPRINCIPAL* memoriaPrincipal;
 t_dictionary* tablasPags;
 TLB* tlb;
 pthread_t hilo_tlbFlush;
@@ -55,6 +57,7 @@ pthread_t hilo_memFlush;
 pthread_attr_t attr;
 pthread_mutex_t mutex;
 int socketSwap;
+pid_t pid;
 
  int main(void){
 
@@ -65,7 +68,7 @@ int socketSwap;
 
 	 	 	 	 /* Inicialización de espacio de memoria, array indicador de memoria libre y TLB */
 
-	 	 	 	 t_memoria_crear(&memoriaPrincipal,configAdmMem);
+	 	 	 	memoriaPrincipal =  t_memoria_crear(configAdmMem);
 
 	 	 	 	 if (configAdmMem->tlb_habilitada) {
 	 	 	        tlb = t_tlb_crear(configAdmMem);
@@ -78,8 +81,9 @@ int socketSwap;
 
 	 	 	 	 /* Creación de los hilos para los flush de TLB y memoria */
 
-	 	 	 	signal(SIGUSR2,memoriaFlushHandler);
-	 	 	 	signal(SIGUSR1,tlbFlushHandler);
+	 	 	 	 signal(SIGUSR2,memoriaFlushHandler);
+	 	 	 	 signal(SIGUSR1,tlbFlushHandler);
+	 	 	 	 signal(SIGPOLL,dumpMemoriaHandler);
 
 
 	 	 	 	 pthread_mutexattr_t Attr;
@@ -223,12 +227,12 @@ int socketSwap;
 		 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
 
 			 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
-			 frame = buscarFrameLibre(&memoriaPrincipal);
+			 frame = buscarFrameLibre(memoriaPrincipal);
 
 			 if (marcosAsignados == configAdmMem->max_marcos_proceso){
-				 frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+				 frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp);
 				 borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
-				 insertarPaginaenMP(contenido,&memoriaPrincipal,&frame);
+				 insertarPaginaenMP(contenido,memoriaPrincipal,&frame);
 				 actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
 				 sleep(configAdmMem->retardo_memoria);
 				 loguearActualizacionMemoria(logAdmMem,protInic->paginas,paginaReemp,protInic->pid,frame);
@@ -236,7 +240,7 @@ int socketSwap;
 			 else{
 			 if (frame == -1){
 				 if(marcosAsignados == 0) {
-					finalizarProceso(&memoriaPrincipal, dictionary_get(tablasPags, string_itoa(protInic->pid)));
+					finalizarProceso(memoriaPrincipal, dictionary_get(tablasPags, string_itoa(protInic->pid)));
 					eliminarTablaDePaginasDelProceso(tablasPags,protInic->pid);
 					t_protoc_Finaliza* protFinaliz = malloc(sizeof(t_protoc_Finaliza));
 					protFinaliz->tipoInstrucc = FINALIZAR;
@@ -246,9 +250,9 @@ int socketSwap;
 					send(socketCPU,&rtaSwap,sizeof(int),0);
 			 	 }
 			 	 else {
-					frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+					frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp);
 					borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
-					insertarPaginaenMP(contenido,&memoriaPrincipal,&frame);
+					insertarPaginaenMP(contenido,memoriaPrincipal,&frame);
 					actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
 					sleep(configAdmMem->retardo_memoria);
 					loguearActualizacionMemoria(logAdmMem,protInic->paginas,paginaReemp,protInic->pid,frame);
@@ -256,7 +260,7 @@ int socketSwap;
 			 }
 			 else {
 
-				 insertarPaginaenMP(contenido,&memoriaPrincipal,&frame);
+				 insertarPaginaenMP(contenido,memoriaPrincipal,&frame);
 				 actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
 				 sleep(configAdmMem->retardo_memoria);
 				 paginaReemp = -1;
@@ -276,7 +280,7 @@ int socketSwap;
 			 }
 
 
-			 contenido = memoriaPrincipal.Memoria[frame];
+			 contenido = memoriaPrincipal->Memoria[frame];
 
 			 // Serializo el contenido del frame leido para su envío al CPU
 			 tamanioContenido = configAdmMem->tamanio_marco;
@@ -324,7 +328,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 
 		 if(frame != -1){
 
-			 insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
+			 insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 			 actualizarUtilizyModifPag(ESCRIBIR,tablaPagsProceso,pedido->pagina);
 
 			 //----Logging Acceso TLB(hit) -------//
@@ -343,7 +347,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 
 			 if(frame != -1){
 
-				 insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
+				 insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 				 actualizarUtilizyModifPag(ESCRIBIR,tablaPagsProceso,pedido->pagina);
 				 //-----------Logging Acceso Memoria (hit)-----------------------------------------------//
 				 t_tempLogueo* datosLogMemoria = cargaDatosAccesoMemoria(pedido->pid,pedido->pagina,frame);
@@ -356,12 +360,12 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 			 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
 
 				 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
-				 frame = buscarFrameLibre(&memoriaPrincipal);
+				 frame = buscarFrameLibre(memoriaPrincipal);
 
 				 if (marcosAsignados == configAdmMem->max_marcos_proceso){
-					 frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+					 frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp);
 					 borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
-					 insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
+					 insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 					 actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
 					 sleep(configAdmMem->retardo_memoria);
 					 loguearActualizacionMemoria(logAdmMem,pedido->pagina,paginaReemp,pedido->pid,frame);
@@ -369,7 +373,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				 else{
 				 if (frame == -1){
 					 if(marcosAsignados == 0) {
-						finalizarProceso(&memoriaPrincipal, dictionary_get(tablasPags, string_itoa(pedido->pid)));
+						finalizarProceso(memoriaPrincipal, dictionary_get(tablasPags, string_itoa(pedido->pid)));
 						eliminarTablaDePaginasDelProceso(tablasPags,pedido->pid);
 						t_protoc_Finaliza* protFinaliz = malloc(sizeof(t_protoc_Finaliza));
 						protFinaliz->tipoInstrucc = FINALIZAR;
@@ -379,16 +383,16 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 						send(socketCPU,&rtaSwap,sizeof(int),0);
 				 	 }
 				 	 else {
-				 		frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+				 		frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp);
 						borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
-						insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
+						insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 						actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
 						sleep(configAdmMem->retardo_memoria);
 						loguearActualizacionMemoria(logAdmMem,pedido->pagina,paginaReemp,pedido->pid,frame);
 				 	 }
 				 }
 				 else {
-					 insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
+					 insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 					 actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
 					 sleep(configAdmMem->retardo_memoria);
 					 paginaReemp = -1;
@@ -437,7 +441,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 	 memcpy(&pedido->pid, &pedidoCpu->pid,sizeof(int));
 
 
-	 finalizarProceso(&memoriaPrincipal, dictionary_get(tablasPags, string_itoa(pedido->pid)));
+	 finalizarProceso(memoriaPrincipal, dictionary_get(tablasPags, string_itoa(pedido->pid)));
 	 eliminarTablaDePaginasDelProceso(tablasPags,pedido->pid);
 	 sleep(configAdmMem->retardo_memoria);
 
@@ -575,7 +579,7 @@ void memFlush() {
 
 			pthread_mutex_lock(&mutex);
 			tlb_Flush(tlb);
-			mem_Flush(&memoriaPrincipal,tablasPags);
+			mem_Flush(memoriaPrincipal,tablasPags);
 			pthread_mutex_unlock(&mutex);
 			printf("Se han limpiado todos los registros de la Memoria. \n");
 			pthread_exit(EXIT_SUCCESS);
@@ -593,3 +597,44 @@ void memoriaFlushHandler(int signum) {
 	return;
 
 	}
+
+void dumpMemoriaHandler(int signum)
+{
+	 pid = fork();
+
+	 if(pid!=0)
+	 {
+		 signal(SIGPOLL,dumpMemoriaHandler);
+		 wait(NULL);
+		/// waitpid(pid,NULL,WNOHANG);
+
+	 }
+	 else
+	 {
+		 memoryDump();
+		 exit(0);
+
+	 }
+
+}
+
+
+
+
+void memoryDump()
+{
+
+   int i ;
+
+
+	log_info(logAdmMem,"MEMORY DUMP MARCOS = %d ",memoriaPrincipal->cantMarcos);
+	for(i=0; i<memoriaPrincipal->cantMarcos; i++)
+	{
+		char *frame ;
+
+		frame = memoriaPrincipal->Memoria[i];
+
+		log_info(logAdmMem, "FRAME #%d  CONTENIDO = %s",i,frame);
+
+	}
+}
