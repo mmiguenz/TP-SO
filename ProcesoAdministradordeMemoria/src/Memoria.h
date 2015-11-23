@@ -51,7 +51,10 @@ typedef struct{
 	void finalizarProceso(MEMORIAPRINCIPAL* memoria,t_tablaDePaginas* tablaDePaginas);
 	int buscarPaginaenMemoria(int, int,t_dictionary*);
 	void insertarPaginaenMP(char*,MEMORIAPRINCIPAL*,int*);
-	int reemplazarPaginaFIFO (int,char*, MEMORIAPRINCIPAL*, t_tablaDePaginas*,int*);
+	int reemplazarPagina(char*,int, MEMORIAPRINCIPAL*, t_tablaDePaginas*,int*);
+	void reemplazarPaginaFIFO(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp);
+	void reemplazarPaginaLRU(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp);
+	void reemplazarPaginaClockModif(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp);
 	void enviarDatosPorModifASwap(int,char*,int,int,int);
 	void actualizarTablaPaginas(int,int,int,t_tablaDePaginas*);
 	void inicializarMarco(MEMORIAPRINCIPAL*, char* marco);

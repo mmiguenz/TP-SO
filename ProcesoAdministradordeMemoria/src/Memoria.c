@@ -18,6 +18,8 @@
 
 #define MAXTIME 90000000;
 
+enum {FIFO,LRU,CLOCKMODIF};
+
 
 void t_memoria_crear(MEMORIAPRINCIPAL* memoriaP , t_paramConfigAdmMem* config)
 {
@@ -137,39 +139,90 @@ void insertarPaginaenMP(char*contenido,MEMORIAPRINCIPAL* memoria,int* marco){
 
 }
 
-int reemplazarPaginaFIFO (int socketSwap,char* contenido, MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso,int* pagAReemp){
-	int i;
-	int pagAModif = 0;
+int reemplazarPagina(char* algoritmoReemplazo,int socketSwap, MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp){
+
+	int algReemp = 0;
+	algReemp = strcmp(algoritmoReemplazo,"FIFO") == 0?FIFO:algReemp;
+	algReemp = strcmp(algoritmoReemplazo,"LRU") == 0?LRU:algReemp;
+	algReemp = strcmp(algoritmoReemplazo,"CLOCKMODIF") == 0?CLOCKMODIF:algReemp;
+
 	int frame;
+
+	switch (algReemp) {
+	case FIFO:
+		reemplazarPaginaFIFO(tablaPagsProceso,nroPagAReemp);
+		break;
+
+	case LRU:
+		reemplazarPaginaLRU(tablaPagsProceso,nroPagAReemp);
+		break;
+
+	case CLOCKMODIF:
+		reemplazarPaginaClockModif(tablaPagsProceso,nroPagAReemp);
+		break;
+	}
+
+	t_regPagina* paginaAReemp = tablaPagsProceso->Pagina[*nroPagAReemp];
+
+	//Evalúo si la página a reemplazar fue modificada previamente, y en caso afirmativo envío su contenido a Swap para su modificación.
+
+	if(paginaAReemp->bitModificado){
+		int tamanioContenido = memoria->tamanioMarco;
+		char* contenidoReemp = malloc(memoria->tamanioMarco);
+		contenidoReemp = memoria->Memoria[paginaAReemp->idFrame];
+		enviarDatosPorModifASwap(socketSwap,contenidoReemp,tamanioContenido,*nroPagAReemp,tablaPagsProceso->pid);
+	}
+
+	//Reinicio la entrada de la tabla de páginas correspondiente a la página reemplazada y asigno frame correspondiente.
+
+	frame = paginaAReemp->idFrame;
+	paginaAReemp->bitPresencia = 0;
+	paginaAReemp->bitModificado = 0;
+	paginaAReemp->bitUtilizado = 0;
+	paginaAReemp->horaIngreso = MAXTIME;
+	paginaAReemp->horaUtilizacion = MAXTIME;
+	paginaAReemp->idFrame = -1;
+
+	return frame;
+
+}
+
+void reemplazarPaginaFIFO(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp){
+
+	int i;
 	t_regPagina* PaginaFirstIn;
 	PaginaFirstIn = tablaPagsProceso->Pagina[0];
 	for (i=1;i<tablaPagsProceso->cantTotalPaginas;i++){
 
 		if (tablaPagsProceso->Pagina[i]->horaIngreso < PaginaFirstIn->horaIngreso){
 			PaginaFirstIn = tablaPagsProceso->Pagina[i];
-			pagAModif = i;
+			*nroPagAReemp = i;
 		}
 	}
-	PaginaFirstIn->bitPresencia = 0;
-	*pagAReemp = pagAModif;
-
-	if(PaginaFirstIn->bitModificado){
-		int tamanioContenido = memoria->tamanioMarco;
-		char* contenidoReemp = malloc(memoria->tamanioMarco);
-		contenidoReemp = memoria->Memoria[PaginaFirstIn->idFrame];
-		enviarDatosPorModifASwap(socketSwap,contenidoReemp,tamanioContenido,pagAModif,tablaPagsProceso->pid);
-		//free(contenidoReemp);
-	}
-
-	frame = PaginaFirstIn->idFrame;
-	PaginaFirstIn->bitPresencia = 0;
-	PaginaFirstIn->bitModificado = 0;
-	PaginaFirstIn->horaIngreso = MAXTIME;
-	PaginaFirstIn->idFrame = -1;
-
-	return frame;
 
 }
+
+void reemplazarPaginaLRU(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp){
+
+	int i;
+	t_regPagina* PaginaLRU;
+	PaginaLRU = tablaPagsProceso->Pagina[0];
+	for (i=1;i<tablaPagsProceso->cantTotalPaginas;i++){
+
+		if (tablaPagsProceso->Pagina[i]->horaUtilizacion < PaginaLRU->horaUtilizacion){
+			PaginaLRU = tablaPagsProceso->Pagina[i];
+			*nroPagAReemp = i;
+		}
+	}
+
+}
+
+void reemplazarPaginaClockModif(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp){
+
+
+}
+
+
 
 void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp, int tamanioContenido,int pagAModif,int pid){
 	t_protoc_escrituraProceso* protocEscrSwap = malloc(sizeof(t_protoc_escrituraProceso));

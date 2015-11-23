@@ -28,6 +28,8 @@
 #include "Tlb.h"
 #include "LoggingAdmMem.h"
 
+#define MAXTIME 90000000;
+
 
 void crear_e_insertar_TabladePaginas(int, int, t_dictionary*);
 void* deserializarInfoCPU_Inicio_Lectura(int, t_protoc_inicio_lectura_Proceso*,char);
@@ -224,7 +226,7 @@ int socketSwap;
 			 frame = buscarFrameLibre(&memoriaPrincipal);
 
 			 if (marcosAsignados == configAdmMem->max_marcos_proceso){
-				 frame = reemplazarPaginaFIFO(socketSwap,contenido,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+				 frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
 				 borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
 				 insertarPaginaenMP(contenido,&memoriaPrincipal,&frame);
 				 actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
@@ -244,7 +246,7 @@ int socketSwap;
 					send(socketCPU,&rtaSwap,sizeof(int),0);
 			 	 }
 			 	 else {
-					frame = reemplazarPaginaFIFO(socketSwap,contenido,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+					frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
 					borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
 					insertarPaginaenMP(contenido,&memoriaPrincipal,&frame);
 					actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
@@ -357,7 +359,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				 frame = buscarFrameLibre(&memoriaPrincipal);
 
 				 if (marcosAsignados == configAdmMem->max_marcos_proceso){
-					 frame = reemplazarPaginaFIFO(socketSwap,pedido->contenido,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+					 frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
 					 borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
 					 insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
 					 actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
@@ -377,7 +379,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 						send(socketCPU,&rtaSwap,sizeof(int),0);
 				 	 }
 				 	 else {
-						frame = reemplazarPaginaFIFO(socketSwap,pedido->contenido,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+				 		frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
 						borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
 						insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
 						actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
@@ -501,7 +503,9 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 		 tablaPaginasProceso->Pagina[i]->idFrame = -1;
 		 tablaPaginasProceso->Pagina[i]->bitPresencia = 0;
 		 tablaPaginasProceso->Pagina[i]->bitModificado = 0;
-		 tablaPaginasProceso->Pagina[i]->horaIngreso = 90000000;//Espacio que ocupa la hora en formato 'hh:mm:ss:mmmm'
+		 tablaPaginasProceso->Pagina[i]->bitUtilizado = 0;
+		 tablaPaginasProceso->Pagina[i]->horaIngreso = MAXTIME;
+		 tablaPaginasProceso->Pagina[i]->horaUtilizacion = MAXTIME;//Espacio que ocupa la hora en formato 'hh:mm:ss:mmmm'
 	 };
 
 	 char* pidConv = malloc(20);
