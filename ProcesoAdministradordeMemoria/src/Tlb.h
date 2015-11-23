@@ -32,6 +32,7 @@ char t_tlb_estaLibre(t_regTLB* cacheTLB); // recibe un registro tlb e indica si 
 int buscarPaginaTLB(TLB* tlb,int pid, int pagina,int* entradaTLB);
 
 t_tempLogueo* agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int frame);
+void borrarRegistroTLBPagReemp(TLB* tlb, int* paginaReemp,int pid);
 
 #endif /* TLB_H_ */
 

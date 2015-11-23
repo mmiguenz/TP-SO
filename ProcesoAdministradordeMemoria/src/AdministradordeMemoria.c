@@ -207,8 +207,8 @@ int socketSwap;
 			 t_tempLogueo* datosLogMemoria = cargaDatosAccesoMemoria(protInic->pid,protInic->paginas,frame);
 			 datosLogMemoria->hit = true;
 			 loguearEvento(logAdmMem,datosLogMemoria);
-		 }
 		 //-----------------------------------------------//
+		 }
 	 }
 
 
@@ -225,6 +225,7 @@ int socketSwap;
 
 			 if (marcosAsignados == configAdmMem->max_marcos_proceso){
 				 frame = reemplazarPaginaFIFO(socketSwap,contenido,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+				 borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
 				 insertarPaginaenMP(contenido,&memoriaPrincipal,&frame);
 				 actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
 				 sleep(configAdmMem->retardo_memoria);
@@ -244,6 +245,7 @@ int socketSwap;
 			 	 }
 			 	 else {
 					frame = reemplazarPaginaFIFO(socketSwap,contenido,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+					borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
 					insertarPaginaenMP(contenido,&memoriaPrincipal,&frame);
 					actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
 					sleep(configAdmMem->retardo_memoria);
@@ -337,20 +339,17 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 			 frame = buscarPaginaenMemoria(pedido->pid,pedido->pagina,tablasPags);
 			 sleep(configAdmMem->retardo_memoria);
 
+			 if(frame != -1){
+
+				 insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
+				 actualizarUtilizyModifPag(ESCRIBIR,tablaPagsProceso,pedido->pagina);
+				 //-----------Logging Acceso Memoria (hit)-----------------------------------------------//
+				 t_tempLogueo* datosLogMemoria = cargaDatosAccesoMemoria(pedido->pid,pedido->pagina,frame);
+				 datosLogMemoria->hit = true;
+				 loguearEvento(logAdmMem,datosLogMemoria);
+				 //--------------------------------------------------------------------------------------//
+			 }
 		 }
-
-
-		 if(frame != -1){
-
-			 insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
-			 actualizarUtilizyModifPag(ESCRIBIR,tablaPagsProceso,pedido->pagina);
-			 //-----------Logging Acceso Memoria (hit)-----------------------------------------------//
-			 t_tempLogueo* datosLogMemoria = cargaDatosAccesoMemoria(pedido->pid,pedido->pagina,frame);
-			 datosLogMemoria->hit = true;
-			 loguearEvento(logAdmMem,datosLogMemoria);
-			 //--------------------------------------------------------------------------------------//
-		 }
-
 
 			 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
 
@@ -359,6 +358,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 
 				 if (marcosAsignados == configAdmMem->max_marcos_proceso){
 					 frame = reemplazarPaginaFIFO(socketSwap,pedido->contenido,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+					 borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
 					 insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
 					 actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
 					 sleep(configAdmMem->retardo_memoria);
@@ -378,6 +378,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				 	 }
 				 	 else {
 						frame = reemplazarPaginaFIFO(socketSwap,pedido->contenido,&memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+						borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
 						insertarPaginaenMP(pedido->contenido,&memoriaPrincipal,&frame);
 						actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
 						sleep(configAdmMem->retardo_memoria);

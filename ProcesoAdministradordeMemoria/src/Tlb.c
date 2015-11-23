@@ -126,6 +126,31 @@ t_tempLogueo* agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int fr
 
 }
 
+void borrarRegistroTLBPagReemp(TLB* tlb, int* paginaReemp,int pid){
+	int i;
+	int posicAElim = 0;
+	for (i = 0; i < tlb->nroEntradasTLB; ++i) {
+		if(tlb->CacheTLB[i]->pid == pid && tlb->CacheTLB[i]->pagina == *paginaReemp){
+			tlb->CacheTLB[i]->pid = -1;
+			tlb->CacheTLB[i]->pagina = -1;
+			tlb->CacheTLB[i]->frame = -1;
+			posicAElim = i;
+		}
+	}
+
+	if (posicAElim != 0){
+
+		bool buscarEntradaAEliminar(int* entradaTLB)
+		{
+			return *entradaTLB==posicAElim;
+		}
+
+		int* posContElim = list_remove_by_condition(tlb->sOrdenDeIngresoTLB->elements,(void*)buscarEntradaAEliminar);
+
+		printf("Se elimino de la cola de la TLB la entrada: %i",*posContElim);
+	}
+}
+
 
 char t_tlb_estaLibre(t_regTLB* cacheTLB)
 {
