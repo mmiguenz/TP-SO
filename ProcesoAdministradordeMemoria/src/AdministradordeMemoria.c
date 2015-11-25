@@ -440,13 +440,25 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 
 	 memcpy(&pedido->pid, &pedidoCpu->pid,sizeof(int));
 
+	 t_tablaDePaginas* tablaDelProceso = dictionary_get(tablasPags, string_itoa(pedido->pid));
 
-	 finalizarProceso(memoriaPrincipal, dictionary_get(tablasPags, string_itoa(pedido->pid)));
+	 char respuestaSwap=1;
+
+
+	 if(tablaDelProceso!=NULL )
+	 {
+
+	 finalizarProceso(memoriaPrincipal,tablaDelProceso);
 	 eliminarTablaDePaginasDelProceso(tablasPags,pedido->pid);
 	 sleep(configAdmMem->retardo_memoria);
 
 
-	 char respuestaSwap = notificarFinalizarSwap(socketSwap,pedido);
+	 respuestaSwap = notificarFinalizarSwap(socketSwap,pedido);
+
+
+	 }
+
+
 
 	 if(respuestaSwap)
 	 {
@@ -454,6 +466,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 		notificarFinalizarCpu(socketCpu);
 
 	 }
+
 
 
 
