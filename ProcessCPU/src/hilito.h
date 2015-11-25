@@ -97,6 +97,8 @@ void abrir(PCB* PcbAux, char buffer[1500]);
 
 void* conectar();
 
+void* mensajear_porc();
+
 void porcentajesCPU(t_queue * porcentajes_CPU);
 
 usoCPU* buscarNodo(int cpu, t_queue * porcentajes_CPU);

@@ -623,7 +623,7 @@ void* conectar(void* mensa){
 			instrucciones[cpu]++;
 
 
-	free(aux);
+
 
 	while(1){
 		//avisamos al planificador que estamos listo para recibir un mProc
@@ -716,6 +716,52 @@ void* conectar(void* mensa){
 
 	return EXIT_SUCCESS;
 }
+
+
+
+void* mensajear_porc(void* mensa){
+	//--inicializamos estrucctura para recibir parametros
+	struct1 *param;
+	//param=malloc(sizeof(struct1));
+	param=(struct1*)mensa;
+
+	//las asignamos a variables locales
+	int puertoPlanificador = param->puerto_escucha_planificador;
+	char* ipPlanificador = param ->ip_conec_plani;
+	int puertoMemoria = param-> puerto_escucha_memoria;
+	char* ipMemoria = param->ip_conec_memoria;
+	t_log* logger = param->logger;
+	retardo = param->retardo;
+	int cpu;
+
+
+	//--nos conectamos con planificador y memoria
+	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
+
+	char* aux = recibirMensaje(planificador);
+
+	t_msgHeader header2;
+			memset(&header2, 0, sizeof(t_msgHeader));
+			header2.msgtype = 7; //significa kien soy
+			header2.payload_size = planificador;
+			send(planificador, &header2, sizeof( t_msgHeader), 0);
+
+			recv(planificador,&cpu,sizeof(int),0);
+			printf("Soy el Master %d \n\n",cpu);
+
+
+
+
+	while(1){
+		recv(planificador,&cpu,sizeof(int),0);
+
+
+			}
+
+
+	return EXIT_SUCCESS;
+}
+
 
 
 
