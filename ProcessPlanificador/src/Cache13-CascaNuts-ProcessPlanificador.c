@@ -87,7 +87,7 @@ PCB *pcb_create(char *name, int estado, char* ruta);
 int identificar_comando(char comando[]);
 
 #include "servidor.h"
-#include "semaph.h"
+
 
 
 
@@ -124,21 +124,6 @@ int main(void)
 
                         	 log_trace(logger, "Se abrio el archivo de configuracion %s", "CONFIG");
                         	}
-//------------------Soy una barra separadora ;p------------------------------------//
-//------------------Creacion de semaforos------------------------------------------//
-
-   int   mutex;	/* semáforo */
-
-   /* obtener una clave cualquiera para el recurso ipc */
-   if ((key_t) -1 == (claveMutex = ftok("/bin/ls", 123))) {
-	   fprintf(stderr, "main: Error al crear la clave con ftok()\n");
-       exit(1);
-       }
-    /* crear del semaforo */
-     if (-1 == (mutex = semCreate(claveMutex, 1))){
-     fprintf(stderr, "main: No pude crear el semaforo\n");
-     exit(1);
-       }
 
 
 /********************Soy una barra llena de asteriscos*********************************************/
@@ -148,13 +133,12 @@ int main(void)
 
 
 
-				pthread_create(&hilo_shell, NULL, shell, (void *) &mutex);
+				pthread_create(&hilo_shell, NULL, shell, (void *) NULL);
 
 				pthread_create(&hilo_io, NULL, manejo_IO, (void *) NULL);
 
 
-				conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger, PCB_running,
-						mutex, block_PCB);
+				conectar_fifo(puerto_escucha_planif, fifo_PCB_ready, logger, PCB_running, block_PCB);
 
 
 
@@ -178,8 +162,6 @@ void *shell(int mutex){
 	printf("----Por esta consola debera ingresar los procesos que necesite correr----\n");
 	printf("----o bien los comandos que desea que realize el planificador------------\n");
 	printf("--------------------------------------------------------------------------\n\n\n\n");
-	  if (-1 == (mutex = semOpen(claveMutex)))
-		 fprintf(stderr, "No tengo el cualificador de mutex\n");
 
 	    sem_init(&sem_mutex1, 1, 1);
 	    sem_init(&sem_porc, 1, 0);
@@ -341,7 +323,7 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		printf("El Comando que eligio fue finalizar \n");
 		printf("Y el PID del proceso a finalizar es = %d  \n",pid);
 		int tamanio=queue_size(fifo_PCB_ready);
-		semWait(mutex);
+
 		while(tamanio!=0){
 		auxPCB=queue_pop(fifo_PCB_ready);
 		//printf("El pid del proceso es: %d \n",auxPCB->PID);
@@ -352,7 +334,7 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		queue_push(fifo_PCB_ready,auxPCB);
 		tamanio--;
 		}
-		semSignal(mutex);
+
 		break;
 	}
 	case PS:
@@ -361,7 +343,7 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		PCB* auxPCBrun=malloc(sizeof(PCB));
 		PCB* auxPCBblock=malloc(sizeof(PCB));
 		int tamanio=queue_size(fifo_PCB_ready);
-		semWait(mutex);
+
 		while(tamanio!=0){
 		auxPCBrun=queue_pop(fifo_PCB_ready);
 		printf("mProc %d: %s -> Listo \n",auxPCBrun->PID,auxPCBrun->nombreProc);
@@ -384,7 +366,7 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		queue_push(block_PCB,auxPCBblock);
 		tamanio--;
 		}
-		semSignal(mutex);
+
 
 		break;
 	}

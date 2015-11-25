@@ -431,28 +431,41 @@ int ubicarPunta(char cadena [1500], PCB* PcbAux){
 
 
 void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
-	int instruccion = 4;
-	int paginas=0;
-	enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
+int 	instruccion =4 ;
+		printf("Encontre Finalizar\n");
+		int paginas=0;
 
-	printf("El proceso Pudo finalizar\n");
-	log_info(logger, "El pid es %d", PcbAux->PID);
-	log_info(logger, "mProc %s solo ejecuta sentencia finalizado", PcbAux->nombreProc);
+		enviarSolicitud (PcbAux->PID, instruccion, paginas , memoria);
+		char msj = *(recibirMsjMemoria(memoria));
+		printf("mensaje de la memoria %d \n",msj);
 
-	t_msgHeader header;
-	memset(&header, 0, sizeof(t_msgHeader));
-	header.msgtype = 3;
-	header.payload_size = 0;
-	send(planificador, &header, sizeof( t_msgHeader), 0);
+		if(msj==1)
+		{
+			printf("El proceso Pudo finalizar\n");
+			log_info(logger, "El pid es %d", PcbAux->PID);
+			log_info(logger, "mProc %s finalizado", PcbAux->nombreProc);
+			PcbAux->contadorProgram++;
 
-	PCB_PARCIAL parcial;
-	memset(&parcial, 0, sizeof(PCB_PARCIAL));
-	parcial.pid = PcbAux->PID;
-	parcial.tiempo = 0;
-	parcial.contadorDePrograma = PcbAux->contadorProgram;
-	send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 
-	usleep((retardo*1000000));
+			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
+
+
+			t_msgHeader header;
+			memset(&header, 0, sizeof(t_msgHeader));
+			header.msgtype = 3;
+			header.payload_size = 0;
+			send(planificador, &header, sizeof( t_msgHeader), 0);
+
+			PCB_PARCIAL parcial;
+			memset(&parcial, 0, sizeof(PCB_PARCIAL));
+			parcial.pid = PcbAux->PID;
+			parcial.tiempo = 0;
+			parcial.contadorDePrograma = PcbAux->contadorProgram;
+			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
+
+
+			usleep((retardo*1000000));
+		}
 	return;
 }
 
@@ -747,25 +760,27 @@ void* mensajear_porc(void* mensa){
 			send(planificador, &header2, sizeof( t_msgHeader), 0);
 
 			recv(planificador,&cpu,sizeof(int),0);
-
-
-
+			printf("Soy el Master %d \n\n",cpu);
+			time_t inicio;
+			int times;
 
 	while(1){
 
+					inicio=time(NULL);
 					recv(planificador,&cpu,sizeof(int),0);
+					times=difftime(time(NULL),inicio);
 					int i=0;
-					printf("Soy el Master %d \n\n",cpu);
 
+					if (times==0){times=1;};
 						while(i!=50)
 						{
 							if (instrucciones[i]!=-1){
-								porcentajes[i]=(instrucciones[i]*100)/(60*retardo);
+								porcentajes[i]=(instrucciones[i]*100)/(times*retardo);
+
 								printf("La cantidad de instrucciones es %d \n",instrucciones[i] );
 								printf("El retardo es %d \n",retardo);
-								//instrucciones[i]=0;
 								printf("\n-----------El porcentaje de uso del CPU %d es %f.2-------\n---------------------------------------------\n",i,porcentajes[i]);
-
+								instrucciones[i]=0;
 							}
 							i++;
 						}
@@ -794,16 +809,12 @@ void* calcularPorcentajes(){
 
 
 	int i=0;
-	sleep(60);
+	sleep(20);
 	while(i!=50)
 	{
 		if (instrucciones[i]!=-1){
-			porcentajes[i]=(instrucciones[i]*100)/(60*retardo);
-			printf("La cantidad de instrucciones es %d \n",instrucciones[i] );
-			printf("El retardo es %d \n",retardo);
-			//instrucciones[i]=0;
-			printf("\n-----------El porcentaje de uso del CPU %d es %f.2-------\n---------------------------------------------\n",i,porcentajes[i]);
-
+			porcentajes[i]=(instrucciones[i]*100)/(20*retardo);
+			instrucciones[i]=0;
 		}
 		i++;
 	}

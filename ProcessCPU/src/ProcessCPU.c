@@ -89,11 +89,8 @@ int main(void) {
 	int err;
 	long t;
 
-
- 	pthread_t hilo_porcentajes;
  	pthread_t manejo_porcentajes;
 
- 	pthread_create(&hilo_porcentajes, NULL, (void*)calcularPorcentajes, NULL);
  	pthread_create(&manejo_porcentajes, NULL,(void*)mensajear_porc, (void*) paramHilo);
 
 
@@ -114,7 +111,6 @@ int main(void) {
 	}
 	//pthread_join(threadPorcentajes, NULL);
 	//--liberamos memoria
-	pthread_join(hilo_porcentajes, NULL);
 	pthread_join(manejo_porcentajes, NULL);
 	queue_destroy(porcentajes_CPU);
 	pthread_mutex_destroy(&mutex);

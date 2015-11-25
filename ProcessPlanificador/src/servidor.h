@@ -44,7 +44,7 @@ void * search_and_destroy(int pid,t_queue * running_PCB);
 
 void* dormir(void* param_hilo);
 
-void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB);
+void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB,  t_queue * block_PCB);
 void* manejo_porc();
 
 /**
@@ -83,7 +83,7 @@ int dameMaximo (int *tabla, int n);
 void compactaClaves (int *tabla, int *n);
 
 
-void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex,t_queue * block_PCB);
+void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, t_queue * block_PCB);
 
 
 

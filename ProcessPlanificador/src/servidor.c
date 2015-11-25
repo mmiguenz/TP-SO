@@ -1,7 +1,7 @@
 #include "servidor.h"
 #include <sys/types.h>
 #include <fcntl.h>
-#include "semaph.h"
+
 
 #include <semaphore.h>
 #include <time.h>
@@ -57,7 +57,7 @@ PCB *search_and_return(int pid,t_queue * running_PCB);
  * a empezar.
  */
 
-void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB)
+void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB,  t_queue * block_PCB)
 {
 	sem_init(&sem_consumidor_block,1,0);
 	sem_init(&sem_consume_cpu,1,0);
@@ -151,7 +151,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 				 if ((recv(socketCliente[i],&header,sizeof(header),0)) > 0){
 
 
-					 	procesar_mensaje(socketCliente[i],header,fifo_PCB, logger,  running_PCB, mutex,  block_PCB);
+					 	procesar_mensaje(socketCliente[i],header,fifo_PCB, logger,  running_PCB,  block_PCB);
 
 
 
@@ -434,7 +434,7 @@ return 0;
 }
 
 
-void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB){
+void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB,  t_queue * block_PCB){
 
 	 PCB_PARCIAL pcb_parc;
 					 pcb_parc.contadorDePrograma=0;
@@ -689,7 +689,7 @@ void* manejo_cpu_libres(void* mensa){
 
 void* manejo_porc(){
 
-	printf("LLEGUEEEEEE\n");
+
 	while(1){
 	sem_wait(&sem_porc);
 
