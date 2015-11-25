@@ -244,6 +244,7 @@ float aciertos_TLB;
 
 		 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
 
+			 (tablaPagsProceso->contadorPF)++;
 			 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
 			 frame = buscarFrameLibre(memoriaPrincipal);
 
@@ -288,6 +289,7 @@ float aciertos_TLB;
 			 }
 		 }
 
+		 (tablaPagsProceso->contadorPaginasAcc)++;
 
 		 if (frame != -1){
 
@@ -385,6 +387,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 
 			 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
 
+				 (tablaPagsProceso->contadorPF)++;
 				 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
 				 frame = buscarFrameLibre(memoriaPrincipal);
 
@@ -427,6 +430,8 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				 	 }
 				 }
 			 }
+
+		 (tablaPagsProceso->contadorPaginasAcc)++;
 
 			 if (frame != -1){
 
@@ -476,6 +481,14 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 	 {
 
 	 finalizarProceso(memoriaPrincipal,tablaDelProceso);
+
+	 /*Se muestra la cantidad de Fallos de Página y Paginas accedidas del proceso que finaliza*/
+	 printf("Proceso Finalizado. \n");
+	 printf("PID:%d \n",tablaDelProceso->pid);
+	 printf("Cantidad total de páginas accedidas: %d \n",tablaDelProceso->contadorPaginasAcc);
+	 printf("Cantidad de fallos de páginas producidos: %d \n",tablaDelProceso->contadorPF);
+	 /*---------------------------------------------------------------------------------------*/
+
 	 eliminarTablaDePaginasDelProceso(tablasPags,pedido->pid);
 	 sleep(configAdmMem->retardo_memoria);
 
@@ -542,6 +555,8 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 	 tablaPaginasProceso->Pagina = (t_regPagina**)calloc(paginas,sizeof(t_regPagina*));
 	 tablaPaginasProceso->pid = pid;
 	 tablaPaginasProceso->cantTotalPaginas = paginas;
+	 tablaPaginasProceso->contadorPF = 0;
+	 tablaPaginasProceso->contadorPaginasAcc = 0;
 
 	 for (i=0; i<paginas; ++i){
 		 tablaPaginasProceso->Pagina[i] = malloc(sizeof(t_regPagina));
@@ -701,8 +716,6 @@ while(1)
 	tasaAciertos = (referMem_TLB != 0.00)?aciertos_TLB/referMem_TLB:0.00;
 	pthread_mutex_unlock(&mutexTLB);
 
-	printf("Cantidad de aciertos (historico) = %.2f \n",aciertos_TLB);
-	printf("Cantidad de referencias (historico) = %.2f \n",referMem_TLB);
 	printf("Tasa de aciertos histórica de TLB = %.2f \n",tasaAciertos);
 }
 

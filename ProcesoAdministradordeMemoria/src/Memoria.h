@@ -35,17 +35,9 @@ typedef struct{
 		int cantTotalPaginas;
 		int** vectClockModif;
 		int posicClockModif;
+		int contadorPaginasAcc;
+		int contadorPF;
 	}t_tablaDePaginas;
-
-
-	typedef struct{
-		int totalDePaginas;
-		int ** tablaDePaginas;
-		t_list* marcosAsignados;
-		t_queue* contenidoDeMarcos;
-		int contadorMissTLB;
-		int contadorHits;
-	}TABLADEPROCESOS;
 
 	char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos, int Tamanio_Marco);
 	char* inicializarMemoriaLibre(int cant_Marcos);
