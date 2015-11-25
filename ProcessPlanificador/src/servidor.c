@@ -7,12 +7,13 @@
 #include <time.h>
 
 sem_t sem_mutex1;
+sem_t sem_porc;
 sem_t sem_consumidor;
 sem_t sem_consumidor_block;
 sem_t sem_consume_cpu;
 
 t_queue * cpu_libres; //Cola de cpu libres
-
+int master;
 
 typedef struct {
 char* nombreProc;
@@ -85,6 +86,16 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 		perror ("Error al abrir servidor");
 
 	}
+
+
+	pthread_t hilo_porc; //Hilo que creo para correr la i/o  que acepta procesos y los blockea
+			pthread_create(&hilo_porc, NULL, manejo_porc, (void *) NULL);
+
+
+
+
+
+
 
 	/* Bucle infinito.
 	 * Se atiende a si hay más clientes para conectar y a los mensajes enviados
@@ -173,6 +184,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 	}}
 
 	pthread_join(hilo_cpu_libres, NULL);
+	pthread_join(hilo_porc, NULL);
 
 
 }
@@ -543,8 +555,20 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 	case 7:{
 
 		send(socketCliente,&socketCliente,sizeof(int),0);
+		break;
+
+	}
+
+	case 8:{
+
+		send(socketCliente,&socketCliente,sizeof(int),0);
+		printf("SE CONECTO EL MASTER\n\n");
+		master=socketCliente;
+				break;
+
 	}
 	}
+
 
 
 }
@@ -660,4 +684,16 @@ void* manejo_cpu_libres(void* mensa){
 		sem_post(&sem_mutex1);
 
 }
+}
+
+
+void* manejo_porc(){
+
+	printf("LLEGUEEEEEE\n");
+	while(1){
+	sem_wait(&sem_porc);
+
+	send(master,&master,sizeof(int),0);
+	}
+	return 0;
 }

@@ -42,6 +42,8 @@ t_queue * block_PCB; //Cola de pcb que estan blockeados
 
 sem_t sem_mutex1;
 sem_t sem_consumidor;
+sem_t sem_porc;
+
 sem_t sem_mutex_block;
 sem_t sem_consumidor_block;
 
@@ -180,6 +182,8 @@ void *shell(int mutex){
 		 fprintf(stderr, "No tengo el cualificador de mutex\n");
 
 	    sem_init(&sem_mutex1, 1, 1);
+	    sem_init(&sem_porc, 1, 0);
+
 	    sem_init(&sem_consumidor,1,0);
 	    sem_init(&sem_mutex_block,1,0);
 
@@ -387,7 +391,7 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 	case CPU:
 	{
 		printf("El comando que eligio fue cpu \n");
-		send(cpu_conectada,"Dame %", 8, 0);
+		sem_post(&sem_porc);
 		break;
 	}
 	case ERROR:

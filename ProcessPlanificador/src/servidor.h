@@ -45,7 +45,7 @@ void * search_and_destroy(int pid,t_queue * running_PCB);
 void* dormir(void* param_hilo);
 
 void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t_log* logger, t_queue * running_PCB, int mutex, t_queue * block_PCB);
-
+void* manejo_porc();
 
 /**
  * Abre u socket INET para atender al servicio cuyo nombre es Servicio.

@@ -742,19 +742,33 @@ void* mensajear_porc(void* mensa){
 
 	t_msgHeader header2;
 			memset(&header2, 0, sizeof(t_msgHeader));
-			header2.msgtype = 7; //significa kien soy
+			header2.msgtype = 8; //significa kien soy
 			header2.payload_size = planificador;
 			send(planificador, &header2, sizeof( t_msgHeader), 0);
 
 			recv(planificador,&cpu,sizeof(int),0);
-			printf("Soy el Master %d \n\n",cpu);
 
 
 
 
 	while(1){
-		recv(planificador,&cpu,sizeof(int),0);
 
+					recv(planificador,&cpu,sizeof(int),0);
+					int i=0;
+					printf("Soy el Master %d \n\n",cpu);
+
+						while(i!=50)
+						{
+							if (instrucciones[i]!=-1){
+								porcentajes[i]=(instrucciones[i]*100)/(60*retardo);
+								printf("La cantidad de instrucciones es %d \n",instrucciones[i] );
+								printf("El retardo es %d \n",retardo);
+								//instrucciones[i]=0;
+								printf("\n-----------El porcentaje de uso del CPU %d es %f.2-------\n---------------------------------------------\n",i,porcentajes[i]);
+
+							}
+							i++;
+						}
 
 			}
 
