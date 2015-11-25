@@ -21,6 +21,13 @@ typedef enum {
 	STATUSSENIAL,
 } t_Evento;
 
+typedef enum {
+	SIGUSR1_,
+	SIGUSR2_,
+	SIGPOLL_,
+} t_Senial;
+
+
 typedef struct{
 	int pid;
 	int paginas;
@@ -29,6 +36,7 @@ typedef struct{
 	bool regSaliente;
 	bool hit;
 	char* algoritmo_reemplazo;
+	t_Senial nomSenial;
 	t_Evento tipoEvento;
 }t_tempLogueo;
 
@@ -41,7 +49,8 @@ void loguearAccesoTLB(t_log*logAdmMem,t_tempLogueo* estructDatosALoguear);
 void loguearActualizacionTLB(t_log*logAdmMem,t_tempLogueo* datosLogTLB,int frame,int pid,int pagina);
 void loguearAccesoMemoria(t_log*logAdmMem,t_tempLogueo* estructDatosALoguear);
 void loguearActualizacionMemoria(t_log* logAdmMem,int pagina,int paginaReemp, int pid,int frame);
-void loguearSenial(t_log*logAdmMem);
+void loguearSenial(t_log*logAdmMem,t_tempLogueo* datosLog);
+void loggingSenial(t_log* logAdmMem,t_Senial nomSenial);
 t_tempLogueo* cargaDatosLogCrearMProc (t_protoc_inicio_lectura_Proceso* arg);
 t_tempLogueo* cargaDatosLogSolicLect (t_protoc_inicio_lectura_Proceso* arg);
 t_tempLogueo* cargaDatosLogSolicEscr (t_protoc_escrituraProceso* arg);

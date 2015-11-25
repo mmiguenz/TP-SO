@@ -32,7 +32,7 @@ void loguearEvento(t_log* logAdmMem,t_tempLogueo* estructDatosALoguear)
 		loguearAccesoMemoria(logAdmMem,estructDatosALoguear);
 		break;
 		case STATUSSENIAL:
-		loguearSenial(logAdmMem);
+		loguearSenial(logAdmMem,estructDatosALoguear);
 		break;
 
 	}
@@ -158,7 +158,42 @@ t_tempLogueo* datosLogMemPF;
 }
 }
 
-void loguearSenial(t_log*logAdmMem){
+void loguearSenial(t_log*logAdmMem,t_tempLogueo* datosLog){
+
+	char* lineaALoguear = malloc(120);
+
+	switch (datosLog->nomSenial) {
+		case SIGUSR1_:
+
+			sprintf(lineaALoguear,"Se recibió la señal SIGUSR1 \n");
+			log_warning(logAdmMem,lineaALoguear);
+			sprintf(lineaALoguear,"Tratamiento de señal SIGUSR1 finalizado: Se han reinicializado todos los registros de la TLB (TLB Flush). \n");
+			log_info(logAdmMem,lineaALoguear);
+			free(lineaALoguear);
+			free(datosLog);
+			break;
+
+		case SIGUSR2_:
+
+			sprintf(lineaALoguear,"Se recibió la señal SIGUSR2 \n");
+			log_warning(logAdmMem,lineaALoguear);
+			sprintf(lineaALoguear,"Tratamiento de señal SIGUSR2 finalizado. Se han limpiado los contenidos de los frames de la Memoria Principal. \n");
+			log_info(logAdmMem,lineaALoguear);
+			free(lineaALoguear);
+			free(datosLog);
+
+			break;
+		case SIGPOLL_:
+
+			sprintf(lineaALoguear,"Se recibió la señal SIGPOLL \n");
+			log_warning(logAdmMem,lineaALoguear);
+			sprintf(lineaALoguear,"Tratamiento de señal SIGPOLL en curso. Mostrando los contenidos de cada frame de la memoria principal.. \n");
+			log_info(logAdmMem,lineaALoguear);
+			free(lineaALoguear);
+			free(datosLog);
+
+			break;
+	}
 
 }
 
@@ -210,4 +245,11 @@ t_tempLogueo* cargaDatosAccesoMemoria (int pid, int pagina, int frame){
 	tempLog->paginas = pagina;
 	tempLog->frame = frame;
 	return tempLog;
+}
+
+void loggingSenial(t_log* logAdmMem,t_Senial nomSenial){
+	t_tempLogueo* tempLog = malloc(sizeof(t_tempLogueo));
+	tempLog->tipoEvento = STATUSSENIAL;
+	tempLog->nomSenial = nomSenial;
+	loguearEvento(logAdmMem,tempLog);
 }

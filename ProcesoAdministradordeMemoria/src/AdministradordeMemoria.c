@@ -626,7 +626,7 @@ void tlbFlush(){
 	pthread_mutex_lock(&mutex);
 	tlb_Flush(tlb);
 	pthread_mutex_unlock(&mutex);
-	printf("Se han limpiado todos los registros de la TLB. \n");
+	loggingSenial(logAdmMem,SIGUSR1_);
 	pthread_exit(EXIT_SUCCESS);
 
 }
@@ -646,7 +646,7 @@ void memFlush() {
 			tlb_Flush(tlb);
 			mem_Flush(memoriaPrincipal,tablasPags);
 			pthread_mutex_unlock(&mutex);
-			printf("Se han limpiado todos los registros de la Memoria. \n");
+			loggingSenial(logAdmMem,SIGUSR2_);
 			pthread_exit(EXIT_SUCCESS);
 }
 
@@ -691,7 +691,7 @@ void memoryDump()
 
    int i ;
 
-
+    loggingSenial(logAdmMem,SIGPOLL_);
 	log_info(logAdmMem,"MEMORY DUMP MARCOS = %d ",memoriaPrincipal->cantMarcos);
 	for(i=0; i<memoriaPrincipal->cantMarcos; i++)
 	{
@@ -699,7 +699,7 @@ void memoryDump()
 
 		frame = memoriaPrincipal->Memoria[i];
 
-		log_info(logAdmMem, "FRAME #%d  CONTENIDO = %s",i,frame);
+		log_info(logAdmMem, "FRAME #%d || CONTENIDO = %s",i,frame);
 
 	}
 }
