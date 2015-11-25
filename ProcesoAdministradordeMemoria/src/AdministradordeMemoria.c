@@ -45,6 +45,7 @@ void tlbFlushHandler(int signum);
 void memoriaFlushHandler(int signum);
 void dumpMemoriaHandler(int signum);
 void memoryDump();
+void publicarTasaAciertos();
 
 t_config* config;
 t_log* logAdmMem;
@@ -54,10 +55,14 @@ t_dictionary* tablasPags;
 TLB* tlb;
 pthread_t hilo_tlbFlush;
 pthread_t hilo_memFlush;
+pthread_t hilo_tasaHitsTLB;
 pthread_attr_t attr;
 pthread_mutex_t mutex;
+pthread_mutex_t mutexTLB;
 int socketSwap;
 pid_t pid;
+float referMem_TLB;
+float aciertos_TLB;
 
  int main(void){
 
@@ -72,7 +77,12 @@ pid_t pid;
 
 	 	 	 	 if (configAdmMem->tlb_habilitada) {
 	 	 	        tlb = t_tlb_crear(configAdmMem);
+	 	 	        referMem_TLB = 0;
+	 	 	        aciertos_TLB = 0;
+
+	 	 	        pthread_create(&hilo_tasaHitsTLB, NULL,(void*)publicarTasaAciertos,NULL);
 	 	 	 	 }
+
 
 	 	 	 	 /* Se crea una estructura dinámica que contendrá las tablas de páginas de los procesos en ejecución*/
 
@@ -90,6 +100,7 @@ pid_t pid;
 	 	 	 	 pthread_mutexattr_init(&Attr);
 	 	 	 	 pthread_mutexattr_settype(&Attr, PTHREAD_MUTEX_RECURSIVE);
 	 	 	 	 pthread_mutex_init(&mutex, &Attr);
+	 	 	 	 pthread_mutex_init(&mutex,&Attr);
 
 
 
@@ -192,6 +203,10 @@ pid_t pid;
 
 	 frame = configAdmMem->tlb_habilitada?buscarPaginaTLB(tlb,protInic->pid,protInic->paginas,&entradaTLB):frame;
 
+	 pthread_mutex_lock(&mutexTLB);
+	 referMem_TLB++; // Cantidad de referencias a memoria históricas (para calcular tasa de aciertos TLB)
+	 pthread_mutex_unlock(&mutexTLB);
+
 	 if(frame != -1){
 		 actualizarUtilizyModifPag(LEER,tablaPagsProceso,protInic->paginas);
 	 //----Logging Acceso TLB(hit) -------//
@@ -200,6 +215,9 @@ pid_t pid;
 		 tlbHit = datosLogTLB->hit;
 		 loguearEvento(logAdmMem,datosLogTLB);
 	 //-----------------------------------//
+		 pthread_mutex_lock(&mutexTLB);
+		 aciertos_TLB++; // Modificación de cantidad histórica de aciertos TLB
+		 pthread_mutex_unlock(&mutexTLB);
 	 }
 
 	 if (frame == -1 && tlbHit != true )/*No se encontró página en TLB*/{
@@ -327,6 +345,9 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 
 	frame = configAdmMem->tlb_habilitada?buscarPaginaTLB(tlb,pedido->pid,pedido->pagina,&entradaTLB):frame;
 
+	pthread_mutex_lock(&mutexTLB);
+	referMem_TLB++; // Cantidad de referencias a memoria históricas (para calcular tasa de aciertos TLB)
+	pthread_mutex_unlock(&mutexTLB);
 		 if(frame != -1){
 
 			 insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
@@ -338,6 +359,10 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 			 tlbHit = datosLogTLB->hit;
 			 loguearEvento(logAdmMem,datosLogTLB);
 			 //-----------------------------------//
+
+			 pthread_mutex_lock(&mutexTLB);
+			 aciertos_TLB++; // Modificación de cantidad histórica de aciertos TLB
+			 pthread_mutex_unlock(&mutexTLB);
 		 }
 
 
@@ -662,4 +687,23 @@ void memoryDump()
 		log_info(logAdmMem, "FRAME #%d  CONTENIDO = %s",i,frame);
 
 	}
+}
+
+void publicarTasaAciertos(){
+
+float tasaAciertos;
+
+while(1)
+{
+	sleep(20);
+
+	pthread_mutex_lock(&mutexTLB);
+	tasaAciertos = (referMem_TLB != 0.00)?aciertos_TLB/referMem_TLB:0.00;
+	pthread_mutex_unlock(&mutexTLB);
+
+	printf("Cantidad de aciertos (historico) = %.2f \n",aciertos_TLB);
+	printf("Cantidad de referencias (historico) = %.2f \n",referMem_TLB);
+	printf("Tasa de aciertos histórica de TLB = %.2f \n",tasaAciertos);
+}
+
 }
