@@ -143,12 +143,12 @@ void insertarPaginaenMP(char*contenido,MEMORIAPRINCIPAL* memoria,int* marco){
 
 }
 
-int reemplazarPagina(char* algoritmoReemplazo,int socketSwap, MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp){
+int reemplazarPagina(t_paramConfigAdmMem* configAdmMem,int socketSwap, MEMORIAPRINCIPAL* memoria, t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp, int paginaSolicit){
 
 	int algReemp = 0;
-	algReemp = strcmp(algoritmoReemplazo,"FIFO") == 0?FIFO:algReemp;
-	algReemp = strcmp(algoritmoReemplazo,"LRU") == 0?LRU:algReemp;
-	algReemp = strcmp(algoritmoReemplazo,"CLOCKMODIF") == 0?CLOCKMODIF:algReemp;
+	algReemp = strcmp(configAdmMem->algoritmo_reemplazo,"FIFO") == 0?FIFO:algReemp;
+	algReemp = strcmp(configAdmMem->algoritmo_reemplazo,"LRU") == 0?LRU:algReemp;
+	algReemp = strcmp(configAdmMem->algoritmo_reemplazo,"CLOCKMODIF") == 0?CLOCKMODIF:algReemp;
 
 	int frame;
 
@@ -162,7 +162,7 @@ int reemplazarPagina(char* algoritmoReemplazo,int socketSwap, MEMORIAPRINCIPAL* 
 		break;
 
 	case CLOCKMODIF:
-		reemplazarPaginaClockModif(tablaPagsProceso,nroPagAReemp);
+		reemplazarPaginaClockModif(tablaPagsProceso,nroPagAReemp,configAdmMem->max_marcos_proceso,paginaSolicit);
 		break;
 	}
 
@@ -221,7 +221,62 @@ void reemplazarPaginaLRU(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp){
 
 }
 
-void reemplazarPaginaClockModif(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp){
+void reemplazarPaginaClockModif(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp,int maxMarcos, int paginaSolicit){
+
+	int i;
+	int pagVectClockModif;
+	int posVectClockModif;
+	char bitReferencia;
+	char bitModificado;
+	posVectClockModif = tablaPagsProceso->posicClockModif;
+	t_regPagina* paginaActual;
+
+	while(1){
+
+
+		for (i = 0; i < maxMarcos; ++i) {
+			pagVectClockModif = *(tablaPagsProceso->vectClockModif[posVectClockModif]);
+			if(pagVectClockModif != -1){
+				bitReferencia = tablaPagsProceso->Pagina[pagVectClockModif]->bitUtilizado;
+				bitModificado = tablaPagsProceso->Pagina[pagVectClockModif]->bitModificado;
+
+				if (bitReferencia == 0 && bitModificado == 0){
+					*nroPagAReemp = pagVectClockModif;
+					*(tablaPagsProceso->vectClockModif[posVectClockModif])=paginaSolicit;
+					tablaPagsProceso->posicClockModif = posVectClockModif++;
+					tablaPagsProceso->posicClockModif = (tablaPagsProceso->posicClockModif > maxMarcos)?0:tablaPagsProceso->posicClockModif;
+					return;
+				}
+			}
+			posVectClockModif = (posVectClockModif == (maxMarcos-1))?0:posVectClockModif+1;
+		}
+
+
+		for (i = 0; i < maxMarcos; ++i){
+
+			pagVectClockModif = *(tablaPagsProceso->vectClockModif[posVectClockModif]);
+
+			if(pagVectClockModif != -1){
+				bitReferencia = tablaPagsProceso->Pagina[pagVectClockModif]->bitUtilizado;
+				bitModificado = tablaPagsProceso->Pagina[pagVectClockModif]->bitModificado;
+
+				if (bitReferencia == 0 && bitModificado == 1){
+					*nroPagAReemp = pagVectClockModif;
+					*(tablaPagsProceso->vectClockModif[posVectClockModif])=paginaSolicit;
+					tablaPagsProceso->posicClockModif = posVectClockModif++;
+					tablaPagsProceso->posicClockModif = (tablaPagsProceso->posicClockModif > maxMarcos)?0:tablaPagsProceso->posicClockModif;
+					return;
+				}
+			}
+
+			paginaActual = tablaPagsProceso->Pagina[pagVectClockModif];
+			paginaActual->bitUtilizado = (paginaActual->bitUtilizado == 0)?1:0;
+			posVectClockModif = (posVectClockModif == (maxMarcos-1))?0:posVectClockModif+1;
+
+		}
+
+	}
+
 
 
 }
@@ -240,7 +295,6 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp, int tamanioCo
 	protocEscrSwap->tamanio = tamanioContenido;
 	protocEscrSwap->contenido = malloc(sizeof(tamanioContenido));
 	protocEscrSwap->contenido = contenidoReemp;
-	int tamanioString = strlen(contenidoReemp)+1;
 
 	offset = sizeof(char);
 	memcpy(buffer,&(protocEscrSwap->tipoInstrucc),sizeof(char));
@@ -250,7 +304,7 @@ void enviarDatosPorModifASwap(int swapSocket,char* contenidoReemp, int tamanioCo
 	offset += sizeof(int);
 	memcpy(buffer+offset,&(protocEscrSwap->tamanio),sizeof(int));
 	offset += sizeof(int);
-	memcpy(buffer+offset,protocEscrSwap->contenido,tamanioString);
+	memcpy(buffer+offset,protocEscrSwap->contenido,tamanioContenido);
 
 	send(swapSocket,buffer,tamanioBuffer,0);
 
@@ -297,6 +351,22 @@ tablaPagsProceso->Pagina[pagina]->horaUtilizacion = convertirTimeStringToInt(tem
 
 char* bitModifdePagina = &(tablaPagsProceso->Pagina[pagina]->bitModificado);
 *bitModifdePagina = instruccion == ESCRIBIR?(*bitModifdePagina = 1):*bitModifdePagina;
+}
+
+void actualizarVectorClockModif(t_paramConfigAdmMem* configAdmMem,t_tablaDePaginas* tablaPagsProceso,int pagina){
+
+	int i = 0;
+	if (strcmp(configAdmMem->algoritmo_reemplazo,"CLOCKMODIF") == 0){
+		while (*(tablaPagsProceso->vectClockModif[i]) != -1 && i < configAdmMem->max_marcos_proceso){
+			i++;
+		}
+		if (*(tablaPagsProceso->vectClockModif[i]) == -1){
+		int* entradaVectorClckModif = tablaPagsProceso->vectClockModif[(tablaPagsProceso->posicClockModif)+1];
+		*entradaVectorClckModif = pagina;
+		tablaPagsProceso->posicClockModif = i;
+		}
+	}
+
 }
 
 

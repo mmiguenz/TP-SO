@@ -230,7 +230,7 @@ pid_t pid;
 			 frame = buscarFrameLibre(memoriaPrincipal);
 
 			 if (marcosAsignados == configAdmMem->max_marcos_proceso){
-				 frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+				 frame = reemplazarPagina(configAdmMem,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp,protInic->paginas);
 				 borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
 				 insertarPaginaenMP(contenido,memoriaPrincipal,&frame);
 				 actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
@@ -250,7 +250,7 @@ pid_t pid;
 					send(socketCPU,&rtaSwap,sizeof(int),0);
 			 	 }
 			 	 else {
-					frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+					frame = reemplazarPagina(configAdmMem,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp,protInic->paginas);
 					borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
 					insertarPaginaenMP(contenido,memoriaPrincipal,&frame);
 					actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
@@ -262,6 +262,7 @@ pid_t pid;
 
 				 insertarPaginaenMP(contenido,memoriaPrincipal,&frame);
 				 actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
+				 actualizarVectorClockModif(configAdmMem,tablaPagsProceso,protInic->paginas);
 				 sleep(configAdmMem->retardo_memoria);
 				 paginaReemp = -1;
 				 loguearActualizacionMemoria(logAdmMem,protInic->paginas,paginaReemp,protInic->pid,frame);
@@ -363,7 +364,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				 frame = buscarFrameLibre(memoriaPrincipal);
 
 				 if (marcosAsignados == configAdmMem->max_marcos_proceso){
-					 frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+					 frame = reemplazarPagina(configAdmMem,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp,pedido->pagina);
 					 borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
 					 insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 					 actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
@@ -383,7 +384,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 						send(socketCPU,&rtaSwap,sizeof(int),0);
 				 	 }
 				 	 else {
-				 		frame = reemplazarPagina(configAdmMem->algoritmo_reemplazo,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp);
+				 		frame = reemplazarPagina(configAdmMem,socketSwap,memoriaPrincipal,tablaPagsProceso,&paginaReemp,pedido->pagina);
 						borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
 						insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 						actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
@@ -394,6 +395,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				 else {
 					 insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 					 actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
+					 actualizarVectorClockModif(configAdmMem,tablaPagsProceso,pedido->pagina);
 					 sleep(configAdmMem->retardo_memoria);
 					 paginaReemp = -1;
 					 loguearActualizacionMemoria(logAdmMem,pedido->pagina,paginaReemp,pedido->pid,frame);
@@ -509,12 +511,13 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 
  void crear_e_insertar_TabladePaginas(int paginas, int pid, t_dictionary* tablasPagsProcesos) {
 
-	 t_tablaDePaginas* tablaPaginasProceso = malloc(sizeof(t_regPagina**)+(sizeof(int)*2));
+	 int i;
+
+	 t_tablaDePaginas* tablaPaginasProceso = malloc(sizeof(t_tablaDePaginas));
 	 tablaPaginasProceso->Pagina = (t_regPagina**)calloc(paginas,sizeof(t_regPagina*));
 	 tablaPaginasProceso->pid = pid;
 	 tablaPaginasProceso->cantTotalPaginas = paginas;
 
-	 int i;
 	 for (i=0; i<paginas; ++i){
 		 tablaPaginasProceso->Pagina[i] = malloc(sizeof(t_regPagina));
 		 tablaPaginasProceso->Pagina[i]->idFrame = -1;
@@ -524,6 +527,15 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 		 tablaPaginasProceso->Pagina[i]->horaIngreso = MAXTIME;
 		 tablaPaginasProceso->Pagina[i]->horaUtilizacion = MAXTIME;//Espacio que ocupa la hora en formato 'hh:mm:ss:mmmm'
 	 };
+
+	 if (strcmp(configAdmMem->algoritmo_reemplazo,"CLOCKMODIF") == 0){
+			 tablaPaginasProceso->vectClockModif = calloc(configAdmMem->max_marcos_proceso,sizeof(int));
+			 for (i = 0; i < configAdmMem->max_marcos_proceso; ++i) {
+				tablaPaginasProceso->vectClockModif[i] = malloc(sizeof(int));
+				*(tablaPaginasProceso->vectClockModif[i]) = -1;
+			 }
+			 tablaPaginasProceso->posicClockModif = -1;
+		 }
 
 	 char* pidConv = malloc(20);
 	 pidConv = string_itoa(pid);

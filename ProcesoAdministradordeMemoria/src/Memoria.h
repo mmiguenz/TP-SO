@@ -33,6 +33,8 @@ typedef struct{
 		t_regPagina** Pagina;
 		int pid;
 		int cantTotalPaginas;
+		int** vectClockModif;
+		int posicClockModif;
 	}t_tablaDePaginas;
 
 
@@ -51,10 +53,10 @@ typedef struct{
 	void finalizarProceso(MEMORIAPRINCIPAL* memoria,t_tablaDePaginas* tablaDePaginas);
 	int buscarPaginaenMemoria(int, int,t_dictionary*);
 	void insertarPaginaenMP(char*,MEMORIAPRINCIPAL*,int*);
-	int reemplazarPagina(char*,int, MEMORIAPRINCIPAL*, t_tablaDePaginas*,int*);
+	int reemplazarPagina(t_paramConfigAdmMem*,int, MEMORIAPRINCIPAL*, t_tablaDePaginas*,int*,int);
 	void reemplazarPaginaFIFO(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp);
 	void reemplazarPaginaLRU(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp);
-	void reemplazarPaginaClockModif(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp);
+	void reemplazarPaginaClockModif(t_tablaDePaginas* tablaPagsProceso,int* nroPagAReemp,int maxMarcos,int paginaSolicit);
 	void enviarDatosPorModifASwap(int,char*,int,int,int);
 	void actualizarTablaPaginas(int,int,int,t_tablaDePaginas*);
 	void inicializarMarco(MEMORIAPRINCIPAL*, char* marco);
@@ -63,6 +65,6 @@ typedef struct{
 	int marcosUtilizadosProceso(t_tablaDePaginas* tablaPagsProceso);
 	void mem_Flush(MEMORIAPRINCIPAL* memoria,t_dictionary* tablaDePaginas);
 	void actualizarUtilizyModifPag(int instruccion, t_tablaDePaginas* tablaPagsProceso, int pagina);
-
+	void actualizarVectorClockModif(t_paramConfigAdmMem* configAdmMem,t_tablaDePaginas* tablaPagsProceso,int pagina);
 
 #endif /* MEMORIA_H_ */
