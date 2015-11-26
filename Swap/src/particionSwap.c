@@ -191,7 +191,7 @@ int hayEspacioContiguo(t_particion* particion,int espacioRequerido)
 
 void compactar(t_particion* particion,t_list* espacioUtilizado_lista)
 {
-	sleep(particion->retardoCompactacion);
+	usleep(particion->retardoCompactacion);
 
 	int pagina= 0 ;
 	int cantidadDeProcesos =  list_size( espacioUtilizado_lista);

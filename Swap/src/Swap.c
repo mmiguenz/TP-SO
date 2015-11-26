@@ -98,7 +98,7 @@ int main (){
 
 void atenderPedido(int memSocket, void* buffer )
 {
-	sleep(config->retardo_SWAP);
+	usleep(config->retardo_SWAP);
 
 	char tipoPedido;
 	memcpy(&tipoPedido,buffer,sizeof(char));
