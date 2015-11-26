@@ -195,30 +195,44 @@ void *shell(int mutex){
 }
 
  void * manejo_IO()
- {PCB* pcb_block;
-
+ {PCB* pcb_block_aux;
+ PCB* pcb_block;
 
 	 while(1){
 
 		sem_wait(&sem_consumidor_block);
+		pcb_block_aux = malloc(sizeof(PCB));
+		pcb_block_aux->nombreProc = malloc(50);
+		pcb_block_aux->path = malloc(200);
+		pcb_block_aux = queue_peek(block_PCB);
+
 		pcb_block = malloc(sizeof(PCB));
 		pcb_block->nombreProc = malloc(50);
 		pcb_block->path = malloc(200);
-		pcb_block = queue_pop(block_PCB);
+		pcb_block = queue_peek(block_PCB);
+
+
+
 		//pritf("El proceso blokeado es........ %s\n",pcb_block->nombreProc );
-		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
-		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
+		//pcb_block_aux->tiempo_respuesta=(pcb_block_aux->tiempo_respuesta+(difftime(time(NULL),pcb_block_aux->t_entrada_cola_block)));
+
+
+
 		printf("-------------------------------------------------\n");
 		printf("-         Entrada Salida del Proceso            --\n");
-		printf("-                    %s                  -\n",pcb_block->nombreProc);
-		printf("-			Su Pid es %d                         -\n",pcb_block->PID);
+		printf("-                    %s                  -\n",pcb_block_aux->nombreProc);
+		printf("-			Su Pid es %d                         -\n",pcb_block_aux->PID);
 		printf("---------------------------------------------------\n\n");
-		usleep(pcb_block->retardo_io*1000000);
-		pcb_block->t_entrada_cola_ready=time(NULL);
+		usleep(pcb_block_aux->retardo_io*1000000);
 
-		pcb_block->tiempo_respuesta=(pcb_block->tiempo_respuesta+(difftime(time(NULL),pcb_block->t_entrada_cola_block)));
+
+		pcb_block=queue_pop(block_PCB);
+		pcb_block->t_entrada_cola_ready=time(NULL);
+		pcb_block->tiempo_respuesta=(pcb_block_aux->tiempo_respuesta+(difftime(time(NULL),pcb_block_aux->t_entrada_cola_block)));
+
 
 		queue_push(fifo_PCB_ready,pcb_block);
+
 		sem_post(&sem_consumidor);
 
 	 }
@@ -322,11 +336,22 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		pid=recolectar_pid(proceso);
 		printf("El Comando que eligio fue finalizar \n");
 		printf("Y el PID del proceso a finalizar es = %d  \n",pid);
-		int tamanio=queue_size(fifo_PCB_ready);
+		int tamanio=queue_size(block_PCB);
+
+		while(tamanio!=0){
+		auxPCB=queue_pop(block_PCB);
+		if(auxPCB->PID==pid)
+		{printf("Encontre  al proceso a finalizar\n");
+		auxPCB->contadorProgram=-1;}//Si el cpu encuentra -1 lo finaliza automaticamente
+
+		queue_push(block_PCB,auxPCB);
+		tamanio--;
+		}
+
+		tamanio=queue_size(fifo_PCB_ready);
 
 		while(tamanio!=0){
 		auxPCB=queue_pop(fifo_PCB_ready);
-		//printf("El pid del proceso es: %d \n",auxPCB->PID);
 		if(auxPCB->PID==pid)
 		{printf("Encontre  al proceso a finalizar\n");
 		auxPCB->contadorProgram=-1;}//Si el cpu encuentra -1 lo finaliza automaticamente
@@ -335,13 +360,27 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		tamanio--;
 		}
 
+		tamanio=queue_size(PCB_running);
+
+		while(tamanio!=0){
+		auxPCB=queue_pop(PCB_running);
+		if(auxPCB->PID==pid)
+		{printf("Encontre  al proceso a finalizar\n");
+		auxPCB->contadorProgram=-1;}//Si el cpu encuentra -1 lo finaliza automaticamente
+
+		queue_push(PCB_running,auxPCB);
+		tamanio--;
+		}
+
+
+
 		break;
 	}
 	case PS:
 	{
 		printf("El comando que eligio fue ps \n");
 		PCB* auxPCBrun=malloc(sizeof(PCB));
-		PCB* auxPCBblock=malloc(sizeof(PCB));
+
 		int tamanio=queue_size(fifo_PCB_ready);
 
 		while(tamanio!=0){
@@ -358,10 +397,15 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		queue_push(PCB_running,auxPCBrun);
 		tamanio--;
 		}
+
+		PCB* auxPCBblock=malloc(sizeof(PCB));
+		auxPCBblock->path=malloc(200);
+		auxPCBblock->nombreProc=malloc(50);
+
 		tamanio=0;
 		tamanio=queue_size(block_PCB);
 		while(tamanio!=0){
-		auxPCBrun=queue_pop(block_PCB);
+		auxPCBblock=queue_pop(block_PCB);
 		printf("mProc %d: %s -> Blockeado \n",auxPCBblock->PID,auxPCBblock->nombreProc);
 		queue_push(block_PCB,auxPCBblock);
 		tamanio--;

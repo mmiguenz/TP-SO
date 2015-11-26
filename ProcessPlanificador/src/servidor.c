@@ -499,15 +499,18 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 		Pcb_IO->path=malloc(200);
 
 		Pcb_IO=search_and_return(pcb_parc.pid,running_PCB);
-		printf("El proceso a blokear es........ %s",Pcb_IO->nombreProc );
-		//log_trace(logger,"El proceso a blokear es........ %s\n",Pcb_IO->nombreProc );
 		Pcb_IO->retardo_io=pcb_parc.tiempo;
+		if(Pcb_IO->contadorProgram!=-1){
 		Pcb_IO->contadorProgram= pcb_parc.contadorDePrograma;
+		printf("El proceso a blokear es........ %s",Pcb_IO->nombreProc );
+		log_trace(logger,"El proceso a blokear es........ %s\n",Pcb_IO->nombreProc );
+
 		Pcb_IO->cant_run++;
 		Pcb_IO->tiempo_ejecucion=((Pcb_IO->tiempo_ejecucion)+(difftime(time(NULL),Pcb_IO->t_entrada_cola_run)));
 		Pcb_IO->t_entrada_cola_block=time(NULL);
 		queue_push(block_PCB,Pcb_IO);
-		sem_post(&sem_consumidor_block);
+		sem_post(&sem_consumidor_block);}else{queue_push(fifo_PCB,Pcb_IO);
+		sem_post(&sem_consumidor);}
 
 
 
@@ -523,7 +526,8 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 		pcbAux->path=malloc(50);
 		pcbAux->nombreProc=malloc(300);
 		pcbAux=search_and_return(pcb_parc.pid,running_PCB);
-		pcbAux->contadorProgram=pcb_parc.contadorDePrograma;
+		if(pcbAux->contadorProgram!=-1){
+		pcbAux->contadorProgram=pcb_parc.contadorDePrograma;}
 		pcbAux->t_entrada_cola_ready=time(NULL);
 		pcbAux->cant_run++;
 		pcbAux->tiempo_ejecucion=((pcbAux->tiempo_ejecucion)+(difftime(time(NULL),pcbAux->t_entrada_cola_run)));
