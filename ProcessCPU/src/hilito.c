@@ -116,10 +116,10 @@ int identificar_instruccion(char comando[15])
 
 
 
-int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20],time_t comienzo,int cantInst)
+int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3], int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo,char texto[20],int cantInst)
 {
 	char instruccion;
-	time_t final;
+
 
 
 	switch(identificar_instruccion(comando))
@@ -143,15 +143,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			//--la memoria tiene lugar para iniciar el mCod
 			printf("Hay lugar\n");
 
-			log_info(logger, "mProc %s Iniciado", PcbAux->nombreProc);
-			log_info(logger, "El pid es %d", PcbAux->PID);
-
-			//--enviamos msj solo header a PLANIFICADOR
-			//t_msgHeader header;
-			//memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-			//header.msgtype = 2;
-			//header.payload_size = PcbAux->PID; //en este caso el playload lo usamos para pid
-			//send(planificador, &header, sizeof( t_msgHeader), 0);
+			log_info(logger, "mProc %s Iniciado con pid %d", PcbAux->nombreProc, PcbAux->PID);
 
 			PcbAux->contadorProgram ++;
 			cantInst ++;
@@ -160,7 +152,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		}else{
 			printf("No hay lugar\n");
 			printf("mProc %s Fallo\n", PcbAux->nombreProc);
-			log_info(logger, "mProc %s Fallo\n", PcbAux->nombreProc);
+			log_info(logger, "mProc %s Fallo\n pid %d", PcbAux->nombreProc, PcbAux->PID);
 			PcbAux->contadorProgram = 0;
 
 			t_msgHeader header;
@@ -204,8 +196,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			printf("Pude leer\n");
 			printf("El contenido leido es:%s\n", contenidoLeido);
 
-			log_info(logger, "El pid es %d", PcbAux->PID);
-			log_info(logger, "mProc %s - Pagina %d leida: %s", PcbAux->nombreProc, paginas, contenidoLeido);
+
+			log_info(logger, "mProc %s pid %d - Pagina %d leida: %s", PcbAux->nombreProc, PcbAux->PID, paginas, contenidoLeido);
 
 			PcbAux->contadorProgram++;
 			cantInst++;
@@ -214,8 +206,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 		}else{
 			printf("No pudo leer\n");
-			log_info(logger, "El pid es %d", PcbAux->PID);
-			log_info(logger, "mProc %s Fallo lectura",PcbAux->nombreProc);
+
+			log_info(logger, "mProc %s pid %d Fallo lectura",PcbAux->nombreProc, PcbAux->PID);
 			printf("mProc %s Fallo\n", PcbAux->nombreProc);
 
 			t_msgHeader header;
@@ -264,16 +256,16 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 			PcbAux->contadorProgram++;
 
-			log_info(logger, "El pid es %d", PcbAux->PID);
-			log_info(logger, "mProc %s - Pagina %d escrita:%s",PcbAux->nombreProc, paginas, texto);
+
+			log_info(logger, "mProc %s  pid  %d- Pagina %d escrita:%s",PcbAux->nombreProc, PcbAux->PID, paginas, texto);
 
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 			usleep((retardo*1000000));
 			cantInst++;
 		}else{
 			printf("La escritura fallo \n");
-			log_info(logger, "El pid es %d", PcbAux->PID);
-			log_info(logger, "mProc %s Fallo lectura",PcbAux->nombreProc);
+
+			log_info(logger, "mProc %s pid %d Fallo lectura",PcbAux->nombreProc, PcbAux->PID);
 
 			t_msgHeader header;
 			memset(&header, 0, sizeof(t_msgHeader));
@@ -302,8 +294,8 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		printf("El comando es Entrada-Salida y la cantidad de tiempo es %d \n", tiempo);
 
 		//--calculamos porcentaje de uso
-		final = time( NULL );
-		printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
+		//final = time( NULL );
+		//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 		PcbAux->contadorProgram++;
 
 
@@ -324,8 +316,7 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 
 		printf("mProc %s en entrada-salida de tiempo %d\n", PcbAux->nombreProc,tiempo);
 		printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
-		//log_info(logger, "El pid es %d", PcbAux->PID);
-		//log_info(logger, "mProc %s en entrada-salida de tiempo %d",PcbAux->nombreProc, tiempo);
+		log_info(logger, "mProc %s pid %d en entrada-salida de tiempo %d",PcbAux->nombreProc, PcbAux->PID, tiempo);
 
 
 
@@ -347,16 +338,16 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 		if(msj==1)
 		{
 			printf("El proceso Pudo finalizar\n");
-			log_info(logger, "El pid es %d", PcbAux->PID);
-			log_info(logger, "mProc %s finalizado", PcbAux->nombreProc);
+
+			log_info(logger, "mProc %s pid %d finalizado", PcbAux->nombreProc, PcbAux->PID);
 			PcbAux->contadorProgram++;
 
 
 			printf("El contador de programa es:%d\n", PcbAux->contadorProgram);
 
 			cantInst++;
-			printf ("la cantint es %d", cantInst);
-			final = time( NULL );
+
+			//final = time( NULL );
 			//printf( "Número de segundos transcurridos desde el comienzo del programa: %f s\n", difftime(final, comienzo) );
 
 			t_msgHeader header;
@@ -371,16 +362,6 @@ int procesar_instruccion(char* cadena,char comando[15],int punta,char pagina[3],
 			parcial.tiempo = 0;
 			parcial.contadorDePrograma = PcbAux->contadorProgram;
 			send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
-
-			//actualizamos el porcentaje de cpu en la cola
-			/*usoCPU* nodo =malloc(sizeof(usoCPU*));
-			nodo =buscarNodo(PcbAux->cpu_asignada, porcentajes_CPU);
-			nodo->porcentaje=porcentaje;
-			pthread_mutex_lock(&mutex);
-			queue_push(porcentajes_CPU, nodo);
-			pthread_mutex_unlock(&mutex);
-			free(nodo);*/
-			//-------
 
 
 			usleep((retardo*1000000));
@@ -431,7 +412,7 @@ int ubicarPunta(char cadena [1500], PCB* PcbAux){
 
 
 void sentenciaFinalizar(int memoria, int planificador,t_log* logger, PCB* PcbAux, int retardo){
-int 	instruccion =4 ;
+int instruccion =4 ;
 		printf("Encontre Finalizar\n");
 		int paginas=0;
 
@@ -442,8 +423,8 @@ int 	instruccion =4 ;
 		if(msj==1)
 		{
 			printf("El proceso Pudo finalizar\n");
-			log_info(logger, "El pid es %d", PcbAux->PID);
-			log_info(logger, "mProc %s finalizado", PcbAux->nombreProc);
+
+			log_info(logger, "mProc %s pid %d finalizado", PcbAux->nombreProc, PcbAux->PID);
 			PcbAux->contadorProgram++;
 
 
@@ -476,8 +457,8 @@ void procesarCadenaConQuantum(int quantum , char cadena[1500], int memoria, int 
 	char pagina[3];
 	char texto[20];
 	int i=0;
-	time_t comienzo, final;
-	comienzo = time( NULL );
+
+
 	int flag=0;
 
 int cantInst =0;
@@ -498,7 +479,7 @@ int cantInst =0;
 		aux= recolectar_instruccion(cadena,comando, punta);
 		punta=aux;
 
-		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto,comienzo, cantInst);
+		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto, cantInst);
 		instrucciones[cpu]++;
 		punta=aux;
 		if(punta>1500){
@@ -526,8 +507,8 @@ int cantInst =0;
 		send(planificador, &parcial, sizeof( PCB_PARCIAL), 0);
 	}
 
-	log_info(logger, "El pid es %d", PcbAux->PID);
-	log_info(logger, "mProc %s finalizo el quantum de %d", PcbAux->nombreProc, quantum);
+
+	log_info(logger, "mProc %s pid finalizo el quantum de %d", PcbAux->nombreProc, PcbAux->PID, quantum);
 	return;
 }
 
@@ -541,8 +522,7 @@ void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logg
 	char texto[20];
 	int cantInst =0;
 
-	time_t comienzo;
-	comienzo = time( NULL );
+
 
 	if (punta != 0){
 		t_msgHeader header;
@@ -553,7 +533,7 @@ void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logg
 
 
 	}
-	printf ("la cantint es %d", cantInst);
+
 	//--mientras no punta sea menor al tamaño del mProc
 	while(punta<(tamBuff-1))
 	{
@@ -561,7 +541,7 @@ void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logg
 		aux= recolectar_instruccion(cadena,comando, punta);
 		punta=aux;
 
-		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto, comienzo, cantInst);
+		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto, cantInst);
 		punta=aux;
 		instrucciones[cpu]++;
 	}
@@ -615,7 +595,7 @@ void* conectar(void* mensa){
 	inicializarInstrucciones();
 	//--verificamos que nos hayamos conectado correctamente a memoria, loggueamos
 	if (memoria > 0) {
-		//log_info(logger, "El hilo %u se conecto a memoria correctamente", (unsigned int) pthread_self());
+		log_info(logger, "El hilo %u se conecto a memoria correctamente", (unsigned int) pthread_self());
 	} else {
 		log_info(logger, "error al conectarse con memoria");
 	}
@@ -647,9 +627,8 @@ void* conectar(void* mensa){
 		header2.payload_size = planificador;
 		send(planificador, &header2, sizeof( t_msgHeader), 0);
 
-		//inicializamos variables para calcular el porcentaje de uso
-		time_t comienzo, final;
-		comienzo = time( NULL );
+
+
 
 
 		//primero recibimos el tamaño del msj del planificador
@@ -691,7 +670,7 @@ void* conectar(void* mensa){
 		printf("El nombre  del proceso es:       %s\n", PcbAux->nombreProc);
 		printf("El path es:                      %s\n", PcbAux->path);
 		printf("El quantum es:                   %d\n", PcbAux->quantum);
-/*
+
 		log_info(logger, "----------------PCB-------------------------------------------------------------------------------------------------------------------------------------------------------------");
 		log_info(logger, "Este es el PID:                  %d\n", PcbAux->PID);
 		log_info(logger, "Este es el contador de programa: %d\n",PcbAux->contadorProgram);
@@ -700,7 +679,7 @@ void* conectar(void* mensa){
 		log_info(logger, "El path es:                      %s\n", PcbAux->path);
 		log_info(logger, "El quantum es:                   %d\n", PcbAux->quantum);
 		log_info(logger, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-*/
+
 
 		//contadorProgram; si es -1 no abrimos, ejecutamos solo FINALIZAR
 		if(PcbAux->contadorProgram!= -1){
@@ -712,11 +691,11 @@ void* conectar(void* mensa){
 			// si el quantum es 0 la planificacion es FIFO, sino es ROUND ROBIN
 			if(PcbAux->quantum == 0){
 				//fifo
-				printf("El quantum es %d\n", PcbAux->quantum);
+
 				procesarCadena(archivoProc, memoria, planificador,logger, PcbAux, retardo, cpu);
 
 			}else{
-				printf("El quantum es %d\n", PcbAux->quantum);
+
 				procesarCadenaConQuantum(PcbAux->quantum, archivoProc, memoria, planificador, logger, PcbAux, retardo,cpu);
 			}
 		}else{
@@ -784,6 +763,9 @@ void* mensajear_porc(void* mensa){
 								printf("La cantidad de instrucciones es %d \n",instrucciones[i] );
 								printf("El retardo es %d \n",retardo);
 								printf("\n-----------El porcentaje de uso del CPU %d es %.2f-------\n---------------------------------------------\n",i,porcentajes[i]);
+
+								log_info(logger, "La cantidad de instrucciones es %d el retardo es %d El porcentaje de uso del CPU %d es %.2f---\n", instrucciones[i],retardo,i,porcentajes[i]);
+
 								instrucciones[i]=0;
 							}
 							i++;
