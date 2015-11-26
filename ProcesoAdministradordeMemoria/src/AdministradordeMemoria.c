@@ -236,13 +236,14 @@ float aciertos_TLB;
 	 }
 
 
-		 //enviarSolicitudSwap() y recibirContenido de Swap;
+
+		 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
+
+		//enviarSolicitudSwap() y recibirContenido de Swap;
 		 send(socketSwap,buffer,sizeof(char)+(sizeof(int)*2),0);
 		 recv(socketSwap,&tamanioContenido,sizeof(int),0);
 		 contenido = malloc(tamanioContenido);
 		 recv(socketSwap,contenido,tamanioContenido,0);
-
-		 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
 
 			 (tablaPagsProceso->contadorPF)++;
 			 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
