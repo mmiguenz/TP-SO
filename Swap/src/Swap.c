@@ -207,9 +207,8 @@ void realizarLectura(int memSocket)
 
 
 
-		t_proceso* proceso = list_find(espacioUtilizado_lista,buscarPid);
+		t_proceso* proceso = list_find(espacioUtilizado_lista,(void*)buscarPid);
 		proceso->paginasLeidas++;
-
 
 		printf("Se Enviaron %d Bytes. Tamanio Cont = %d , Cont = %s\n ",enviado,tamanioContenido,contenido);
 
@@ -257,7 +256,7 @@ void realizarEscritura(int memSocket)
 
 
 
-		t_proceso* proceso = list_find(espacioUtilizado_lista,buscarPid);
+		t_proceso* proceso = list_find(espacioUtilizado_lista,(void*)buscarPid);
 		proceso->paginasEscritas++;
 
 	//Liberación de estructuras dinámicas utilizadas
