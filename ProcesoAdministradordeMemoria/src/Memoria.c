@@ -37,7 +37,7 @@ MEMORIAPRINCIPAL* t_memoria_crear(t_paramConfigAdmMem* config)
 }
 
 
-char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,int Tamanio_Marco)
+char** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,int Tamanio_Marco)
 {
 	int i;
 	char** memoriaPrincipal;
@@ -50,18 +50,22 @@ char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,
 		for (i = 0; i < Cant_Marcos; i++)
 		{
 
-				inicializarMarco(memoriaP,memoriaPrincipal[i]);
+			memoriaPrincipal[i] = malloc(sizeof(char) * memoriaP->tamanioMarco);
+			inicializarMarco(memoriaP,memoriaPrincipal[i]);
 		}
 
+	for(i=0;i<Cant_Marcos;i++)
+		printf("FRAME #%d Contenido= %s\n",i,memoriaPrincipal[i]);
+
 	return memoriaPrincipal;
+
 }
 
 
 void inicializarMarco(MEMORIAPRINCIPAL* memoriaP, char* marco)
 {
-	char* tmp = malloc(sizeof(char) * memoriaP->tamanioMarco);
-						memset(tmp,'\0',memoriaP->tamanioMarco);
-						marco =tmp;
+
+			memset(marco,'\0',memoriaP->tamanioMarco);
 
 }
 
