@@ -770,16 +770,20 @@ void* mensajear_porc(void* mensa){
 					recv(planificador,&cpu,sizeof(int),0);
 					times=difftime(time(NULL),inicio);
 					int i=0;
-
+					float divisor; float porcentaje;
 					if (times==0){times=1;};
 						while(i!=50)
 						{
 							if (instrucciones[i]!=-1){
-								porcentajes[i]=(instrucciones[i]*100)/(times/retardo);
+								divisor=(times/retardo);
+								if (divisor==0){divisor=1;};
+								porcentaje=(instrucciones[i]*100)/divisor;
+								if (porcentaje>100){porcentaje=0;};
+								porcentajes[i]=porcentaje;
 
 								printf("La cantidad de instrucciones es %d \n",instrucciones[i] );
 								printf("El retardo es %d \n",retardo);
-								printf("\n-----------El porcentaje de uso del CPU %d es %f.2-------\n---------------------------------------------\n",i,porcentajes[i]);
+								printf("\n-----------El porcentaje de uso del CPU %d es %.2f-------\n---------------------------------------------\n",i,porcentajes[i]);
 								instrucciones[i]=0;
 							}
 							i++;
