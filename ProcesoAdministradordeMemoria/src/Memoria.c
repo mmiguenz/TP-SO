@@ -54,8 +54,6 @@ char** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,i
 			inicializarMarco(memoriaP,memoriaPrincipal[i]);
 		}
 
-	for(i=0;i<Cant_Marcos;i++)
-		printf("FRAME #%d Contenido= %s\n",i,memoriaPrincipal[i]);
 
 	return memoriaPrincipal;
 
