@@ -775,7 +775,7 @@ void* mensajear_porc(void* mensa){
 						while(i!=50)
 						{
 							if (instrucciones[i]!=-1){
-								porcentajes[i]=(instrucciones[i]*100)/(times*retardo);
+								porcentajes[i]=(instrucciones[i]*100)/(times/retardo);
 
 								printf("La cantidad de instrucciones es %d \n",instrucciones[i] );
 								printf("El retardo es %d \n",retardo);
