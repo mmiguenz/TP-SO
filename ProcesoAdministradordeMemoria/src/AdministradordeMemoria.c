@@ -46,6 +46,8 @@ void memoriaFlushHandler(int signum);
 void dumpMemoriaHandler(int signum);
 void memoryDump();
 void publicarTasaAciertos();
+void* prepararSolicitudASwap(t_protoc_escrituraProceso* pedido);
+char* solicitarContenidoASwap(int socketSwap,void* buffer);
 
 t_config* config;
 t_log* logAdmMem;
@@ -236,13 +238,10 @@ float aciertos_TLB;
 	 }
 
 
-		 //enviarSolicitudSwap() y recibirContenido de Swap;
-		 send(socketSwap,buffer,sizeof(char)+(sizeof(int)*2),0);
-		 recv(socketSwap,&tamanioContenido,sizeof(int),0);
-		 contenido = malloc(tamanioContenido);
-		 recv(socketSwap,contenido,tamanioContenido,0);
 
 		 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
+
+			contenido = solicitarContenidoASwap(socketSwap,buffer);
 
 			 (tablaPagsProceso->contadorPF)++;
 			 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
@@ -340,6 +339,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 	int entradaTLB;
 	int paginaReemp = 0;
 	int tlbHit = false;
+	char* contenido;
 
 	char* pidBuscado = string_itoa(pedido->pid);
 	t_tablaDePaginas* tablaPagsProceso;
@@ -386,6 +386,9 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 		 }
 
 			 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
+
+				 void* buffer = prepararSolicitudASwap(pedido);
+				 contenido = solicitarContenidoASwap(socketSwap,buffer);
 
 				 (tablaPagsProceso->contadorPF)++;
 				 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
@@ -602,6 +605,33 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 
  	 return buffer;
  }
+
+ char* solicitarContenidoASwap(int socketSwap,void* buffer){
+ 	 int tamanioContenido;
+ 	 char* contenido;
+ 	 send(socketSwap,buffer,sizeof(char)+(sizeof(int)*2),0);
+ 	 recv(socketSwap,&tamanioContenido,sizeof(int),0);
+ 	 contenido = malloc(tamanioContenido);
+ 	 recv(socketSwap,contenido,tamanioContenido,0);
+ 	 return contenido;
+ }
+
+ void* prepararSolicitudASwap(t_protoc_escrituraProceso* pedido){
+
+	 char instruccSwap = LEER;
+	 void* buffer = malloc(sizeof(char)+(sizeof(int)*2));
+	 int offset = 0;
+
+	 memcpy(buffer,&instruccSwap,sizeof(char));
+	 offset++;
+	 memcpy(buffer+offset,&(pedido->pagina),sizeof(int));
+	 offset += sizeof(int);
+	 memcpy(buffer+offset,&(pedido->pid),sizeof(int));
+	 return buffer;
+
+ }
+
+
 
  void eliminarTablaDePaginasDelProceso(t_dictionary* tablasPags,int pid)
  {

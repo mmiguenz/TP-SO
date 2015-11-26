@@ -191,7 +191,7 @@ int hayEspacioContiguo(t_particion* particion,int espacioRequerido)
 
 void compactar(t_particion* particion,t_list* espacioUtilizado_lista)
 {
-	sleep(particion->retardoCompactacion);
+	usleep(particion->retardoCompactacion);
 
 	int pagina= 0 ;
 	int cantidadDeProcesos =  list_size( espacioUtilizado_lista);
@@ -277,6 +277,8 @@ void reAsignarHuecosPorCompactacion( t_particion* particion,int proximaPaginaLib
 	t_hueco* unHueco = t_hueco_crear(proximaPaginaLibre,(particion->paginas_cantidad - proximaPaginaLibre));
 
 	list_add(particion->espacioLibre ,(void*) unHueco);
+
+	t_particion_limpiar(particion,unHueco->paginaInicio,unHueco->cantidadPaginas);
 
 
 }

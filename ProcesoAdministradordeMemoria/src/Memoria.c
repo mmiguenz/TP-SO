@@ -37,7 +37,7 @@ MEMORIAPRINCIPAL* t_memoria_crear(t_paramConfigAdmMem* config)
 }
 
 
-char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,int Tamanio_Marco)
+char** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,int Tamanio_Marco)
 {
 	int i;
 	char** memoriaPrincipal;
@@ -50,18 +50,20 @@ char ** inicializarMemoriaPrincipal(MEMORIAPRINCIPAL* memoriaP ,int Cant_Marcos,
 		for (i = 0; i < Cant_Marcos; i++)
 		{
 
-				inicializarMarco(memoriaP,memoriaPrincipal[i]);
+			memoriaPrincipal[i] = malloc(sizeof(char) * memoriaP->tamanioMarco);
+			inicializarMarco(memoriaP,memoriaPrincipal[i]);
 		}
 
+
 	return memoriaPrincipal;
+
 }
 
 
 void inicializarMarco(MEMORIAPRINCIPAL* memoriaP, char* marco)
 {
-	char* tmp = malloc(sizeof(char) * memoriaP->tamanioMarco);
-						memset(tmp,'\0',memoriaP->tamanioMarco);
-						marco =tmp;
+
+			memset(marco,'\0',memoriaP->tamanioMarco);
 
 }
 
@@ -263,8 +265,8 @@ void reemplazarPaginaClockModif(t_tablaDePaginas* tablaPagsProceso,int* nroPagAR
 				if (bitReferencia == 0 && bitModificado == 1){
 					*nroPagAReemp = pagVectClockModif;
 					*(tablaPagsProceso->vectClockModif[posVectClockModif])=paginaSolicit;
-					tablaPagsProceso->posicClockModif = posVectClockModif++;
-					tablaPagsProceso->posicClockModif = (tablaPagsProceso->posicClockModif > maxMarcos)?0:tablaPagsProceso->posicClockModif;
+					(tablaPagsProceso->posicClockModif)++;
+					tablaPagsProceso->posicClockModif = (tablaPagsProceso->posicClockModif > (maxMarcos-1))?0:tablaPagsProceso->posicClockModif;
 					return;
 				}
 			}
@@ -361,9 +363,9 @@ void actualizarVectorClockModif(t_paramConfigAdmMem* configAdmMem,t_tablaDePagin
 			i++;
 		}
 		if (*(tablaPagsProceso->vectClockModif[i]) == -1){
-		int* entradaVectorClckModif = tablaPagsProceso->vectClockModif[(tablaPagsProceso->posicClockModif)+1];
+		int* entradaVectorClckModif = tablaPagsProceso->vectClockModif[i];
 		*entradaVectorClckModif = pagina;
-		tablaPagsProceso->posicClockModif = i;
+		tablaPagsProceso->posicClockModif = 0;
 		}
 	}
 

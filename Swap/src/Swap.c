@@ -98,7 +98,7 @@ int main (){
 
 void atenderPedido(int memSocket, void* buffer )
 {
-	sleep(config->retardo_SWAP);
+	usleep(config->retardo_SWAP);
 
 	char tipoPedido;
 	memcpy(&tipoPedido,buffer,sizeof(char));
@@ -179,7 +179,6 @@ void iniciarProceso(int memSocket)
 void realizarLectura(int memSocket)
 {
 
-
 	// Recepción de la solicitud de información de la Memoria
 		t_protoc_inicio_lectura_Proceso* pedido = malloc(sizeof(t_protoc_inicio_lectura_Proceso));
 		pedido->tipoInstrucc = LEER;
@@ -199,6 +198,17 @@ void realizarLectura(int memSocket)
 
 		char* contenido = malloc(tamanioContenido);
 		memcpy(contenido,contenidoPag,tamanioContenido);
+
+		bool buscarPid(t_proceso* proc)
+		{
+			return proc->pid==pedido->pid;
+
+		}
+
+
+
+		t_proceso* proceso = list_find(espacioUtilizado_lista,(void*)buscarPid);
+		proceso->paginasLeidas++;
 
 		printf("Se Enviaron %d Bytes. Tamanio Cont = %d , Cont = %s\n ",enviado,tamanioContenido,contenido);
 
@@ -236,6 +246,18 @@ void realizarEscritura(int memSocket)
 
 		printf("Se envio confirmacion de Escritura = %d\n",*confirmMemoria);
 
+
+
+		bool buscarPid(t_proceso* proc)
+		{
+			return proc->pid==pedido->pid;
+
+		}
+
+
+
+		t_proceso* proceso = list_find(espacioUtilizado_lista,(void*)buscarPid);
+		proceso->paginasEscritas++;
 
 	//Liberación de estructuras dinámicas utilizadas
 
@@ -287,6 +309,7 @@ void finalizarProceso(int memSocket)
 
 	    t_SwapLog* swapLog  = t_swapLog_crear(pedido->pid,(proceso->paginaComienzo)* config->tamanio_Pagina,proceso->cantidad * config->tamanio_Pagina,NULL);
 		t_loguear(logSwap,LIBERADO,swapLog);
+		log_info(logSwap,"Paginas Leidas= %d  -  Paginas Escritas= %d",proceso->paginasLeidas,proceso->paginasEscritas);
 		t_swapLog_eliminar(swapLog);
 
 
@@ -348,6 +371,8 @@ t_proceso* t_proceso_crear(int pid, int paginaInicio, int cantidad)
 	unproceso ->cantidad= cantidad;
 	unproceso->pid = pid;
 	unproceso->paginaComienzo = paginaInicio;
+	unproceso->paginasLeidas=0;
+	unproceso->paginasEscritas=0;
 
 	return unproceso;
 

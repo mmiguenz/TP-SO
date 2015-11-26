@@ -35,6 +35,8 @@ typedef struct
 	int pid;
 	int paginaComienzo;
 	int cantidad;
+	int paginasLeidas;
+	int paginasEscritas;
 
 } t_proceso ;
 
