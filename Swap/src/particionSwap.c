@@ -278,6 +278,8 @@ void reAsignarHuecosPorCompactacion( t_particion* particion,int proximaPaginaLib
 
 	list_add(particion->espacioLibre ,(void*) unHueco);
 
+	t_particion_limpiar(particion,unHueco->paginaInicio,unHueco->cantidadPaginas);
+
 
 }
 
