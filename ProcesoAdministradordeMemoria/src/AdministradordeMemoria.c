@@ -194,7 +194,7 @@ float aciertos_TLB;
 	 int frame=-1;
 	 int marcosAsignados;
 	 int tamanioContenido;
-	 char* contenido;
+	 char* contenido= malloc(configAdmMem->tamanio_marco);
 	 int entradaTLB;
 	 int paginaReemp = 0;
 	 int tlbHit = false;
@@ -241,7 +241,7 @@ float aciertos_TLB;
 
 		 if(frame == -1 && tlbHit != true)/*No se encontró página en MP*/{
 
-			contenido = solicitarContenidoASwap(socketSwap,buffer);
+			strcpy(contenido, solicitarContenidoASwap(socketSwap,buffer));
 
 			 (tablaPagsProceso->contadorPF)++;
 			 marcosAsignados = marcosUtilizadosProceso(tablaPagsProceso);
@@ -300,7 +300,7 @@ float aciertos_TLB;
 			 }
 
 
-			 contenido = memoriaPrincipal->Memoria[frame];
+			 strcpy(contenido, memoriaPrincipal->Memoria[frame]);
 
 			 // Serializo el contenido del frame leido para su envío al CPU
 			 tamanioContenido = configAdmMem->tamanio_marco;
@@ -315,6 +315,7 @@ float aciertos_TLB;
 			 free(bufferContAEnviar);
 		 	 }
 			 free(protInic);
+			 free(contenido);
 	 }
 
 void escrituraMemoria(int socketCPU, int socketSwap){
@@ -606,7 +607,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
  	 return buffer;
  }
 
- char* solicitarContenidoASwap(int socketSwap,void* buffer){
+ char*  (int socketSwap,void* buffer){
  	 int tamanioContenido;
  	 char* contenido;
  	 send(socketSwap,buffer,sizeof(char)+(sizeof(int)*2),0);
