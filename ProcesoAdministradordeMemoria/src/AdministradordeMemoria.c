@@ -316,6 +316,7 @@ float aciertos_TLB;
 		 	 }
 			 free(protInic);
 			 free(contenido);
+			 free(buffer);
 	 }
 
 void escrituraMemoria(int socketCPU, int socketSwap){
@@ -607,7 +608,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
  	 return buffer;
  }
 
- char*  (int socketSwap,void* buffer){
+ char*  solicitarContenidoASwap(int socketSwap,void* buffer){
  	 int tamanioContenido;
  	 char* contenido;
  	 send(socketSwap,buffer,sizeof(char)+(sizeof(int)*2),0);
