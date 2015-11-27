@@ -42,6 +42,11 @@ typedef struct  {
 	int payload_size;
 }t_msgHeader;
 
+typedef struct  {
+	int cpu;
+	float porcentaje;
+}t_msgPorc;
+
 
 //estructura para la comunicacion con planificador dsp de mandar el t_msgHeader
 typedef struct  {

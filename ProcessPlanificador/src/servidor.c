@@ -571,6 +571,22 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 				break;
 
 	}
+
+	case 9: /*porcentajes*/
+	{
+		t_msgPorc porcen;
+		memset(&porcen, 0, sizeof(t_msgPorc));
+
+		recv(socketCliente, &porcen,sizeof (t_msgPorc),0);
+		while(porcen.cpu!=0){
+			printf("\n-----------El porcentaje de uso del CPU %d es %.2f-------\n---------------------------------------------\n",porcen.cpu,porcen.porcentaje);
+
+			recv(socketCliente, &porcen,sizeof (t_msgPorc),0);
+
+		}
+
+		break;
+	}
 	}
 
 
