@@ -442,7 +442,7 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 					 pcb_parc.tiempo=0;
 
 
-	printf("-------------------EL MSJ type es %d \n",header.msgtype);
+	//printf("-------------------EL MSJ type es %d \n",header.msgtype);
 	switch(header.msgtype){
 
 	case 0 : {
@@ -637,7 +637,7 @@ void* manejo_cpu_libres(void* mensa){
 		sem_wait(&sem_consume_cpu);
 		cpus=queue_pop(cpu_libres);
 		socketCliente=cpus->cpu_libre;
-		printf("El cpu libre es %d", socketCliente);
+		//printf("El cpu libre es %d", socketCliente);
 
 		PcbAux=malloc(sizeof(PCB*));
 
