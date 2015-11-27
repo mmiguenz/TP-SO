@@ -288,9 +288,9 @@ float aciertos_TLB;
 			 }
 		 }
 
-		 (tablaPagsProceso->contadorPaginasAcc)++;
 
 		 if (frame != -1){
+			 (tablaPagsProceso->contadorPaginasAcc)++;
 
 			 if (configAdmMem->tlb_habilitada && tlbHit != true){
 				 //---------------------------------Logging Acceso TLB(miss)-----------------------------------------------//
@@ -436,9 +436,10 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				 }
 			 }
 
-		 (tablaPagsProceso->contadorPaginasAcc)++;
 
 			 if (frame != -1){
+
+				 (tablaPagsProceso->contadorPaginasAcc)++;
 
 				 if (configAdmMem->tlb_habilitada && tlbHit != true){
 					 //---------------------------------Logging Acceso TLB(miss)-----------------------------------------------//
