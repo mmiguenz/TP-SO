@@ -580,6 +580,7 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 		recv(socketCliente, &porcen,sizeof (t_msgPorc),0);
 		while(porcen.cpu!=0){
 			printf("\n-----------El porcentaje de uso del CPU %d es %.2f-------\n---------------------------------------------\n",porcen.cpu,porcen.porcentaje);
+			log_info(logger, "\n-----------El porcentaje de uso del CPU %d es %.2f-------\n",porcen.cpu,porcen.porcentaje);
 
 			recv(socketCliente, &porcen,sizeof (t_msgPorc),0);
 

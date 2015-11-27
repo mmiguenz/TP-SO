@@ -744,13 +744,17 @@ void* mensajear_porc(void* mensa){
 			recv(planificador,&cpu,sizeof(int),0);
 			printf("Soy el Master %d \n\n",cpu);
 			time_t inicio;
+			time_t aux1;
 			int times;
+			aux1=time(NULL);
+			time_t fin;
+
 
 	while(1){
-
 					inicio=time(NULL);
 					recv(planificador,&cpu,sizeof(int),0);
-					times=difftime(time(NULL),inicio);
+					fin=time(NULL);
+					times=difftime(fin,inicio);
 
 					header2.msgtype = 9; //significa te mando %
 					header2.payload_size = planificador;
@@ -763,9 +767,14 @@ void* mensajear_porc(void* mensa){
 						{
 							if (instrucciones[i]!=-1){
 								if(times>retardo){
-								divisor=(times/retardo);
+								times=difftime(fin,aux1);
+
+									divisor=(times/retardo);
 								porcentaje=(instrucciones[i]*100)/divisor;
+								if(porcentaje>100){porcentaje=100;}
 								porcentajes[i]=porcentaje;
+								aux1=inicio;
+
 								}
 								printf("La cantidad de instrucciones es %d \n",instrucciones[i] );
 								porcen.cpu=i;
