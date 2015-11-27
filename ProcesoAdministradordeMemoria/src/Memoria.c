@@ -270,9 +270,10 @@ void reemplazarPaginaClockModif(t_tablaDePaginas* tablaPagsProceso,int* nroPagAR
 					return;
 				}
 			}
-
+			if(pagVectClockModif != -1){
 			paginaActual = tablaPagsProceso->Pagina[pagVectClockModif];
 			paginaActual->bitUtilizado = (paginaActual->bitUtilizado == 0)?1:0;
+			}
 			posVectClockModif = (posVectClockModif == (maxMarcos-1))?0:posVectClockModif+1;
 
 		}
@@ -365,7 +366,6 @@ void actualizarVectorClockModif(t_paramConfigAdmMem* configAdmMem,t_tablaDePagin
 		if (*(tablaPagsProceso->vectClockModif[i]) == -1){
 		int* entradaVectorClckModif = tablaPagsProceso->vectClockModif[i];
 		*entradaVectorClckModif = pagina;
-		tablaPagsProceso->posicClockModif = 0;
 		}
 	}
 
