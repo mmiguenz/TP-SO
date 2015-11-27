@@ -720,8 +720,8 @@ void* mensajear_porc(void* mensa){
 	//las asignamos a variables locales
 	int puertoPlanificador = param->puerto_escucha_planificador;
 	char* ipPlanificador = param ->ip_conec_plani;
-	int puertoMemoria = param-> puerto_escucha_memoria;
-	char* ipMemoria = param->ip_conec_memoria;
+	//int puertoMemoria = param-> puerto_escucha_memoria;
+	//char* ipMemoria = param->ip_conec_memoria;
 	t_log* logger = param->logger;
 	retardo = param->retardo;
 	int cpu;
@@ -731,6 +731,9 @@ void* mensajear_porc(void* mensa){
 	int planificador = conectar_cliente(puertoPlanificador, ipPlanificador);
 
 	char* aux = recibirMensaje(planificador);
+	t_msgPorc porcen;
+	memset(&porcen, 0, sizeof(t_msgPorc));
+
 
 	t_msgHeader header2;
 			memset(&header2, 0, sizeof(t_msgHeader));
@@ -741,26 +744,42 @@ void* mensajear_porc(void* mensa){
 			recv(planificador,&cpu,sizeof(int),0);
 			printf("Soy el Master %d \n\n",cpu);
 			time_t inicio;
+			time_t aux1;
 			int times;
+			aux1=time(NULL);
+			time_t fin;
+
 
 	while(1){
-
 					inicio=time(NULL);
 					recv(planificador,&cpu,sizeof(int),0);
-					times=difftime(time(NULL),inicio);
+					fin=time(NULL);
+					times=difftime(fin,inicio);
+
+					header2.msgtype = 9; //significa te mando %
+					header2.payload_size = planificador;
+					send(planificador, &header2, sizeof( t_msgHeader), 0);
+
 					int i=0;
 					float divisor; float porcentaje;
 					if (times==0){times=1;};
 						while(i!=50)
 						{
 							if (instrucciones[i]!=-1){
-								divisor=(times/retardo);
-								if (divisor==0){divisor=1;};
-								porcentaje=(instrucciones[i]*100)/divisor;
-								if (porcentaje>100){porcentaje=0;};
-								porcentajes[i]=porcentaje;
+								if(times>retardo){
+								times=difftime(fin,aux1);
 
+									divisor=(times/retardo);
+								porcentaje=(instrucciones[i]*100)/divisor;
+								if(porcentaje>100){porcentaje=100;}
+								porcentajes[i]=porcentaje;
+								aux1=inicio;
+
+								}
 								printf("La cantidad de instrucciones es %d \n",instrucciones[i] );
+								porcen.cpu=i;
+								porcen.porcentaje=porcentajes[i];
+								send(planificador,&porcen,sizeof(t_msgPorc),0);
 								printf("El retardo es %d \n",retardo);
 								printf("\n-----------El porcentaje de uso del CPU %d es %.2f-------\n---------------------------------------------\n",i,porcentajes[i]);
 
@@ -770,6 +789,9 @@ void* mensajear_porc(void* mensa){
 							}
 							i++;
 						}
+						porcen.cpu=0;
+						porcen.porcentaje=0;
+						send(planificador,&porcen,sizeof(t_msgPorc),0);
 
 			}
 

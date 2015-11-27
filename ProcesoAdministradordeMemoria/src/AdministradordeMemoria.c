@@ -579,7 +579,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 				tablaPaginasProceso->vectClockModif[i] = malloc(sizeof(int));
 				*(tablaPaginasProceso->vectClockModif[i]) = -1;
 			 }
-			 tablaPaginasProceso->posicClockModif = -1;
+			 tablaPaginasProceso->posicClockModif = 0;
 		 }
 
 	 char* pidConv = malloc(20);

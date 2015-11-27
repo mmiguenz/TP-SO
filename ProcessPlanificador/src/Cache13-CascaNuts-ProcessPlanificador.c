@@ -223,6 +223,7 @@ void *shell(int mutex){
 		printf("-                    %s                  -\n",pcb_block_aux->nombreProc);
 		printf("-			Su Pid es %d                         -\n",pcb_block_aux->PID);
 		printf("---------------------------------------------------\n\n");
+		fflush(stdin);
 		usleep(pcb_block_aux->retardo_io*1000000);
 
 
