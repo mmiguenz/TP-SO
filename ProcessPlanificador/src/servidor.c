@@ -88,8 +88,8 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 	}
 
 
-	pthread_t hilo_porc; //Hilo que creo para correr la i/o  que acepta procesos y los blockea
-			pthread_create(&hilo_porc, NULL, manejo_porc, (void *) NULL);
+//	pthread_t hilo_porc; //Hilo que creo para correr la i/o  que acepta procesos y los blockea
+	//		pthread_create(&hilo_porc, NULL, manejo_porc, (void *) NULL);
 
 
 
@@ -184,7 +184,7 @@ void conectar_fifo(char* puerto_escucha_planif,t_queue * fifo_PCB, t_log* logger
 	}}
 
 	pthread_join(hilo_cpu_libres, NULL);
-	pthread_join(hilo_porc, NULL);
+	//pthread_join(hilo_porc, NULL);
 
 
 }
@@ -500,9 +500,10 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 
 		Pcb_IO=search_and_return(pcb_parc.pid,running_PCB);
 		Pcb_IO->retardo_io=pcb_parc.tiempo;
+		printf("EL RETARDO ES %d \n",Pcb_IO->retardo_io);
 		if(Pcb_IO->contadorProgram!=-1){
 		Pcb_IO->contadorProgram= pcb_parc.contadorDePrograma;
-		printf("El proceso a blokear es........ %s",Pcb_IO->nombreProc );
+		printf("El proceso a blokear es........ %s\n",Pcb_IO->nombreProc );
 		log_trace(logger,"El proceso a blokear es........ %s\n",Pcb_IO->nombreProc );
 
 		Pcb_IO->cant_run++;
@@ -652,7 +653,7 @@ void* manejo_cpu_libres(void* mensa){
 
 		log_trace(param->logger,"\n PCB a mandar \n\n");
 		printf("\n PCB a mandar \n\n");
-		log_trace(param->logger,"EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
+		log_trace(param->logger,"EL nombredelproceso es........: \n%s \n",PcbAux->nombreProc);
 		printf("EL nombredelproceso es........: %s \n",PcbAux->nombreProc);
 		log_trace(param->logger,"EL Path es........: %s \n",PcbAux->path);
 		printf("EL Path es........: %s \n",PcbAux->path);
@@ -711,10 +712,10 @@ void* manejo_cpu_libres(void* mensa){
 void* manejo_porc(){
 
 
-	while(1){
-	sem_wait(&sem_porc);
+	//while(1){
+	//sem_wait(&sem_porc);
 
 	send(master,&master,sizeof(int),0);
-	}
+	//}
 	return 0;
 }

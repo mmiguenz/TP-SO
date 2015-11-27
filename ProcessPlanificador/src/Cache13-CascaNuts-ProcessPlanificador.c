@@ -217,14 +217,14 @@ void *shell(int mutex){
 		//pcb_block_aux->tiempo_respuesta=(pcb_block_aux->tiempo_respuesta+(difftime(time(NULL),pcb_block_aux->t_entrada_cola_block)));
 
 
-
+		printf("EL RETARDO ES %d \n",pcb_block_aux->retardo_io);
 		printf("-------------------------------------------------\n");
-		printf("-         Entrada Salida del Proceso            --\n");
-		printf("-                    %s                  -\n",pcb_block_aux->nombreProc);
-		printf("-			Su Pid es %d                         -\n",pcb_block_aux->PID);
+		printf("-         Entrada Salida del Proceso            -\n");
+		printf("-                    %s                   -\n",pcb_block_aux->nombreProc);
+		printf("-			Su Pid es %d                -\n",pcb_block_aux->PID);
 		printf("---------------------------------------------------\n\n");
-		fflush(stdin);
-		usleep(pcb_block_aux->retardo_io*1000000);
+
+		sleep(pcb_block_aux->retardo_io);
 
 
 		pcb_block=queue_pop(block_PCB);
@@ -316,7 +316,7 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
     strcat(ruta, proceso);
     strcat(ruta, ".cod");
 
-    printf("Y su ruta de acceso es: %s \n", ruta);
+    printf("Y su ruta de acceso es:\n %s \n", ruta);
 
     /*-----------------Creo mi PCB----------------------------------*/
 
@@ -418,7 +418,8 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 	case CPU:
 	{
 		printf("El comando que eligio fue cpu \n");
-		sem_post(&sem_porc);
+		manejo_porc();
+		//sem_post(&sem_porc);
 		break;
 	}
 	case ERROR:
