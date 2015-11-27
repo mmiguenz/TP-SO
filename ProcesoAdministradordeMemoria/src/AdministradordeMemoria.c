@@ -102,7 +102,7 @@ float aciertos_TLB;
 	 	 	 	 pthread_mutexattr_init(&Attr);
 	 	 	 	 pthread_mutexattr_settype(&Attr, PTHREAD_MUTEX_RECURSIVE);
 	 	 	 	 pthread_mutex_init(&mutex, &Attr);
-	 	 	 	 pthread_mutex_init(&mutex,&Attr);
+	 	 	 	 pthread_mutex_init(&mutexTLB,&Attr);
 
 
 
@@ -608,7 +608,8 @@ void escrituraMemoria(int socketCPU, int socketSwap){
  	 return buffer;
  }
 
- char*  solicitarContenidoASwap(int socketSwap,void* buffer){
+
+ char* solicitarContenidoASwap (int socketSwap,void* buffer){
  	 int tamanioContenido;
  	 char* contenido;
  	 send(socketSwap,buffer,sizeof(char)+(sizeof(int)*2),0);
