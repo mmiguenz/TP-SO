@@ -711,11 +711,17 @@ void* manejo_cpu_libres(void* mensa){
 
 void* manejo_porc(){
 
+	int codigo =0;
 
-	//while(1){
-	//sem_wait(&sem_porc);
+	send(master,&codigo,sizeof(int),0);
 
-	send(master,&master,sizeof(int),0);
-	//}
 	return 0;
+}
+
+void* manejo_fin(int pid){
+	send(master,&pid,sizeof(int),0);
+
+	return 0;
+
+
 }

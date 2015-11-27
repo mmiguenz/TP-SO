@@ -373,7 +373,7 @@ void procesar_comando(char comando[], char proceso[],int mutex, int cpu_conectad
 		tamanio--;
 		}
 
-
+		manejo_fin(pid);
 
 		break;
 	}

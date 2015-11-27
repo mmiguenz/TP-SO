@@ -58,7 +58,7 @@ typedef struct {
 }struct1;
 
 int instrucciones[50];
-
+int pid_final;
 
 int recolectar_Texto(char cadena[1500], int punta, char texto[20])
 {
@@ -478,7 +478,7 @@ int cantInst =0;
 		int aux;
 		aux= recolectar_instruccion(cadena,comando, punta);
 		punta=aux;
-
+		if(pid_final==PcbAux->PID){strcpy(comando,"finalizar");}
 		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto, cantInst);
 		instrucciones[cpu]++;
 		punta=aux;
@@ -540,7 +540,7 @@ void procesarCadena(char cadena[1500], int memoria, int planificador,t_log* logg
 		int aux;
 		aux= recolectar_instruccion(cadena,comando, punta);
 		punta=aux;
-
+		if(pid_final==PcbAux->PID){strcpy(comando,"finalizar");}
 		aux =procesar_instruccion(cadena, comando, punta, pagina, memoria, planificador,  logger,PcbAux, retardo, texto, cantInst);
 		punta=aux;
 		instrucciones[cpu]++;
@@ -753,6 +753,7 @@ void* mensajear_porc(void* mensa){
 	while(1){
 					inicio=time(NULL);
 					recv(planificador,&cpu,sizeof(int),0);
+					if(cpu==0){
 					fin=time(NULL);
 					times=difftime(fin,inicio);
 
@@ -770,8 +771,9 @@ void* mensajear_porc(void* mensa){
 								times=difftime(fin,aux1);
 
 									divisor=(times/retardo);
-								porcentaje=(instrucciones[i]*100)/divisor;
-								if(porcentaje>100){porcentaje=100;}
+								porcentaje=(instrucciones[i]*100)/(divisor);
+								porcentaje+=20;
+								if(porcentaje>100){porcentaje=100;}if(porcentaje<0){porcentaje=0;}
 								porcentajes[i]=porcentaje;
 								aux1=inicio;
 
@@ -793,8 +795,8 @@ void* mensajear_porc(void* mensa){
 						porcen.porcentaje=0;
 						send(planificador,&porcen,sizeof(t_msgPorc),0);
 
-			}
-
+			}else{pid_final=cpu;}
+	}
 
 	return EXIT_SUCCESS;
 }
