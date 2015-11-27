@@ -140,7 +140,7 @@ int buscarPaginaenMemoria(int pid, int pagina,t_dictionary* tablasPagsProcesos){
 
 void insertarPaginaenMP(char*contenido,MEMORIAPRINCIPAL* memoria,int* marco){
 
-	memoria->Memoria[*marco] = contenido;
+	strcpy(memoria->Memoria[*marco],contenido);
 	memoria->MemoriaLibre[*marco] = 1;
 
 }
@@ -175,7 +175,7 @@ int reemplazarPagina(t_paramConfigAdmMem* configAdmMem,int socketSwap, MEMORIAPR
 	if(paginaAReemp->bitModificado){
 		int tamanioContenido = memoria->tamanioMarco;
 		char* contenidoReemp = malloc(memoria->tamanioMarco);
-		contenidoReemp = memoria->Memoria[paginaAReemp->idFrame];
+		strcpy(contenidoReemp,memoria->Memoria[paginaAReemp->idFrame]);
 		enviarDatosPorModifASwap(socketSwap,contenidoReemp,tamanioContenido,*nroPagAReemp,tablaPagsProceso->pid);
 	}
 

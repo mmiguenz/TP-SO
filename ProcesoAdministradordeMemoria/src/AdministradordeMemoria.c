@@ -725,11 +725,13 @@ void memoryDump()
 	log_info(logAdmMem,"MEMORY DUMP MARCOS = %d ",memoriaPrincipal->cantMarcos);
 	for(i=0; i<memoriaPrincipal->cantMarcos; i++)
 	{
-		char *frame ;
+		char *frame = malloc(configAdmMem->tamanio_marco) ;
 
-		frame = memoriaPrincipal->Memoria[i];
+		strcpy(frame,memoriaPrincipal->Memoria[i]);
 
 		log_info(logAdmMem, "FRAME #%d || CONTENIDO = %s",i,frame);
+
+		free(frame);
 
 	}
 }
