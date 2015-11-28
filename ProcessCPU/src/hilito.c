@@ -629,13 +629,13 @@ void* conectar(void* mensa){
 
 
 
-
+		int control;
 
 		//primero recibimos el tamaño del msj del planificador
 		t_msgHeader header;
 		memset(&header, 0, sizeof(t_msgHeader)); // Ahora el struct tiene cero en todos sus miembros
-		recv(planificador, &header, sizeof( t_msgHeader), 0);
-
+		control = recv(planificador, &header, sizeof( t_msgHeader), 0);
+		if (control>0){
 		//recibimos el msj del planificador pcb
 		char* buffer;
 		PCB *PcbAux =malloc(sizeof(PCB));
@@ -703,8 +703,10 @@ void* conectar(void* mensa){
 		}
 
 		free(buffer);
+	}else{
+		printf("cerro planificador");
 	}
-
+	}
 
 	return EXIT_SUCCESS;
 }

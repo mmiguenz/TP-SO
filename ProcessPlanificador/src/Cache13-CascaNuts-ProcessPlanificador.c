@@ -224,13 +224,13 @@ void *shell(int mutex){
 		printf("-			Su Pid es %d                -\n",pcb_block_aux->PID);
 		printf("---------------------------------------------------\n\n");
 
-		sleep(pcb_block_aux->retardo_io);
 
 
 		pcb_block=queue_pop(block_PCB);
 		pcb_block->t_entrada_cola_ready=time(NULL);
 		pcb_block->tiempo_respuesta=(pcb_block_aux->tiempo_respuesta+(difftime(time(NULL),pcb_block_aux->t_entrada_cola_block)));
-
+		sleep(pcb_block_aux->retardo_io);
+		pcb_block->tiempo_ejecucion+=pcb_block_aux->retardo_io;
 
 		queue_push(fifo_PCB_ready,pcb_block);
 
