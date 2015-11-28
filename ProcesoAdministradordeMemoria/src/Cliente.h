@@ -46,5 +46,3 @@ void enviarMensaje(int socket,t_msgHeaderMemoria encabezado);
 char* enviarSolicitudLectura(int pid ,int  instruccion, int  paginas ,int  sMemoria);
 
 #endif /* CLIENTE_H_ */
-
-

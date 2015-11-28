@@ -218,7 +218,7 @@ int Lee_Socket (int fd, char *Datos, int Longitud)
 				{
 					case EINTR:
 					case EAGAIN:
-						usleep (100);
+						uusleep (100);
 						break;
 					default:
 						return -1;
@@ -376,4 +376,3 @@ int Abre_Socket_Inet (char* puerto_escucha_memoria)
 
 	return listener;
 }
-

@@ -35,6 +35,3 @@ t_tempLogueo* agregar_reemplazarRegistroTLB(TLB* tlb,int pid, int pagina, int fr
 void borrarRegistroTLBPagReemp(TLB* tlb, int* paginaReemp,int pid);
 
 #endif /* TLB_H_ */
-
-
-

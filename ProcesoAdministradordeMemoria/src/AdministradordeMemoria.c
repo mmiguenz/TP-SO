@@ -168,7 +168,7 @@ float aciertos_TLB;
 	 	 if (*confirmSwap == 1) {
 	 	 //Creación de la tabla de páginas del proceso y agregado de la misma a la Lista de Tablas de Páginas
 	 		 crear_e_insertar_TabladePaginas((protInic->paginas), protInic->pid, tablasPags);
-	 		 sleep(configAdmMem->retardo_memoria);
+	 		 usleep(configAdmMem->retardo_memoria);
 	 	 }
 
 	 	 //---------Logging creacion de MProc--------------------//
@@ -225,7 +225,7 @@ float aciertos_TLB;
 	 if (frame == -1 && tlbHit != true )/*No se encontró página en TLB*/{
 
 		 frame = buscarPaginaenMemoria(protInic->pid,protInic->paginas,tablasPags);
-		 sleep(configAdmMem->retardo_memoria);
+		 usleep(configAdmMem->retardo_memoria);
 
 		 if(frame != -1){
 			 actualizarUtilizyModifPag(LEER,tablaPagsProceso,protInic->paginas);
@@ -252,7 +252,7 @@ float aciertos_TLB;
 				 borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
 				 insertarPaginaenMP(contenido,memoriaPrincipal,&frame);
 				 actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
-				 sleep(configAdmMem->retardo_memoria);
+				 usleep(configAdmMem->retardo_memoria);
 				 loguearActualizacionMemoria(logAdmMem,protInic->paginas,paginaReemp,protInic->pid,frame);
 			 }
 			 else{
@@ -272,7 +272,7 @@ float aciertos_TLB;
 					borrarRegistroTLBPagReemp(tlb,&paginaReemp,protInic->pid);
 					insertarPaginaenMP(contenido,memoriaPrincipal,&frame);
 					actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
-					sleep(configAdmMem->retardo_memoria);
+					usleep(configAdmMem->retardo_memoria);
 					loguearActualizacionMemoria(logAdmMem,protInic->paginas,paginaReemp,protInic->pid,frame);
 			 	 }
 			 }
@@ -281,7 +281,7 @@ float aciertos_TLB;
 				 insertarPaginaenMP(contenido,memoriaPrincipal,&frame);
 				 actualizarTablaPaginas(LEER,frame,protInic->paginas,tablaPagsProceso);
 				 actualizarVectorClockModif(configAdmMem,tablaPagsProceso,protInic->paginas);
-				 sleep(configAdmMem->retardo_memoria);
+				 usleep(configAdmMem->retardo_memoria);
 				 paginaReemp = -1;
 				 loguearActualizacionMemoria(logAdmMem,protInic->paginas,paginaReemp,protInic->pid,frame);
 			 	 }
@@ -373,7 +373,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 		 if (frame == -1 && tlbHit != true)/*No se encontró página en TLB*/{
 
 			 frame = buscarPaginaenMemoria(pedido->pid,pedido->pagina,tablasPags);
-			 sleep(configAdmMem->retardo_memoria);
+			 usleep(configAdmMem->retardo_memoria);
 
 			 if(frame != -1){
 
@@ -401,7 +401,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 					 borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
 					 insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 					 actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
-					 sleep(configAdmMem->retardo_memoria);
+					 usleep(configAdmMem->retardo_memoria);
 					 loguearActualizacionMemoria(logAdmMem,pedido->pagina,paginaReemp,pedido->pid,frame);
 				 }
 				 else{
@@ -421,7 +421,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 						borrarRegistroTLBPagReemp(tlb,&paginaReemp,pedido->pid);
 						insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 						actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
-						sleep(configAdmMem->retardo_memoria);
+						usleep(configAdmMem->retardo_memoria);
 						loguearActualizacionMemoria(logAdmMem,pedido->pagina,paginaReemp,pedido->pid,frame);
 				 	 }
 				 }
@@ -429,7 +429,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 					 insertarPaginaenMP(pedido->contenido,memoriaPrincipal,&frame);
 					 actualizarTablaPaginas(ESCRIBIR,frame,pedido->pagina,tablaPagsProceso);
 					 actualizarVectorClockModif(configAdmMem,tablaPagsProceso,pedido->pagina);
-					 sleep(configAdmMem->retardo_memoria);
+					 usleep(configAdmMem->retardo_memoria);
 					 paginaReemp = -1;
 					 loguearActualizacionMemoria(logAdmMem,pedido->pagina,paginaReemp,pedido->pid,frame);
 				 	 }
@@ -496,7 +496,7 @@ void escrituraMemoria(int socketCPU, int socketSwap){
 	 /*---------------------------------------------------------------------------------------*/
 
 	 eliminarTablaDePaginasDelProceso(tablasPags,pedido->pid);
-	 sleep(configAdmMem->retardo_memoria);
+	 usleep(configAdmMem->retardo_memoria);
 
 
 	 respuestaSwap = notificarFinalizarSwap(socketSwap,pedido);
@@ -746,7 +746,7 @@ float tasaAciertos;
 
 while(1)
 {
-	sleep(20);
+	sleep(60);
 
 	pthread_mutex_lock(&mutexTLB);
 	tasaAciertos = (referMem_TLB != 0.00)?aciertos_TLB/referMem_TLB:0.00;

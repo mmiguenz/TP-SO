@@ -31,4 +31,3 @@ t_paramConfigAdmMem* establecerConfigMemoria(t_config* archConfiguracion){
 	free(archConfiguracion);
 	return config;
 }
-
