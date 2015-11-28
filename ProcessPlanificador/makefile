@@ -1,5 +1,3 @@
-
-
 RM = rm -rf
 
 USER_OBJS =
@@ -21,40 +19,30 @@ src \
 
 # Add inputs and outputs from these tool invocations to the build variables
 C_SRCS += \
-../src/AdministradordeMemoria.c \
-../src/Cliente.c \
-../src/LoggingAdmMem.c \
-../src/Memoria.c \
-../src/TADConfig.c \
-../src/Tlb.c \
+../src/Cache13-CascaNuts-ProcessPlanificador.c \
+../src/PCB.c \
 ../src/servidor.c
 
 OBJS += \
-./src/AdministradordeMemoria.o \
-./src/Cliente.o \
-./src/LoggingAdmMem.o \
-./src/Memoria.o \
-./src/TADConfig.o \
-./src/Tlb.o \
+./src/Cache13-CascaNuts-ProcessPlanificador.o \
+./src/PCB.o \
 ./src/servidor.o
 
 C_DEPS += \
-./src/AdministradordeMemoria.d \
-./src/Cliente.d \
-./src/LoggingAdmMem.d \
-./src/Memoria.d \
-./src/TADConfig.d \
-./src/Tlb.d \
+./src/Cache13-CascaNuts-ProcessPlanificador.d \
+./src/PCB.d \
 ./src/servidor.d
 
+# Add inputs and outputs from these tool invocations to the build variables
+
 # All Target
-all: ProcesoAdministradordeMemoria
+all: Cache13-CascaNuts-ProcessPlanificador
 
 # Tool invocations
-ProcesoAdministradordeMemoria: $(OBJS) $(USER_OBJS)
+Cache13-CascaNuts-ProcessPlanificador: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "ProcesoAdministradordeMemoria" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc  -o "Cache13-CascaNuts-ProcessPlanificador" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -66,10 +54,9 @@ src/%.o: ../src/%.c
 	@echo 'Finished building: $<'
 	@echo ' '
 
-
 # Other Targets
 clean:
-	$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) ProcesoAdministradordeMemoria
+	$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) Cache13-CascaNuts-ProcessPlanificador
 	@echo ' '
 
 .PHONY: all clean dependents
