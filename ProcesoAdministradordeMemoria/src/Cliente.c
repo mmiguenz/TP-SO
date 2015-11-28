@@ -42,4 +42,3 @@ void enviarMensaje(int socket,t_msgHeaderMemoria encabezado) {
 }
 
 #endif
-
