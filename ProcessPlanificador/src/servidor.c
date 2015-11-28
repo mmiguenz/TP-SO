@@ -481,7 +481,7 @@ void procesar_mensaje(int socketCliente,t_msgHeader header,t_queue * fifo_PCB, t
 
 	PcbFin->tiempo_ejecucion+=diferencia;
 	PcbFin->tiempo_ejecucion+=PcbFin->tiempo_espera;
-	PcbFin->tiempo_espera+=PcbFin->tiempo_respuesta;
+	PcbFin->tiempo_ejecucion+=PcbFin->tiempo_respuesta;
 	log_info(logger,"-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n\n",PcbFin->tiempo_espera);
 	printf("-----------El Tiempo de espera fue de %.2f segundos aproximadamente--------\n\n",PcbFin->tiempo_espera);
 	log_info(logger,"-----------El Tiempo de ejecucion fue de %.2f segundos aproximadamente......\n\n",PcbFin->tiempo_ejecucion);
