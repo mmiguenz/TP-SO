@@ -29,11 +29,15 @@ void swapConfig_GetConfig(t_swapConfig* swapConfig){
 
 	}
 
+
+
+
+
 	strcpy(swapConfig->puerto_Escucha,config_get_string_value(fileCfg,"PUERTO_ESCUCHA"));
 	strcpy(swapConfig->nombre_Swap,config_get_string_value(fileCfg,"NOMBRE_SWAP"));
 	swapConfig->cantidad_Paginas = config_get_int_value(fileCfg,"CANTIDAD_PAGINAS");
 	swapConfig->tamanio_Pagina = config_get_int_value(fileCfg,"TAMANIO_PAGINA");
-	swapConfig->retardo_SWAP = config_get_int_value(fileCfg,"RETARDO_SWAP");
+	swapConfig->retardo_SWAP = (int) (config_get_double_value(fileCfg,"RETARDO_SWAP")) * 1000000;
 	swapConfig->retardo_Compact = config_get_int_value(fileCfg,"RETARDO_COMPACTACION");
 
 }
