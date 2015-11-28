@@ -218,7 +218,7 @@ int Lee_Socket (int fd, char *Datos, int Longitud)
 				{
 					case EINTR:
 					case EAGAIN:
-						uusleep (100);
+						usleep (100);
 						break;
 					default:
 						return -1;
