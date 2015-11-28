@@ -603,7 +603,7 @@ void* conectar(void* mensa){
 
 
 
-	char* aux = recibirMensaje(planificador);
+	recibirMensaje(planificador);
 
 	t_msgHeader header2;
 			memset(&header2, 0, sizeof(t_msgHeader));
