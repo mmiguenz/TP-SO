@@ -397,28 +397,3 @@ int marcosUtilizadosProceso(t_tablaDePaginas* tablaPagsProceso){
 	return marcosUtilizados;
 }
 
-void mem_Flush(MEMORIAPRINCIPAL* memoria, t_dictionary* tablasDePaginas){
-
-	int i;
-
-	for (i = 0; i < memoria->cantMarcos; ++i) {
-
-		inicializarMarco(memoria,memoria->Memoria[i]);
-
-	}
-	memoria->MemoriaLibre = inicializarMemoriaLibre(memoria->cantMarcos);
-
-	void blanquearTablaPagina(char* pid,t_tablaDePaginas* tablaDePaginas){
-
-		for (i=0; i<tablaDePaginas->cantTotalPaginas; ++i){
-				 tablaDePaginas->Pagina[i]->idFrame = -1;
-				 tablaDePaginas->Pagina[i]->bitPresencia = 0;
-				 tablaDePaginas->Pagina[i]->bitModificado = 0;
-				 tablaDePaginas->Pagina[i]->horaIngreso = 90000000;//Espacio que ocupa la hora en formato 'hh:mm:ss:mmmm'
-			 }
-
-	dictionary_iterator(tablasDePaginas,(void*)blanquearTablaPagina);
-	}
-
-return;
-}

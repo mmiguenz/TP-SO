@@ -774,7 +774,7 @@ void* mensajear_porc(void* mensa){
 
 									divisor=(times/retardo);
 								porcentaje=(instrucciones[i]*100)/(divisor);
-								porcentaje+=20;
+
 								if(porcentaje>100){porcentaje=100;}if(porcentaje<0){porcentaje=0;}
 								porcentajes[i]=porcentaje;
 								aux1=inicio;

@@ -48,6 +48,7 @@ void memoryDump();
 void publicarTasaAciertos();
 void* prepararSolicitudASwap(t_protoc_escrituraProceso* pedido);
 char* solicitarContenidoASwap(int socketSwap,void* buffer);
+void avisarASwap(t_tablaDePaginas* tablaDePaginas);
 
 t_config* config;
 t_log* logAdmMem;
@@ -755,4 +756,57 @@ while(1)
 	printf("Tasa de aciertos histórica de TLB = %.2f \n",tasaAciertos);
 }
 
+}
+
+void mem_Flush(MEMORIAPRINCIPAL* memoria, t_dictionary* tablasDePaginas){
+
+	int i;
+
+	void blanquearTablaPagina(char* pid,t_tablaDePaginas* tablaDePaginas){
+
+		avisarASwap(tablaDePaginas);
+
+		for (i=0; i<tablaDePaginas->cantTotalPaginas; ++i){
+				 tablaDePaginas->Pagina[i]->idFrame = -1;
+				 tablaDePaginas->Pagina[i]->bitPresencia = 0;
+				 tablaDePaginas->Pagina[i]->bitModificado = 0;
+				 tablaDePaginas->Pagina[i]->horaIngreso = 90000000;//Espacio que ocupa la hora en formato 'hh:mm:ss:mmmm'
+			 }
+
+	}
+
+	dictionary_iterator(tablasDePaginas,(void*)blanquearTablaPagina);
+
+	for (i = 0; i < memoria->cantMarcos; ++i) {
+
+		inicializarMarco(memoria,memoria->Memoria[i]);
+
+	}
+
+
+	memoria->MemoriaLibre = inicializarMemoriaLibre(memoria->cantMarcos);
+
+
+return;
+}
+
+
+void avisarASwap(t_tablaDePaginas* tablaDePaginas)
+{
+
+	int i;
+	for(i = 0 ; i< tablaDePaginas->cantTotalPaginas;i++)
+	{
+		if(tablaDePaginas->Pagina[i]->bitPresencia)
+		{
+			char* contenidoS =malloc(configAdmMem->tamanio_marco);
+			strcpy(contenidoS,memoriaPrincipal->Memoria[tablaDePaginas->Pagina[i]->idFrame]);
+			enviarDatosPorModifASwap(socketSwap,contenidoS,configAdmMem->tamanio_marco,i, tablaDePaginas->pid);
+
+
+		}
+	}
+
+
+return;
 }
